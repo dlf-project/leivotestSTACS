@@ -1,0 +1,147 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Join the STACS Community on Telegram</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(900px 500px at 80% -10%,rgba(200,146,10,.18),transparent 60%),#0A2E16;color:#F0F0EC;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:36px 16px}
+.box{width:100%;max-width:450px}
+.brand{text-align:center;margin-bottom:20px}.brand b{font-size:17px;font-weight:800}.brand small{display:block;font-size:9px;letter-spacing:.22em;color:#E2A53A;margin-top:3px}
+.card{background:#12502A;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px}
+h1{font-size:20px;margin-bottom:6px}.sub{font-size:13px;color:rgba(240,240,236,.7);margin-bottom:16px;line-height:1.55}
+label{font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:#F0F0EC;display:block;margin:12px 0 6px}
+input,select{width:100%;background:#0F4423;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 13px;color:#F0F0EC;font-size:14px;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:#C8920A}
+.phrow{display:flex;gap:8px}.phrow select{flex:0 0 42%}.phrow input{flex:1}
+.btn{width:100%;background:#C8920A;color:#231a02;border:none;border-radius:10px;padding:14px;font-weight:800;font-size:14.5px;cursor:pointer;margin-top:18px}
+.btn:disabled{opacity:.55;cursor:default}
+.tgbtn{display:block;width:100%;text-align:center;background:#229ED9;color:#fff;text-decoration:none;border-radius:10px;padding:15px;font-weight:800;font-size:15px;margin-top:6px}
+.msg{font-size:12.5px;border-radius:9px;padding:11px 13px;margin-top:14px;display:none;line-height:1.5}
+.msg.err{background:rgba(232,106,106,.13);color:#E86A6A;display:block}
+.step2{text-align:center;padding:6px 0}.step2 .tick{width:56px;height:56px;border-radius:50%;background:rgba(46,204,113,.15);display:flex;align-items:center;justify-content:center;font-size:28px;margin:4px auto 12px}
+.step2 h2{font-size:18px;margin-bottom:8px}.step2 p{font-size:13px;color:rgba(240,240,236,.75);line-height:1.6}
+.foot{text-align:center;font-size:11.5px;color:rgba(240,240,236,.4);margin-top:16px;line-height:1.5}
+</style></head><body><div class="box">
+<div class="brand"><b>LEIVOTEST — STACS</b><small>SKILLED WORKER COMMUNITY</small></div>
+<div class="card" id="cardForm">
+<h1>Join our Telegram Community</h1>
+<div class="sub">This community is for <b>verified, approved STACS skilled workers only</b>. Enter the details exactly as on your profile to confirm your membership. The group link is never shared publicly — it keeps scammers out.</div>
+<label>Your Registration ID <span style="color:#E2A53A">*</span></label>
+<input id="f_id" placeholder="e.g. WK-1234567890-NG" autocomplete="off">
+<label>Email address used at registration <span style="color:#E2A53A">*</span></label>
+<input id="f_email" type="email" placeholder="you@email.com" autocomplete="off">
+<label>Country of residence <span style="color:#E2A53A">*</span></label>
+<select id="f_country"><option value="">Select…</option></select>
+<label>Nationality <span style="color:#E2A53A">*</span></label>
+<select id="f_nat"><option value="">Select…</option></select>
+<label>Your Telegram-registered phone number <span style="color:#E2A53A">*</span></label>
+<div class="phrow"><select id="f_code"><option value="">Code…</option></select>
+<input id="f_phone" inputmode="numeric" placeholder="e.g. 07030620212" autocomplete="off"></div>
+<button class="btn" id="btn" onclick="checkDetails()">Verify my STACS details</button>
+<div class="msg" id="msg"></div>
+</div>
+<div class="card" id="cardStep2" style="display:none"><div class="step2">
+<div class="tick">&#10003;</div><h2 id="s2name">Your details match</h2>
+<p>Final step: confirm your identity on Telegram. Tap the button below — it opens our STACS bot, which verifies your real Telegram account and sends you your personal one-time group link right inside Telegram.</p>
+<a id="tgConfirm" class="tgbtn" href="#" target="_blank" rel="noopener">Confirm on Telegram</a>
+<p style="font-size:11px;color:rgba(240,240,236,.5);margin-top:12px">You must have a Telegram username set. No username? Open Telegram → Settings → Username, set one, then try again.</p>
+</div></div>
+<div class="foot">Secured by LEIVOTEST — STACS · One pass per member</div>
+</div>
+<script>
+var ACTION='https://script.google.com/macros/s/AKfycbwtUYMty_LLT2MohBVwnMoCNRsm-r2b1A4rJRcU6q9B8x-1eOHJgzctiagmKrybo5alqg/exec';
+var TGC=[['Afghanistan','Afghan','+93'],['Albania','Albanian','+355'],['Algeria','Algerian','+213'],
+['Andorra','Andorran','+376'],['Angola','Angolan','+244'],['Antigua and Barbuda','Antiguan','+1-268'],
+['Argentina','Argentine','+54'],['Armenia','Armenian','+374'],['Australia','Australian','+61'],
+['Austria','Austrian','+43'],['Azerbaijan','Azerbaijani','+994'],['Bahamas','Bahamian','+1-242'],
+['Bahrain','Bahraini','+973'],['Bangladesh','Bangladeshi','+880'],['Barbados','Barbadian','+1-246'],
+['Belarus','Belarusian','+375'],['Belgium','Belgian','+32'],['Belize','Belizean','+501'],
+['Benin','Beninese','+229'],['Bhutan','Bhutanese','+975'],['Bolivia','Bolivian','+591'],
+['Bosnia and Herzegovina','Bosnian','+387'],['Botswana','Motswana','+267'],['Brazil','Brazilian','+55'],
+['Brunei','Bruneian','+673'],['Bulgaria','Bulgarian','+359'],['Burkina Faso','Burkinabe','+226'],
+['Burundi','Burundian','+257'],['Cambodia','Cambodian','+855'],['Cameroon','Cameroonian','+237'],
+['Canada','Canadian','+1'],['Cape Verde','Cape Verdean','+238'],['Central African Republic','Central African','+236'],
+['Chad','Chadian','+235'],['Chile','Chilean','+56'],['China','Chinese','+86'],
+['Colombia','Colombian','+57'],['Comoros','Comoran','+269'],['Congo (Brazzaville)','Congolese','+242'],
+['Congo (DR)','Congolese','+243'],['Costa Rica','Costa Rican','+506'],['Croatia','Croatian','+385'],
+['Cuba','Cuban','+53'],['Cyprus','Cypriot','+357'],['Czech Republic','Czech','+420'],
+['Denmark','Danish','+45'],['Djibouti','Djiboutian','+253'],['Dominica','Dominican','+1-767'],
+['Dominican Republic','Dominican','+1-809'],['Ecuador','Ecuadorian','+593'],['Egypt','Egyptian','+20'],
+['El Salvador','Salvadoran','+503'],['Equatorial Guinea','Equatorial Guinean','+240'],['Eritrea','Eritrean','+291'],
+['Estonia','Estonian','+372'],['Eswatini','Swazi','+268'],['Ethiopia','Ethiopian','+251'],
+['Fiji','Fijian','+679'],['Finland','Finnish','+358'],['France','French','+33'],
+['Gabon','Gabonese','+241'],['Gambia','Gambian','+220'],['Georgia','Georgian','+995'],
+['Germany','German','+49'],['Ghana','Ghanaian','+233'],['Greece','Greek','+30'],
+['Grenada','Grenadian','+1-473'],['Guatemala','Guatemalan','+502'],['Guinea','Guinean','+224'],
+['Guinea-Bissau','Bissau-Guinean','+245'],['Guyana','Guyanese','+592'],['Haiti','Haitian','+509'],
+['Honduras','Honduran','+504'],['Hungary','Hungarian','+36'],['Iceland','Icelandic','+354'],
+['India','Indian','+91'],['Indonesia','Indonesian','+62'],['Iran','Iranian','+98'],
+['Iraq','Iraqi','+964'],['Ireland','Irish','+353'],['Israel','Israeli','+972'],
+['Italy','Italian','+39'],['Ivory Coast','Ivorian','+225'],['Jamaica','Jamaican','+1-876'],
+['Japan','Japanese','+81'],['Jordan','Jordanian','+962'],['Kazakhstan','Kazakhstani','+7'],
+['Kenya','Kenyan','+254'],['Kiribati','I-Kiribati','+686'],['Kuwait','Kuwaiti','+965'],
+['Kyrgyzstan','Kyrgyzstani','+996'],['Laos','Lao','+856'],['Latvia','Latvian','+371'],
+['Lebanon','Lebanese','+961'],['Lesotho','Mosotho','+266'],['Liberia','Liberian','+231'],
+['Libya','Libyan','+218'],['Liechtenstein','Liechtensteiner','+423'],['Lithuania','Lithuanian','+370'],
+['Luxembourg','Luxembourgish','+352'],['Madagascar','Malagasy','+261'],['Malawi','Malawian','+265'],
+['Malaysia','Malaysian','+60'],['Maldives','Maldivian','+960'],['Mali','Malian','+223'],
+['Malta','Maltese','+356'],['Marshall Islands','Marshallese','+692'],['Mauritania','Mauritanian','+222'],
+['Mauritius','Mauritian','+230'],['Mexico','Mexican','+52'],['Micronesia','Micronesian','+691'],
+['Moldova','Moldovan','+373'],['Monaco','Monegasque','+377'],['Mongolia','Mongolian','+976'],
+['Montenegro','Montenegrin','+382'],['Morocco','Moroccan','+212'],['Mozambique','Mozambican','+258'],
+['Myanmar','Burmese','+95'],['Namibia','Namibian','+264'],['Nauru','Nauruan','+674'],
+['Nepal','Nepali','+977'],['Netherlands','Dutch','+31'],['New Zealand','New Zealander','+64'],
+['Nicaragua','Nicaraguan','+505'],['Niger','Nigerien','+227'],['Nigeria','Nigerian','+234'],
+['North Korea','North Korean','+850'],['North Macedonia','Macedonian','+389'],['Norway','Norwegian','+47'],
+['Oman','Omani','+968'],['Pakistan','Pakistani','+92'],['Palau','Palauan','+680'],
+['Palestine','Palestinian','+970'],['Panama','Panamanian','+507'],['Papua New Guinea','Papua New Guinean','+675'],
+['Paraguay','Paraguayan','+595'],['Peru','Peruvian','+51'],['Philippines','Filipino','+63'],
+['Poland','Polish','+48'],['Portugal','Portuguese','+351'],['Qatar','Qatari','+974'],
+['Romania','Romanian','+40'],['Russia','Russian','+7'],['Rwanda','Rwandan','+250'],
+['Saint Kitts and Nevis','Kittitian','+1-869'],['Saint Lucia','Saint Lucian','+1-758'],
+['Saint Vincent and the Grenadines','Vincentian','+1-784'],['Samoa','Samoan','+685'],
+['San Marino','Sammarinese','+378'],['Sao Tome and Principe','Sao Tomean','+239'],['Saudi Arabia','Saudi','+966'],
+['Senegal','Senegalese','+221'],['Serbia','Serbian','+381'],['Seychelles','Seychellois','+248'],
+['Sierra Leone','Sierra Leonean','+232'],['Singapore','Singaporean','+65'],['Slovakia','Slovak','+421'],
+['Slovenia','Slovenian','+386'],['Solomon Islands','Solomon Islander','+677'],['Somalia','Somali','+252'],
+['South Africa','South African','+27'],['South Korea','South Korean','+82'],['South Sudan','South Sudanese','+211'],
+['Spain','Spanish','+34'],['Sri Lanka','Sri Lankan','+94'],['Sudan','Sudanese','+249'],
+['Suriname','Surinamese','+597'],['Sweden','Swedish','+46'],['Switzerland','Swiss','+41'],
+['Syria','Syrian','+963'],['Taiwan','Taiwanese','+886'],['Tajikistan','Tajikistani','+992'],
+['Tanzania','Tanzanian','+255'],['Thailand','Thai','+66'],['Timor-Leste','Timorese','+670'],
+['Togo','Togolese','+228'],['Tonga','Tongan','+676'],['Trinidad and Tobago','Trinidadian','+1-868'],
+['Tunisia','Tunisian','+216'],['Turkey','Turkish','+90'],['Turkmenistan','Turkmen','+993'],
+['Tuvalu','Tuvaluan','+688'],['Uganda','Ugandan','+256'],['Ukraine','Ukrainian','+380'],
+['United Arab Emirates','Emirati','+971'],['United Kingdom','British','+44'],['United States','American','+1'],
+['Uruguay','Uruguayan','+598'],['Uzbekistan','Uzbekistani','+998'],['Vanuatu','Ni-Vanuatu','+678'],
+['Vatican City','Vatican','+379'],['Venezuela','Venezuelan','+58'],['Vietnam','Vietnamese','+84'],
+['Yemen','Yemeni','+967'],['Zambia','Zambian','+260'],['Zimbabwe','Zimbabwean','+263']];
+(function(){
+  var cO='<option value="">Select…</option>', nSeen={}, nats=[], codeO='<option value="">Code…</option>';
+  TGC.forEach(function(x){ cO+='<option value="'+x[0]+'">'+x[0]+'</option>'; if(!nSeen[x[1]]){nSeen[x[1]]=1;nats.push(x[1]);} codeO+='<option value="'+x[2]+'">'+x[2]+' - '+x[0]+'</option>'; });
+  document.getElementById('f_country').innerHTML=cO;
+  nats.sort(); document.getElementById('f_nat').innerHTML='<option value="">Select…</option>'+nats.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+  document.getElementById('f_code').innerHTML=codeO;
+})();
+function checkDetails(){
+  var msg=document.getElementById("msg");msg.className="msg";msg.style.display="none";
+  var id=(document.getElementById("f_id").value||"").trim();
+  var email=(document.getElementById("f_email").value||"").trim();
+  var country=document.getElementById("f_country").value;
+  var nat=document.getElementById("f_nat").value;
+  var code=document.getElementById("f_code").value;
+  var phone=(document.getElementById("f_phone").value||"").trim();
+  if(!id||!email||!country||!nat||!code||!phone){msg.className="msg err";msg.textContent="Please fill in every field.";msg.style.display="block";return;}
+  var D={id:id,email:email,country:country,nationality:nat,tgCode:code,tgPhone:phone};
+  var btn=document.getElementById("btn");btn.disabled=true;btn.textContent="Checking…";
+  fetch(ACTION,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({action:"telegram-handoff"},D))})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok&&d.deepLink){
+      document.getElementById("cardForm").style.display="none";
+      document.getElementById("cardStep2").style.display="block";
+      if(d.fullName) document.getElementById("s2name").textContent="Welcome, "+d.fullName+"!";
+      document.getElementById("tgConfirm").href=d.deepLink;
+    }else{
+      btn.disabled=false;btn.textContent="Verify my STACS details";
+      msg.className="msg err";msg.textContent=(d&&d.error)||"We could not verify those details.";msg.style.display="block";
+    }
+  }).catch(function(){btn.disabled=false;btn.textContent="Verify my STACS details";msg.className="msg err";msg.textContent="Could not reach the server. Please try again.";msg.style.display="block";});
+}
+</script></body></html>

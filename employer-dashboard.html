@@ -1,0 +1,1343 @@
+<!DOCTYPE html><html lang="en"><head><script src="https://js.paystack.co/v2/inline.js"></script>
+<script src="data/taxonomy.js"></script>
+<script src="data/picker.js"></script>
+<script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Employer Dashboard</title>
+<style>
+:root{--bg:#0A2E16;--bg2:#0D3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.12);--bdr2:rgba(255,255,255,.22);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.66);--tx3:rgba(240,240,236,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5}
+.top{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:12px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20}
+.logo{width:40px;height:40px;border-radius:50%;background:#fff;object-fit:cover;border:1.5px solid var(--gold)}
+.bn{font-size:14px;font-weight:800}.bt{font-size:9px;letter-spacing:.2em;color:var(--gold2)}
+.who{margin-left:auto;font-size:13px;color:var(--tx2);display:flex;align-items:center;gap:12px}
+.cartbtn{background:var(--gold);color:#231a02;border:none;border-radius:100px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px}
+.cartbtn .cnt{background:#231a02;color:var(--gold2);border-radius:100px;padding:0 7px;font-size:11px}
+.ghost{background:transparent;border:1px solid var(--bdr2);color:var(--tx);border-radius:100px;padding:7px 14px;font-size:12.5px;cursor:pointer}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 20px 60px}
+.tabs{display:flex;gap:8px;margin-bottom:18px}
+.tab{background:var(--card2);border:1px solid var(--bdr);color:var(--tx2);border-radius:100px;padding:8px 18px;font-size:13.5px;font-weight:600;cursor:pointer}
+.tab.on{background:var(--card);border-color:var(--gold);color:#fff}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.filters input,.filters select{background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:9px 12px;color:var(--tx);font-size:13px;font-family:inherit}
+.filters input{flex:1;min-width:200px}
+.count{font-size:12.5px;color:var(--tx3);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.cc{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;transition:.2s}
+.cc:hover{border-color:var(--gold2);transform:translateY(-3px)}
+.cc-top{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.cc-av{width:48px;height:48px;border-radius:50%;background:var(--card2);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold2);font-size:16px;flex-shrink:0}
+.cc-id{font-size:15px;font-weight:700}.cc-loc{font-size:11.5px;color:var(--tx3)}
+.cc-skill{font-size:13.5px;color:var(--tx);margin-bottom:4px;font-weight:600}
+.cc-meta{font-size:12px;color:var(--tx2);margin-bottom:10px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.bdg{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px}
+.bdg.ver{background:rgba(46,204,113,.15);color:var(--grn)}
+.bdg.ori{background:rgba(200,146,10,.15);color:var(--gold2)}
+.bdg.tier{background:rgba(255,255,255,.08);color:var(--tx2)}
+.cc-acts{display:flex;gap:8px}
+.cc-acts button{flex:1;border:none;border-radius:8px;padding:8px;font-size:12.5px;font-weight:700;cursor:pointer}
+.add{background:var(--gold);color:#231a02}.add.in{background:var(--card2);color:var(--grn);border:1px solid var(--grn)}
+.view{background:transparent;color:var(--tx2);border:1px solid var(--bdr2)!important}
+.empty{text-align:center;color:var(--tx3);padding:60px 20px;font-size:14px}
+/* drawer */
+.ov{position:fixed;inset:0;background:rgba(4,18,9,.6);display:none;z-index:40}.ov.show{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:390px;max-width:92vw;background:var(--bg2);border-left:1px solid var(--bdr2);z-index:50;transform:translateX(100%);transition:.3s;display:flex;flex-direction:column}
+.drawer.show{transform:none}
+.dh{padding:18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:between;gap:10px}
+.dh h3{font-size:16px}.dh .x{margin-left:auto;background:none;border:none;color:var(--tx2);font-size:22px;cursor:pointer}
+.dbody{flex:1;overflow-y:auto;padding:16px}
+.citem{display:flex;align-items:center;gap:10px;padding:10px;background:var(--card2);border-radius:10px;margin-bottom:8px}
+.citem .ci-id{font-size:13px;font-weight:600}.citem .ci-s{font-size:11px;color:var(--tx3)}
+.citem .rm{margin-left:auto;background:none;border:none;color:var(--rd);cursor:pointer;font-size:16px}
+.dfoot{padding:16px;border-top:1px solid var(--bdr)}
+.dfoot label{font-size:12px;color:var(--tx);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px}
+.dfoot select,.dfoot input{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-size:13px;margin-bottom:10px}
+.save{width:100%;background:var(--gold);color:#231a02;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:14px;cursor:pointer}
+.warn{font-size:11.5px;color:var(--gold2);margin-bottom:10px}
+.msg{font-size:12.5px;border-radius:9px;padding:10px;margin-top:10px;display:none}
+.msg.ok{background:rgba(46,204,113,.12);color:var(--grn);display:block}.msg.err{background:rgba(232,106,106,.12);color:var(--rd);display:block}
+/* projects view */
+.pj{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px;margin-bottom:12px}
+.pj h4{font-size:16px;margin-bottom:4px}.pj .pm{font-size:12.5px;color:var(--tx3)}
+.pj .bar{height:6px;background:var(--card2);border-radius:100px;margin-top:10px;overflow:hidden}
+.pj .bar i{display:block;height:100%;background:var(--gold)}
+.banner{background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.3);border-radius:11px;padding:11px 14px;font-size:12.5px;color:var(--gold2);margin-bottom:16px}
+:root[data-theme="light"]{--bg:#F3F1EA;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F5F4EE;--s1:#FFFFFF;--s2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#4f574a;--tx3:#6c7466;--gp:rgba(200,146,10,.13);--grnp:rgba(46,204,113,.14)}
+.shell{display:flex;gap:20px;max-width:1200px;margin:22px auto;padding:0 20px;align-items:flex-start}
+.side{flex:0 0 240px;position:sticky;top:20px}
+.idcard{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px}
+.idcard .av{width:64px;height:64px;border-radius:50%;background:var(--gp);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin:0 auto 10px;border:2px solid var(--gold2);overflow:hidden}
+.idcard .nm{font-size:15px;font-weight:800}
+.idcard .em{font-size:11px;color:var(--tx3);margin-top:2px}
+.idcard .co{font-size:12px;color:var(--tx2);margin-top:4px}
+.vbadge{display:inline-block;font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px}
+.status{display:inline-block;font-size:10.5px;font-weight:800;padding:4px 12px;border-radius:100px}
+.status.pending{background:rgba(200,146,10,.15);color:var(--gold2)}
+.status.approved{background:rgba(46,204,113,.15);color:var(--grn)}
+.snav{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:8px}
+.snav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;color:var(--tx2);font-size:13.5px;font-family:inherit;padding:10px 11px;border-radius:9px;cursor:pointer}
+.snav button:hover{background:var(--card2);color:var(--tx)}
+.snav button.on{background:var(--card2);color:var(--tx);font-weight:700}
+.snav button .i{width:20px;text-align:center;font-size:15px}
+/* rich status card */
+.statrow{display:flex;justify-content:space-between;font-size:11.5px;padding:4px 0;border-bottom:1px solid var(--bdr)}
+.statrow:last-child{border-bottom:none}
+.statrow .k{color:var(--tx3)}.statrow .v{color:var(--tx);font-weight:600}
+.meter{height:7px;background:var(--card2);border-radius:100px;overflow:hidden;margin-top:8px}
+.meter>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:100px}
+.lockpill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:2px 8px;border-radius:100px}
+/* sectioned menu */
+.mgroup{margin-top:10px}
+.mgroup .mh{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);padding:8px 11px 4px}
+.snav button.soon{opacity:.5;cursor:default}
+.snav button.soon:hover{background:transparent;color:var(--tx3)}
+.snav button .soonbadge{margin-left:auto;font-size:8.5px;background:var(--card2);color:var(--tx3);padding:2px 6px;border-radius:100px;text-transform:uppercase;letter-spacing:.05em}
+/* accordion sidebar */
+.acc-parent{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;color:var(--tx);font-size:13.5px;font-weight:700;font-family:inherit;padding:11px;border-radius:9px;cursor:pointer}
+.acc-parent:hover{background:var(--card2)}
+.acc-parent .i{width:20px;text-align:center;font-size:16px}
+.acc-parent .caret{margin-left:auto;font-size:11px;color:var(--tx3);transition:transform .2s}
+.acc-parent.open .caret{transform:rotate(90deg)}
+.acc-parent.active{background:var(--gp);color:var(--gold2)}
+.acc-children{overflow:hidden;max-height:0;transition:max-height .25s ease}
+.acc-children.open{max-height:400px}
+.acc-children button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;border:none;color:var(--tx2);font-size:13px;font-family:inherit;padding:9px 11px 9px 40px;border-radius:8px;cursor:pointer}
+.acc-children button:hover{background:var(--card2);color:var(--tx)}
+.acc-children button.on{background:var(--card2);color:var(--tx);font-weight:700}
+.acc-children button.soon{opacity:.5;cursor:default}
+.acc-children button.soon:hover{background:transparent;color:var(--tx3)}
+.acc-children button .soonbadge{margin-left:auto;font-size:8px;background:var(--card2);color:var(--tx3);padding:2px 6px;border-radius:100px;text-transform:uppercase}
+.side{flex:0 0 258px}
+.emcontent{flex:1;min-width:0}
+.completebar{background:var(--gp);border:1px solid rgba(200,146,10,.3);border-radius:12px;padding:12px 15px;margin-bottom:16px;font-size:13px;color:var(--tx)}
+.completebar b{color:var(--gold2)}
+/* richer candidate card */
+.cc{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;transition:box-shadow .15s,transform .15s}
+.cc:hover{box-shadow:0 6px 20px rgba(15,59,46,.1);transform:translateY(-2px)}
+.cc-hd{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.cc-av2{width:48px;height:48px;border-radius:50%;background:var(--gp);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;flex-shrink:0}
+.cc-facts{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.cc-fact{font-size:11px;background:var(--card2);border:1px solid var(--bdr);border-radius:100px;padding:4px 10px;color:var(--tx2)}
+.matchbar{height:6px;background:var(--card2);border-radius:100px;overflow:hidden;margin:8px 0 4px}
+@media(max-width:840px){.shell{flex-direction:column}.side{position:static;width:100%}}
+/* ===== sliding talent showcase (preview-only, non-interactive) ===== */
+.showcase{position:relative;overflow:hidden;border:1px solid var(--bdr);border-radius:14px;background:var(--card);padding:16px 0;margin-bottom:18px;cursor:pointer}
+/* ===== Organization: independently expandable/collapsible cards ===== */
+.orgcard{background:var(--card);border:1px solid var(--bdr);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.orgcard-head{display:flex;align-items:center;gap:10px;padding:16px 18px;cursor:pointer;font-weight:700;font-size:14px;color:var(--tx);user-select:none}
+.orgcard-head:hover{background:var(--card2)}
+.orgcard-icon{font-size:17px}
+.orgcard-sub{font-size:11.5px;color:var(--tx3);font-weight:400;margin-left:2px}
+.orgcard-chev{margin-left:auto;color:var(--tx3);transition:transform .2s;font-size:12px}
+.orgcard.open .orgcard-chev{transform:rotate(180deg)}
+.orgcard-body{display:none;padding:0 18px 18px;border-top:1px solid var(--bdr)}
+.orgcard.open .orgcard-body{display:block;padding-top:16px}
+.showcase-track{display:flex;gap:14px;width:max-content;animation:slideShow 60s linear infinite;padding:0 14px}
+.showcase:hover .showcase-track{animation-play-state:paused}
+@keyframes slideShow{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tcard{flex:0 0 200px;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;padding:14px;pointer-events:none;user-select:none}
+.tcard .flag{font-size:22px}
+.tcard .trade{font-size:14px;font-weight:800;color:var(--gold2);margin:6px 0 2px}
+.tcard .meta{font-size:11.5px;color:var(--tx2)}
+.tcard .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.tcard .chip{font-size:10px;background:var(--card);border:1px solid var(--bdr);border-radius:100px;padding:2px 8px;color:var(--tx3)}
+.tcard .locked{margin-top:8px;font-size:10.5px;color:var(--tx3);display:flex;align-items:center;gap:4px}
+.showcase-fade{position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:2}
+.showcase-fade.l{left:0;background:linear-gradient(90deg,var(--card),transparent)}
+.showcase-fade.r{right:0;background:linear-gradient(270deg,var(--card),transparent)}
+.showcase-cta{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(10,46,22,.0);transition:background .2s}
+.showcase:hover .showcase-cta{background:rgba(10,46,22,.55)}
+.showcase-cta .msg{opacity:0;transition:opacity .2s;text-align:center;background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:14px 18px;max-width:300px}
+.showcase:hover .showcase-cta .msg{opacity:1}
+/* ===== full-width hero — mirrors the Skilled Worker dashboard's identity block ===== */
+.emhero{display:flex;align-items:center;gap:16px;max-width:1200px;margin:20px auto 0;padding:0 20px}
+.emhero .av{width:66px;height:66px;border-radius:50%;background:var(--card2);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--gold2);flex-shrink:0}
+.emhero h1{font-size:22px;margin:0 0 2px}
+.emhero .idline{font-size:12.5px;color:var(--tx3);font-family:ui-monospace,monospace}
+.emhero .badges{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
+@media(max-width:840px){
+  .emhero{flex-wrap:wrap;padding:0 16px;margin-top:16px}
+  .emhero .av{width:52px;height:52px;font-size:19px}
+  .emhero h1{font-size:19px}
+  .emhero button.add{width:100%}
+}
+</style></head><body>
+<div class="top"><a href="index.html" class="brandlink" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit" title="Back to STACS home"><img class="logo" src="data:image/jpeg;base64,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" alt="STACS"><div><div class="bn">STACS</div></a><div class="bt">EMPLOYER HUB</div></div>
+ <div class="who"><span id="whoName">Employer</span>
+  <button class="cartbtn" onclick="openCart()">Hire Cart <span class="cnt" id="cartCount">0</span></button>
+  <button class="ghost" onclick="logout()">Sign out</button></div></div>
+<div class="emhero">
+  <div class="av" id="emAv">EM</div>
+  <div style="min-width:0;flex:1">
+    <h1 id="emHello">Hello, Employer</h1>
+    <div class="idline" id="emIdLine">EM-…</div>
+    <div id="emCompanyLine" style="font-size:12.5px;color:var(--tx2);margin-top:2px"></div>
+    <div class="badges">
+      <span id="emAccountBadge" class="status pending">PENDING</span>
+      <span id="emVBadge" class="vbadge" style="background:var(--card2);color:var(--tx3)">Business: Unverified</span>
+    </div>
+    <button class="add" style="white-space:nowrap;margin-top:12px" onclick="emNavClick('organization',null,'profile');orgCardOpen('documents');orgCardOpen('verification')">Expand all sections</button>
+  </div>
+</div>
+<div class="shell">
+ <aside class="side">
+   <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);padding:8px 11px 4px">Employer Profile</div>
+   <nav class="snav" id="emNav">
+     <button class="acc-parent active" data-parent="dashboard" onclick="emNavClick('dashboard',this)"><span class="i">🏠</span>Dashboard</button>
+     <div id="gettingStartedNav"></div>
+     <button class="acc-parent" data-parent="hiring" onclick="accToggle('hiring')"><span class="i">🔎</span>Hiring<span class="caret">▸</span></button>
+     <div class="acc-children" data-acc="hiring">
+       <button data-tab="browse" onclick="emNavClick('browse',this)">Find Talent</button>
+       <button data-tab="cart" onclick="openCart()">Hire Cart</button>
+       <button data-tab="jobs" onclick="emNavClick('jobs',this)">Job Requests</button>
+     </div>
+     <button class="acc-parent" data-parent="organization" onclick="accToggle('organization');emNavClick('organization',this)"><span class="i">🏢</span>Organization<span class="caret">▸</span></button>
+     <div class="acc-children" data-acc="organization">
+       <button data-tab="organization" onclick="emNavClick('organization',this,'profile')">Profile</button>
+       <button data-tab="organization" onclick="emNavClick('organization',this,'documents')">Documents</button>
+       <button data-tab="organization" onclick="emNavClick('organization',this,'verification')">Verification</button>
+     </div>
+     <button class="acc-parent" data-parent="communication" onclick="accToggle('communication')"><span class="i">💬</span>Communication<span class="caret">▸</span></button>
+     <div class="acc-children" data-acc="communication">
+       <button class="soon" onclick="emSoon()">Messages<span class="soonbadge">soon</span></button>
+       <button class="soon" onclick="emSoon()">Notifications<span class="soonbadge">soon</span></button>
+       <button class="soon" onclick="emSoon()">Support<span class="soonbadge">soon</span></button>
+     </div>
+     <button class="acc-parent" data-parent="billing" onclick="accToggle('billing')"><span class="i">💳</span>Billing<span class="caret">▸</span></button>
+     <div class="acc-children" data-acc="billing">
+       <button class="soon" onclick="emSoon()">Subscription &amp; Plans<span class="soonbadge">soon</span></button>
+       <button class="soon" onclick="emSoon()">Transactions<span class="soonbadge">soon</span></button>
+       <button class="soon" onclick="emSoon()">Promotions<span class="soonbadge">soon</span></button>
+     </div>
+   </nav>
+ </aside>
+ <div class="emcontent">
+ <div class="completebar" id="completeBar" style="display:none"></div>
+ <div class="banner" id="banner">Showing candidates in the STACS pool. Contact details are masked — you engage through STACS. You can view both verified and not-yet-verified details of anyone you're interested in.</div>
+ <div id="browseView" style="display:none">
+  <div class="filters">
+   <div style="flex:1;min-width:260px">
+     <div id="profPicker"></div>
+     <input type="hidden" id="profPicked">
+     <div style="font-size:11.5px;color:var(--tx3);margin-top:5px">Pick the professions you're hiring for — the same list workers choose from, so nothing is missed by wording.</div>
+   </div>
+   <input id="q" placeholder="Or search by name / STACS ID…" oninput="render()" style="max-width:220px">
+   <select id="fSector" onchange="render()"><option value="">All sectors</option></select>
+   <select id="fCountry" onchange="render()"><option value="">All countries</option></select>
+   <select id="fVer" onchange="render()"><option value="">All</option><option value="Verified">Verified only</option></select>
+  </div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+ </div>
+ <div id="projectsView" style="display:none"></div>
+ <div id="verifView" style="display:none"></div>
+ <div id="dashboardView" style="display:none"></div>
+ <div id="journeyView" style="display:none"></div>
+ <div id="organizationView" style="display:none">
+   <div class="orgcard" id="orgCard-profile">
+     <div class="orgcard-head" onclick="orgCardToggle('profile')"><span class="orgcard-icon">🏢</span><span>Profile</span><span class="orgcard-sub">Company details &amp; contact person</span><span class="orgcard-chev">▾</span></div>
+     <div class="orgcard-body" id="orgprofileView"></div>
+   </div>
+   <div class="orgcard" id="orgCard-documents">
+     <div class="orgcard-head" onclick="orgCardToggle('documents')"><span class="orgcard-icon">📄</span><span>Documents</span><span class="orgcard-sub">What STACS needs to confirm your business</span><span class="orgcard-chev">▾</span></div>
+     <div class="orgcard-body" id="documentsView"></div>
+   </div>
+   <div class="orgcard" id="orgCard-verification">
+     <div class="orgcard-head" onclick="orgCardToggle('verification')"><span class="orgcard-icon">🛡️</span><span>Verification</span><span class="orgcard-sub">Where your organization stands</span><span class="orgcard-chev">▾</span></div>
+     <div class="orgcard-body" id="verificationView"></div>
+   </div>
+ </div>
+ <div id="jobsView" style="display:none"></div>
+ </div><!-- .emcontent -->
+</div><!-- .shell -->
+
+<div class="ov" id="candOv" onclick="closeCand(event)"></div>
+<div class="drawer" id="candDrawer" style="width:520px">
+ <div class="dh"><h3 id="candTitle">Candidate</h3><button class="x" onclick="closeCand()">&times;</button></div>
+ <div class="dbody" id="candBody">Loading…</div>
+</div>
+<div class="ov" id="ov" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+ <div class="dh"><h3>Your Hire Cart</h3><button class="x" onclick="closeCart()">&times;</button></div>
+ <div class="dbody" id="cartBody"></div>
+ <div class="dfoot">
+  <div class="warn" id="capWarn"></div>
+  <label>Save into a Project (max 5 projects · 150 candidates each)</label>
+  <select id="projSel" onchange="toggleNew()"></select>
+  <input id="newProj" placeholder="New project name" style="display:none">
+  <button class="save" onclick="saveToProject()">Save to Project</button>
+  <div class="msg" id="cartMsg"></div>
+ </div>
+</div>
+<script>
+/* ===== endpoints (GET pool from Skilled app; POST cart/projects to Employer app) ===== */
+const SKILLED_POOL_URL = "https://script.google.com/macros/s/AKfycbwtUYMty_LLT2MohBVwnMoCNRsm-r2b1A4rJRcU6q9B8x-1eOHJgzctiagmKrybo5alqg/exec";
+const EMPLOYER_URL     = "https://script.google.com/macros/s/AKfycbwPlLG5bdp5MsTFUU6RYLdz6g5zWJLRkmjmkkenqqWBz4Xy9PoSIZVRDA4iZSRBHRBq/exec";
+const PAYSTACK_PUBLIC_KEY="pk_live_157aad7152a515664df444b0f67f21587ae2629d";
+function vCur(){ try{ if(/Lagos|Africa\/Lagos/i.test(Intl.DateTimeFormat().resolvedOptions().timeZone||"")) return "NGN"; }catch(e){} return "USD"; }
+const VERIFIER_URL="https://script.google.com/macros/s/AKfycbzyh4HEurpOl9T_Ap5HXpGZlro0jCz3xBet7yQMFZcVwUFa7bQD5PtzkWJe4iABUkgf/exec";
+const MAX_PROJECTS=5, MAX_PER_PROJECT=150;
+
+/* ===== verification fee stack — mirrors the Fee Engine workbook ===== */
+var VFEE={app:4.00, commission:0.12, storage:1.00, exec:2.00, feedback:0.50, audit:1.00, dispute:0.50,
+          expressPct:0.60, expressMin:20.00, vat:0.075, ngn:1550};
+function vFees(base, express){
+  var fixed=VFEE.app+VFEE.storage+VFEE.exec+VFEE.feedback+VFEE.audit+VFEE.dispute;
+  var comm=base*VFEE.commission;
+  var up=express?Math.max(base*VFEE.expressPct,VFEE.expressMin):0;
+  var sub=base+fixed+comm+up, vat=sub*VFEE.vat;
+  return {base:base,fixed:fixed,comm:comm,up:up,sub:sub,vat:vat,total:sub+vat};
+}
+function money(n){ return '$'+n.toFixed(2); }
+
+
+let SESSION=null, POOL=[], PROJECTS=[], CART=[];
+const DEMO=[
+ {id:"WK-4820193756-NG",name:"J. Okafor",country:"Nigeria",skill:"Electrician / Solar Installer",sector:"Construction & Trades",exp:"6–10 yrs",tier:"Verified",orientation:true},
+ {id:"WK-5561120987-GH",name:"K. Mensah",country:"Ghana",skill:"Electrician",sector:"Construction & Trades",exp:"3–5 yrs",tier:"Verified",orientation:true},
+ {id:"WK-2210349981-KE",name:"F. Achieng",country:"Kenya",skill:"Registered Nurse",sector:"Healthcare",exp:"6–10 yrs",tier:"Verified",orientation:true},
+ {id:"WK-7788112390-NG",name:"G. Nwosu",country:"Nigeria",skill:"Chef / Cook",sector:"Hospitality & Food",exp:"3–5 yrs",tier:"Unverified",orientation:false},
+ {id:"WK-3391220456-RW",name:"S. Habimana",country:"Rwanda",skill:"Software Developer",sector:"ICT & Digital",exp:"3–5 yrs",tier:"Verified",orientation:true},
+ {id:"WK-9902113345-TZ",name:"I. Mwakalebela",country:"Tanzania",skill:"Welder / Fabricator",sector:"Manufacturing",exp:"10+ yrs",tier:"Verified",orientation:true}];
+
+function init(){
+ try{SESSION=JSON.parse(localStorage.getItem('stacs_session'));}catch(e){}
+ if(!SESSION||SESSION.role!=='employer'){ location.href='sign-in.html'; return; }
+ // validate server-issued session token (non-blocking; only log out on an explicit reject)
+ if(SESSION.token){ fetch(EMPLOYER_URL+'?action=session&token='+encodeURIComponent(SESSION.token))
+   .then(r=>r.json()).then(d=>{ if(d && d.ok===false){ logout(); } }).catch(()=>{}); }
+ try{ var wn=document.getElementById('whoName'); if(wn) wn.textContent=SESSION.company||'Employer'; }catch(e){}
+ // --- identity + rich status card ---
+ try{
+   var co=SESSION.company||SESSION.name||'Employer';
+   var ini=String(co).replace(/[^A-Za-z ]/g,'').split(' ').filter(Boolean).map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()||'EM';
+   var av=document.getElementById('emAv'); if(av) av.textContent=ini;
+   set('emHello', 'Hello, '+(SESSION.name||SESSION.company||'there'));
+   set('emIdLine', SESSION.id||SESSION.em||'—');
+   // Account approval (automatic, on email verification) is a DIFFERENT thing from
+   // business verification (manual, admin-reviewed) — shown as two separate badges
+   // so the two are never conflated again.
+   var accApproved=!!(SESSION.id);
+   var ab=document.getElementById('emAccountBadge');
+   if(ab){ ab.textContent=accApproved?'APPROVED':'PENDING REVIEW'; ab.classList.toggle('approved',accApproved); ab.classList.toggle('pending',!accApproved); }
+   EM_STATE.verification = 'Pending';
+   EM_STATE.access = (SESSION.hiringAccess===true) ? 'Active' : 'Locked';
+   refreshHeroLine();
+   refreshStatusCard();
+ }catch(e){}
+ // completion nudge bar (shown on Find Talent)
+ try{
+   var cb=document.getElementById('completeBar');
+   if(cb && EM_STATE.access!=='Active'){
+     cb.style.display='block';
+     cb.innerHTML='<b>Complete your organization profile</b> to unlock hiring. Employers are trusted more with full profiles — finish your details, upload documents and get verified. <a href="#" onclick="emNavClick(\'dashboard\');return false;" style="color:var(--gold2);font-weight:700">Continue setup →</a>';
+   }
+ }catch(e){}
+ // open on the Dashboard home view FIRST (so a later error can't strand us on search)
+ try{ emNavClick('dashboard'); var firstBtn=document.querySelector('#emNav button[data-tab="dashboard"]'); if(firstBtn){ document.querySelectorAll('#emNav button').forEach(function(b){b.classList.remove('on');}); firstBtn.classList.add('on'); } }catch(e){}
+ // then load pool/projects (their errors won't affect the dashboard view)
+ try{ mountPicker(); }catch(e){}
+ try{ loadPool(); }catch(e){}
+ try{ loadProjects(); }catch(e){}
+ // refresh the org profile so status card + readiness reflect real saved data
+ try{ hydrateEmployerState(); }catch(e){}
+}
+/* pull the employer's real profile once on load so the status card, readiness
+   and dashboard reflect saved data (not just the sparse login session). */
+function hydrateEmployerState(){
+  if(!SESSION||!SESSION.token) return;
+  fetch(EMPLOYER_URL+'?action=my-employer-profile&token='+encodeURIComponent(SESSION.token))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.profile) return; var p=d.profile;
+      if(p.company){ var cl=document.getElementById('emCompanyLine'); if(cl) cl.textContent=p.company; var av=document.getElementById('emAv'); if(av) av.textContent=(String(p.company).replace(/[^A-Za-z ]/g,'').split(' ').filter(Boolean).map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()||'EM'); }
+      var rep0=[p.firstname,p.surname].filter(Boolean).join(' ');
+      if(p.firstname||rep0) set('emHello', 'Hello, '+(p.firstname||rep0));
+      if(p.id) set('emIdLine', p.id);
+      if(p.country){ EM_STATE.country=p.country; set('emCountry', p.country); }
+      var rep=[p.firstname,p.surname].filter(Boolean).join(' '); if(rep) set('emRep', rep);
+      if(p.empType){ EM_STATE.empType=p.empType; set('emType', p.empType); }
+      if(p.company) EM_STATE.company=p.company;
+      EM_STATE.verification=p.verification||EM_STATE.verification;
+      EM_STATE.access=(p.hiringAccess==='Active')?'Active':EM_STATE.access;
+      EM_STATE.paidPendingVerification=/paid/i.test(p.hiringAccess||'') && p.hiringAccess!=='Active';
+      EM_STATE.docsDone=Object.keys(p.docs||{}).filter(function(k){return p.docs[k];}).length;
+      // recompute profile % from the returned fields
+      var core=['company','country','city','regno','sector','size','surname','phone'];
+      var filled=core.filter(function(k){return String(p[k]||'').trim();}).length;
+      EM_STATE.profilePct=Math.round(filled/core.length*100);
+      try{ refreshStatusCard(); }catch(e){}
+      // if currently on dashboard, re-render it with fresh numbers
+      var dv=document.getElementById('dashboardView'); if(dv && dv.style.display!=='none'){ try{ renderDashboardView(); }catch(e){} }
+    }).catch(function(){});
+}
+function loadPool(){
+ fetch(SKILLED_POOL_URL+'?action=pool').then(r=>r.json()).then(d=>{POOL=(d&&d.pool)||[];fillFilters();render();})
+  .catch(()=>{POOL=DEMO;document.getElementById('banner').innerHTML+=' <b>(demo data — connect the pool endpoint to see live candidates)</b>';fillFilters();render();});
+}
+function loadProjects(){
+ const em=SESSION.em||'';
+ fetch(EMPLOYER_URL+'?action=projects&em='+encodeURIComponent(em)).then(r=>r.json()).then(d=>{PROJECTS=(d&&d.projects)||[];fillProjSel();renderProjects();})
+  .catch(()=>{PROJECTS=[{name:"Dubai Electricians Q1",count:2}];fillProjSel();renderProjects();});
+}
+var PICKED=[];
+function mountPicker(){
+ if(!window.STACSPicker) return;
+ STACSPicker.mount({el:'profPicker',hidden:'profPicked',source:'professions',max:8,primary:false,
+   placeholder:'Search professions: electrician, nurse, welder, chef…',
+   onChange:function(sel){ PICKED=sel.map(function(p){return p.name.toLowerCase();}); render(); }});
+}
+function fillFilters(){
+ const secs=[...new Set(POOL.map(c=>c.sector))].sort(), cos=[...new Set(POOL.map(c=>c.country))].sort();
+ document.getElementById('fSector').innerHTML='<option value="">All sectors</option>'+secs.map(s=>`<option>${s}</option>`).join('');
+ document.getElementById('fCountry').innerHTML='<option value="">All countries</option>'+cos.map(s=>`<option>${s}</option>`).join('');
+}
+function render(){
+ const q=document.getElementById('q').value.toLowerCase(),fs=document.getElementById('fSector').value,fc=document.getElementById('fCountry').value,fv=document.getElementById('fVer').value;
+ const g=document.getElementById('grid');
+ // FILTER-FIRST: don't dump the whole pool. Ask the employer to specify who they want.
+ var anyFilter = q || fs || fc || fv || (PICKED&&PICKED.length);
+ if(!anyFilter){
+   document.getElementById('count').textContent='';
+   g.innerHTML='<div class="empty" style="text-align:center;padding:40px 20px">'
+     +'<div style="font-size:34px">🔍</div>'
+     +'<div style="font-size:16px;font-weight:800;margin-top:8px;color:var(--tx)">Who are you looking to hire?</div>'
+     +'<div style="font-size:13px;color:var(--tx2);margin-top:6px;max-width:420px;margin-left:auto;margin-right:auto">Pick a profession above, or filter by sector, country or verification, and matching candidates from the STACS pool will appear here.</div>'
+     +'<div style="font-size:12px;color:var(--tx3);margin-top:10px">'+POOL.length+' candidate'+(POOL.length!==1?'s':'')+' currently in the pool.</div>'
+     +'</div>';
+   return;
+ }
+ const list=POOL.filter(c=>(!q||(c.skill+c.id+c.name).toLowerCase().includes(q))&&(!fs||c.sector===fs)&&(!fc||c.country===fc)&&(!fv||c.tier===fv)&&(!PICKED.length||PICKED.some(function(p){return String(c.skill||'').toLowerCase().indexOf(p)>=0||p.indexOf(String(c.skill||'').toLowerCase())>=0;})));
+ document.getElementById('count').textContent=list.length+' candidate'+(list.length!==1?'s':'')+' match';
+ if(!list.length){g.innerHTML='<div class="empty">No candidates match your filters. Try broadening your search.</div>';return;}
+ g.innerHTML=list.map(c=>{const inCart=CART.some(x=>x.id===c.id);const ini=c.name.replace(/[^A-Za-z ]/g,'').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  var verified=(c.tier==='Verified');
+  var facts=[];
+  if(c.gender) facts.push('<span class="cc-fact">'+(/female/i.test(c.gender)?'♀':/male/i.test(c.gender)?'♂':'⚧')+' '+esc(c.gender)+'</span>');
+  if(c.exp) facts.push('<span class="cc-fact">💼 '+c.exp+'</span>');
+  if(c.country) facts.push('<span class="cc-fact">📍 '+c.country+'</span>');
+  if(c.sector) facts.push('<span class="cc-fact">🏭 '+c.sector+'</span>');
+  if(c.orientation) facts.push('<span class="cc-fact">🎓 Orientation ready</span>');
+  return `<div class="cc">
+   <div class="cc-hd"><div class="cc-av2">${ini}</div>
+     <div style="flex:1"><div class="cc-id" style="font-weight:800;font-size:15px">${c.name}</div>
+     <div class="cc-loc" style="font-size:11.5px;color:var(--tx3)">${c.id}</div></div>
+     <span class="bdg ${verified?'ver':'tier'}" style="font-size:10px">${verified?'✓ Verified':'Unverified'}</span></div>
+   <div class="cc-skill" style="font-size:14px;font-weight:700;color:var(--gold2)">${c.skill||'Skilled professional'}</div>
+   <div class="cc-facts">${facts.join('')}</div>
+   <div class="cc-acts" style="display:flex;gap:8px;margin-top:10px"><button class="add ${inCart?'in':''}" style="flex:1" onclick="toggleCart('${c.id}')">${inCart?'✓ In Hire Cart':'Add to Hire Cart'}</button><button class="view" onclick="viewCand('${c.id}')">View profile</button></div>
+  </div>`;}).join('');
+}
+function showActivate(){
+  // route to the Organization page and expand the Verification card, where the payment panel lives
+  emNavClick('organization', null, 'verification');
+  setTimeout(openHiringAccessPay, 300);
+}
+function openHiringAccessPay(){
+  var host=document.getElementById('hiringAccessPay');
+  if(!host){ // create a panel at the top of the verification view if not present
+    var v=document.getElementById('verificationView'); if(!v) return;
+    var div=document.createElement('div'); div.id='hiringAccessPay'; v.insertBefore(div, v.firstChild);
+    host=div;
+  }
+  host.innerHTML='<div class="empty">Loading the activation fee…</div>';
+  fetch(EMPLOYER_URL+'?action=hiring-access-price')
+    .then(function(r){return r.json();}).then(function(p){
+      if(!p||!p.ok||!p.publicKey){ host.innerHTML='<div class="banner" style="color:#E86A6A">Payment is temporarily unavailable.</div>'; return; }
+      window.HIRE_PRICE=p;
+      var ngn=Number(p.amount).toLocaleString('en-NG',{minimumFractionDigits:2});
+      var verified=/verified/i.test(EM_STATE.verification);
+      host.innerHTML='<div style="background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:18px;margin-bottom:16px">'
+        +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800;margin-bottom:6px">Activate hiring access</div>'
+        +'<div style="font-size:22px;font-weight:800;color:var(--tx)">₦'+ngn+'</div>'
+        +'<div style="font-size:12px;color:var(--tx3);margin-bottom:10px">≈ $'+Number(p.usd).toFixed(2)+' USD · one-time · confirms your business and unlocks candidate access</div>'
+        +(!verified?'<div style="background:var(--gp);border:1px solid rgba(200,146,10,.3);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--gold2);margin-bottom:10px">You can pay now, but access unlocks only once your organization is <b>verified</b>. Payment alone does not open the pool — this protects skilled workers.</div>':'')
+        +'<button class="add" onclick="payHiringAccess()">Pay ₦'+ngn+' &amp; '+(verified?'activate':'reserve access')+'</button>'
+        +'<div id="hirePayMsg" style="font-size:12.5px;margin-top:10px"></div>'
+        +'<div style="font-size:11px;color:var(--tx3);margin-top:8px">You\u2019ll review the exact amount in the secure Paystack window before confirming.</div>'
+        +'</div>';
+    }).catch(function(){ host.innerHTML='<div class="banner" style="color:#E86A6A">Could not load the fee.</div>'; });
+}
+function payHiringAccess(){
+  var p=window.HIRE_PRICE, msg=document.getElementById('hirePayMsg');
+  if(!p){ if(msg)msg.textContent='Price unavailable.'; return; }
+  var email=(SESSION&&SESSION.email)||''; 
+  if(!email){ if(msg){msg.style.color='#E86A6A';msg.textContent='Please sign in again.';} return; }
+  if(!window.PaystackPop){ if(msg){msg.style.color='#E86A6A';msg.textContent='Payment library did not load — refresh.';} return; }
+  if(msg){ msg.style.color='var(--tx3)'; msg.textContent='Opening secure checkout…'; }
+  var ref='STACS-EMACC-'+(SESSION.id||'EM')+'-'+Date.now();
+  var HIRE_DONE=false, HIRE_REF='';
+  var paystack=new PaystackPop();
+  paystack.newTransaction({
+    key:PAYSTACK_PUBLIC_KEY, email:email, amount:p.amountKobo, currency:p.currency||'NGN', reference:ref,
+    metadata:{ role:'EM', em:(SESSION.id||''), purpose:'hiring-access' },
+    onSuccess:function(tx){ HIRE_DONE=true; HIRE_REF=tx.reference; hireConfirm(tx.reference, email); },
+    onCancel:function(){ if(msg){ msg.style.color='var(--tx2)'; msg.textContent='Payment window closed. You have not been charged.'; } },
+    onClose:function(){ if(HIRE_DONE) hireConfirm(HIRE_REF, email); }
+  });
+}
+function hireConfirm(ref, email){
+  var msg=document.getElementById('hirePayMsg'); if(msg){ msg.style.color='var(--tx3)'; msg.textContent='Confirming your payment…'; }
+  fetch(EMPLOYER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'record-payment',reference:ref,email:email,em:(SESSION.id||''),amount:window.HIRE_PRICE.amount,currency:window.HIRE_PRICE.currency,item:'Hiring access'})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){
+        if(d.accessGranted){
+          EM_STATE.access='Active'; EM_STATE.paidPendingVerification=false; refreshStatusCard();
+          if(msg){ msg.style.color='#2ECC71'; msg.textContent='✓ Payment confirmed — hiring access is now active. Refreshing…'; }
+          setTimeout(function(){ location.reload(); }, 1600);
+        } else {
+          EM_STATE.paidPendingVerification=true; refreshStatusCard();
+          if(msg){ msg.style.color='#E2A53A'; msg.textContent='✓ Payment received. '+(d.note||'Access unlocks once your organization is verified.'); }
+          var dv=document.getElementById('dashboardView'); if(dv && dv.style.display!=='none'){ try{ renderDashboardView(); }catch(e){} }
+        }
+      } else {
+        if(msg){ msg.style.color='#E86A6A'; msg.textContent='Payment received but not confirmed. If charged, contact support with reference '+ref+'.'; }
+      }
+    }).catch(function(){ if(msg){ msg.style.color='#E86A6A'; msg.textContent='Could not confirm. If charged, contact support with ref '+ref+'.'; } });
+}
+function emHasFullAccess(){ return (EM_STATE.access==='Active') && /verified/i.test(EM_STATE.verification); }
+function showUnlockGate(){
+  var reasons=[
+    ['Complete Company Profile', EM_STATE.profilePct>=100],
+    ['Upload Documents', EM_STATE.docsDone>=EM_STATE.docsTotal],
+    ['Submit Verification', /verified/i.test(EM_STATE.verification)],
+    ['Activate Hiring Access', EM_STATE.access==='Active']
+  ];
+  document.getElementById('candTitle').textContent='🔒 Unlock this candidate';
+  document.getElementById('candBody').innerHTML='<div style="font-size:13px;color:var(--tx2);margin-bottom:14px">To view complete candidate profiles, your organization must:</div>'
+    +reasons.map(function(r){return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13.5px"><span style="color:'+(r[1]?'#2ECC71':'var(--tx3)')+';font-size:15px">'+(r[1]?'✓':'○')+'</span><span style="color:'+(r[1]?'var(--tx2)':'var(--tx)')+'">'+r[0]+'</span></div>';}).join('')
+    +'<div style="font-size:11.5px;color:var(--tx3);margin:14px 0">Even after payment, candidates stay locked until your profile and verification are complete — this protects skilled workers from unverified employers. You will never see a worker\u2019s phone or email; all contact happens through STACS.</div>'
+    +'<button class="add" style="width:100%" onclick="closeCandDrawer();emNavClick(\'dashboard\')">Continue setup →</button>';
+  document.getElementById('candDrawer').classList.add('show');
+  document.getElementById('candOv').classList.add('show');
+}
+function closeCandDrawer(){ document.getElementById('candDrawer').classList.remove('show'); document.getElementById('candOv').classList.remove('show'); }
+function toggleCart(id){
+  if(!emHasFullAccess()){ showUnlockGate(); return; }
+  const i=CART.findIndex(x=>x.id===id);if(i>=0)CART.splice(i,1);else{const c=POOL.find(x=>x.id===id);if(c)CART.push(c);}document.getElementById('cartCount').textContent=CART.length;render();renderCart();
+}
+
+/* ================= CANDIDATE VIEW + VERIFICATION REQUEST ================= */
+var CAND=null, CANDDOCS=[], CURDOC=null, POOLV=[];
+function closeCand(e){ if(e && e.target && e.target.id!=='candOv') return;
+  document.getElementById('candDrawer').classList.remove('show');
+  document.getElementById('candOv').classList.remove('show'); }
+function viewCand(id){
+  if(!emHasFullAccess()){ showUnlockGate(); return; }
+  CAND=POOL.find(function(c){return c.id===id;})||{id:id};
+  document.getElementById('candTitle').textContent=(CAND.name||id);
+  document.getElementById('candBody').innerHTML='Loading…';
+  document.getElementById('candDrawer').classList.add('show');
+  document.getElementById('candOv').classList.add('show');
+  fetch(SKILLED_POOL_URL+'?action=candidate-docs&token='+encodeURIComponent(SESSION.token)+'&candidate='+encodeURIComponent(id))
+   .then(function(r){return r.json();}).then(renderCand)
+   .catch(function(){ renderCand({ok:true,docs:[
+     {slot:1,profession:'Industrial Electrician',qualification:'City & Guilds',status:'Unverified',chip:'Request verification',requests:0,threshold:10},
+     {slot:2,profession:'Solar PV Installer',status:'Verified',chip:'Cleared (sponsored)',isPublic:false,iPaid:false,requests:3,threshold:10}
+   ]}); });
+}
+function chipStyle(chip){
+  if(chip==='Cleared') return 'background:rgba(46,204,113,.15);color:#2ECC71';
+  if(chip==='Cleared (sponsored)') return 'background:rgba(255,255,255,.08);color:var(--tx3)';
+  if(chip==='Not yet cleared') return 'background:rgba(232,106,106,.14);color:#E86A6A';
+  if(chip==='Verification ongoing') return 'background:rgba(200,146,10,.18);color:#E2A53A';
+  return 'background:rgba(255,255,255,.08);color:var(--tx2)';
+}
+function renderCand(d){
+  CANDDOCS=(d&&d.docs)||[];
+  var b=document.getElementById('candBody');
+  if(!CANDDOCS.length){ b.innerHTML='<div class="empty">No credentials listed yet.</div>'; return; }
+  b.innerHTML='<div style="font-size:12.5px;color:var(--tx2);margin-bottom:14px">Contact details are masked. You engage through STACS.</div>'
+   + CANDDOCS.map(function(x,i){
+      var detail=x.detail? '<div style="font-size:11.5px;color:var(--tx3);margin-top:6px">Verified '+(x.detail.date||'').slice(0,10)+' · '+(x.detail.method||'')+' · by '+(x.detail.verifier||'')+'</div>' : '';
+      var reason=x.reason? '<div style="font-size:11.5px;color:#E86A6A;margin-top:6px">Reason: '+x.reason+'</div>' : '';
+      var locked=(x.status==='Verified' && !x.isPublic && !x.iPaid)
+        ? '<div style="font-size:11.5px;color:var(--tx3);margin-top:6px">Verified, but funded by another employer — '+(x.requests||0)+' of '+(x.threshold||10)+' requests before it opens to everyone.</div>' : '';
+      var btn = (x.status==='Verified' && (x.isPublic||x.iPaid))
+        ? '<button class="view" style="flex:0 0 auto" onclick="openReport('+i+')">Open report</button>'
+        : '<button class="add" style="flex:0 0 auto" onclick="askVerify('+i+')">Verify this document</button>';
+      return '<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:11px;padding:14px;margin-bottom:10px">'
+        +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:3px"><b style="font-size:14px">'+(x.profession||'Credential')+'</b>'
+        +'<span class="bdg" style="'+chipStyle(x.chip)+'">'+x.chip+'</span></div>'
+        +'<div style="font-size:12px;color:var(--tx3)">Slot '+x.slot+(x.qualification?' · '+x.qualification:'')+'</div>'
+        +detail+reason+locked
+        +'<div class="cc-acts" style="margin-top:10px">'+btn+'</div></div>';
+     }).join('');
+}
+function openReport(i){
+  var x=CANDDOCS[i], dd=x.detail||{};
+  alert('VERIFICATION REPORT\n\nLEIVOTEST — STACS\nrecruitment@leivotest.com\n\nReference: '+(dd.ref||'')+'\nCredential: '+(x.profession||'')+'\nOutcome: '+(dd.outcome||'')+'\nMethod: '+(dd.method||'')+'\nVerifier: '+(dd.verifier||'')+'\nDate: '+(dd.date||'')+'\n\nRemarks: '+(dd.remarks||'')+'\n\n(Downloadable PDF report is issued from the platform.)');
+}
+/* --- the paywall --- */
+function askVerify(i){
+  CURDOC=CANDDOCS[i];
+  var b=document.getElementById('candBody');
+  b.innerHTML='<div style="background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.32);border-radius:11px;padding:16px;color:var(--gold2);font-size:13.2px;line-height:1.6">'
+   +'<b>Verification is carried out by independent accredited agents</b> in the STACS Verifier Hub, who confirm the credential with the body that issued it and provide a formal report.<br><br>'
+   +'Do you wish to <b>pay for the verification process to commence</b> on <b>'+(CURDOC.profession||'this credential')+'</b>?'
+   +'<div style="display:flex;gap:10px;margin-top:16px">'
+   +'<button class="add" style="flex:1" onclick="chooseVerifier()">Yes — show me verifiers</button>'
+   +'<button class="view" style="flex:1" onclick="declineVerify()">No</button></div></div>';
+}
+function declineVerify(){
+  fetch(SKILLED_POOL_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'verification-decline',token:SESSION.token,candidate:CAND.id,slot:CURDOC.slot})}).catch(function(){});
+  document.getElementById('candBody').innerHTML='<div class="msg ok" style="display:block">Noted. The candidate has been notified that a verification was requested, so they can choose to fund it themselves — in which case the result becomes visible to you and every other employer.</div>'
+   +'<button class="view" style="margin-top:12px" onclick="viewCand(CAND.id)">Back to credentials</button>';
+}
+function chooseVerifier(){
+  var b=document.getElementById('candBody');
+  b.innerHTML='<div style="font-size:13px;color:var(--tx2);margin-bottom:12px">Choose a verifier. They set their own price; ratings and turnaround are earned from completed work. The total you see includes all platform fees.</div><div id="vlist">Loading verifiers…</div>';
+  fetch(VERIFIER_URL+'?action=verifier-pool&category='+encodeURIComponent(CURDOC.sector||''))
+   .then(function(r){return r.json();}).then(function(d){ POOLV=(d&&d.verifiers)||[]; paintVerifiers(); })
+   .catch(function(){ POOLV=[
+     {id:'VF-1042-NG',name:'B. Ade',body:'COREN',country:'Nigeria',basePrice:14,rating:4.1,completion:0.88,avgTurnaround:82,jobs:64},
+     {id:'VF-2288-NG',name:'K. Obi',body:'COREN',country:'Nigeria',basePrice:18,rating:4.6,completion:0.95,avgTurnaround:68,jobs:210},
+     {id:'VF-3391-GH',name:'A. Mensah',body:'GhIE',country:'Ghana',basePrice:26,rating:4.9,completion:0.99,avgTurnaround:44,jobs:157}
+   ]; paintVerifiers(); });
+}
+function paintVerifiers(){
+  var el=document.getElementById('vlist');
+  if(!POOLV.length){ el.innerHTML='<div class="empty">No accredited verifier is currently available for this credential type. Please check back.</div>'; return; }
+  el.innerHTML=POOLV.map(function(v,i){
+    var f=vFees(v.basePrice,false);
+    return '<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:11px;padding:14px;margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px"><b style="font-size:14px">'+v.name+'</b>'
+      +'<span style="font-size:11px;color:var(--tx3)">'+v.id+'</span></div>'
+      +'<div style="font-size:12px;color:var(--tx2);margin:3px 0 8px">'+(v.body||'')+' · '+(v.country||'')+'</div>'
+      +'<div style="font-size:12px;color:var(--tx2)">'
+      +(v.rating?'★ '+v.rating.toFixed(1)+' · ':'')+(v.completion?Math.round(v.completion*100)+'% completion · ':'')
+      +(v.avgTurnaround?v.avgTurnaround+' days avg':'new verifier')+(v.jobs?' · '+v.jobs+' jobs':'')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-top:10px">'
+      +'<div style="flex:1"><div style="font-size:17px;font-weight:800;color:var(--tx)">'+money(f.total)+'</div>'
+      +'<div style="font-size:11px;color:var(--tx3)">all-in · verifier '+money(f.base)+' + platform fees</div></div>'
+      +'<button class="add" onclick="confirmVerify('+i+')">Select</button></div></div>';
+  }).join('') + '<button class="view" style="width:100%;margin-top:6px" onclick="viewCand(CAND.id)">Cancel</button>';
+}
+function confirmVerify(i){
+  var v=POOLV[i], f=vFees(v.basePrice,false), fx=vFees(v.basePrice,true);
+  document.getElementById('candBody').innerHTML=
+    '<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:11px;padding:16px">'
+    +'<b style="font-size:14.5px">'+ (CURDOC.profession||'Credential') +'</b>'
+    +'<div style="font-size:12px;color:var(--tx3);margin-bottom:12px">Verifier '+v.name+' · '+v.id+'</div>'
+    +row('Verifier fee',f.base)+row('Verification application',VFEE.app)+row('Platform commission',f.comm)
+    +row('Storage &amp; maintenance',VFEE.storage)+row('Execution &amp; reporting',VFEE.exec)
+    +row('Feedback storage',VFEE.feedback)+row('Audit trail &amp; disclosure',VFEE.audit)+row('Dispute reserve',VFEE.dispute)
+    +row('VAT',f.vat)
+    +'<div style="display:flex;justify-content:space-between;border-top:1px solid var(--bdr);margin-top:10px;padding-top:10px"><b>Total</b><b style="font-size:17px">'+money(f.total)+'</b></div>'
+    +'<div style="font-size:11.5px;color:var(--tx3);margin-top:4px">Standard turnaround 60–90 days. Express available at '+money(fx.total)+'.</div>'
+    +'<div style="background:rgba(232,106,106,.1);border:1px solid rgba(232,106,106,.3);border-radius:9px;padding:11px;margin-top:12px;font-size:12px;color:#E86A6A">'
+    +'<b>No refunds.</b> You are paying for the investigation, not for a particular outcome. If the document is found unverifiable, expired or not authentic, the service has still been performed.</div>'
+    +'<div style="font-size:11.5px;color:var(--tx3);margin-top:10px">This report will be visible to you only, until '+(CURDOC.threshold||10)+' employers have requested it.</div>'
+    +'<div style="display:flex;gap:10px;margin-top:14px">'
+    +'<button class="add" style="flex:1" onclick="payVerify(\''+v.id+'\','+f.total.toFixed(2)+')">Pay '+money(f.total)+'</button>'
+    +'<button class="view" style="flex:1" onclick="chooseVerifier()">Back</button></div></div>';
+}
+function row(label,val){ return '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--tx2);padding:3px 0"><span>'+label+'</span><span>'+money(val)+'</span></div>'; }
+function payVerify(verifierId, total){
+  var body=document.getElementById('candBody');
+  var email=(SESSION.email||'');
+  if(!email){
+    // employers registered before this build may not have email cached in the session
+    email = prompt('Confirm your billing email for the receipt:')||'';
+    if(!email){ return; }
+  }
+  var cur=vCur();
+  var subunit = (cur==='NGN') ? Math.round(total*VFEE.ngn)*100 : Math.round(total*100);
+  if(!window.PaystackPop){
+    body.innerHTML='<div class="msg err" style="display:block">Payment library did not load. Please refresh and try again.</div>'
+      +'<button class="view" style="margin-top:12px" onclick="viewCand(CAND.id)">Back</button>';
+    return;
+  }
+  body.innerHTML='<div class="empty">Opening secure checkout…</div>';
+  var paystack=new PaystackPop();
+  paystack.newTransaction({
+    key:PAYSTACK_PUBLIC_KEY, email:email, amount:subunit, currency:cur,
+    metadata:{ role:'EM', item:'Verification', candidate:CAND.id, slot:CURDOC.slot, verifier:verifierId },
+    onSuccess:function(tx){
+      // 1. record the payment itself   2. create the verification work item
+      try{ fetch(SKILLED_POOL_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'record-payment',
+        reference:tx.reference,email:email,amount:total,currency:cur,item:'Verification — '+(CURDOC.profession||'')})}); }catch(e){}
+      try{ fetch(SKILLED_POOL_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'verification-request',
+        token:SESSION.token,candidate:CAND.id,slot:CURDOC.slot,item:CURDOC.profession,verifier:verifierId,
+        amount:total,currency:cur,reference:tx.reference})}); }catch(e){}
+      body.innerHTML='<div class="msg ok" style="display:block"><b>Payment received.</b><br>Reference <b>'+tx.reference+'</b>.<br><br>'
+        +'Your verifier has been assigned and the candidate notified. Standard turnaround is 60–90 days; you will be notified when the report is ready. The report will be visible to you only.</div>'
+        +'<button class="view" style="margin-top:12px" onclick="viewCand(CAND.id)">Back to credentials</button>';
+    },
+    onCancel:function(){
+      body.innerHTML='<div class="msg err" style="display:block">Payment cancelled — no verification was requested. You can try again at any time.</div>'
+        +'<button class="view" style="margin-top:12px" onclick="viewCand(CAND.id)">Back to credentials</button>';
+    }
+  });
+}
+
+
+function openCart(){renderCart();document.getElementById('drawer').classList.add('show');document.getElementById('ov').classList.add('show');}
+function closeCart(){document.getElementById('drawer').classList.remove('show');document.getElementById('ov').classList.remove('show');}
+function renderCart(){
+ const b=document.getElementById('cartBody');
+ b.innerHTML=CART.length?CART.map(c=>`<div class="citem"><div><div class="ci-id">${c.name}</div><div class="ci-s">${c.id} · ${c.skill}</div></div><button class="rm" onclick="toggleCart('${c.id}')">&times;</button></div>`).join(''):'<div class="empty">Your cart is empty.</div>';
+}
+function fillProjSel(){
+ const s=document.getElementById('projSel');
+ let html=PROJECTS.map(p=>`<option value="${p.name}">${p.name} (${p.count}/150)</option>`).join('');
+ if(PROJECTS.length<MAX_PROJECTS) html+='<option value="__new">+ New project…</option>';
+ s.innerHTML=html||'<option value="__new">+ New project…</option>';toggleNew();
+}
+function toggleNew(){document.getElementById('newProj').style.display=document.getElementById('projSel').value==='__new'?'block':'none';
+ const warn=document.getElementById('capWarn');warn.textContent=PROJECTS.length>=MAX_PROJECTS?'You have reached the maximum of 5 projects. Save into an existing one.':'';}
+function saveToProject(){
+ const msg=document.getElementById('cartMsg');msg.className='msg';msg.textContent='';
+ if(!CART.length){msg.className='msg err';msg.textContent='Your cart is empty.';return;}
+ const sel=document.getElementById('projSel').value;let name,existing;
+ if(sel==='__new'){name=document.getElementById('newProj').value.trim();if(!name){msg.className='msg err';msg.textContent='Name your new project.';return;}
+   if(PROJECTS.length>=MAX_PROJECTS){msg.className='msg err';msg.textContent='Maximum 5 projects reached.';return;}existing={name,count:0};}
+ else{name=sel;existing=PROJECTS.find(p=>p.name===name);}
+ if((existing.count+CART.length)>MAX_PER_PROJECT){msg.className='msg err';msg.textContent=`That would exceed 150 candidates in "${name}" (currently ${existing.count}). Remove ${existing.count+CART.length-MAX_PER_PROJECT}.`;return;}
+ const payload={action:'save-project',em:SESSION.em,project:name,candidates:CART.map(c=>({id:c.id,name:c.name,skill:c.skill}))};
+ fetch(EMPLOYER_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)}).then(()=>{}).catch(()=>{});
+ // optimistic update
+ if(sel==='__new')PROJECTS.push({name,count:CART.length});else existing.count+=CART.length;
+ msg.className='msg ok';msg.textContent=`Saved ${CART.length} candidate(s) to "${name}".`;CART=[];document.getElementById('cartCount').textContent=0;
+ fillProjSel();renderCart();renderProjects();render();
+}
+/* ===== unified nav: routes every menu item to its view ===== */
+var EM_VIEWS=['dashboard','journey','organization','jobs','browse','projects','verif'];
+function emNavClick(t, btn, openCard){
+  EM_VIEWS.forEach(function(k){
+    var id = k==='browse'?'browseView':k==='projects'?'projectsView':k==='verif'?'verifView':(k+'View');
+    var v=document.getElementById(id); if(v) v.style.display=(t===k)?'block':'none';
+  });
+  // child highlight
+  document.querySelectorAll('#emNav .acc-children button').forEach(function(b){b.classList.remove('on');});
+  if(btn && btn.classList.contains('acc-parent')===false) btn.classList.add('on');
+  // parent highlight: Dashboard and Organization are their own parents; others map to a section
+  var parentOf={ browse:'hiring', cart:'hiring', jobs:'hiring' };
+  document.querySelectorAll('.acc-parent').forEach(function(p){ p.classList.remove('active'); });
+  if(t==='dashboard'||t==='organization'){ var dp=document.querySelector('.acc-parent[data-parent="'+t+'"]'); if(dp) dp.classList.add('active'); }
+  else { var pn=parentOf[t]; if(pn){ var pp=document.querySelector('.acc-parent[data-parent="'+pn+'"]'); if(pp){ pp.classList.add('active'); accOpen(pn); } } }
+  // banner only on Find Talent
+  var banner=document.getElementById('banner'); if(banner) banner.style.display=(t==='browse')?'block':'none';
+  if(t==='projects')renderProjects();
+  if(t==='verif')loadMyRequests();
+  if(t==='dashboard')renderDashboardView();
+  if(t==='journey')renderJourneyView();
+  if(t==='organization'){
+    renderOrgProfileView(); renderDocumentsView(); renderVerificationView();
+    if(openCard) orgCardOpen(openCard);
+  }
+  if(t==='jobs')renderJobsView();
+}
+/* Organization cards: each expands/collapses independently — clicking one
+   never affects the others. orgCardOpen() is used when navigating in with a
+   specific card requested (e.g. from a nav sub-item); it does not close the rest. */
+function orgCardToggle(name){
+  var c=document.getElementById('orgCard-'+name); if(!c) return;
+  c.classList.toggle('open');
+}
+function orgCardOpen(name){
+  var c=document.getElementById('orgCard-'+name); if(!c) return;
+  c.classList.add('open');
+  c.scrollIntoView({behavior:'smooth',block:'start'});
+}
+/* accordion: only one parent expanded at a time */
+function accToggle(name){
+  var child=document.querySelector('.acc-children[data-acc="'+name+'"]');
+  var parent=document.querySelector('.acc-parent[data-parent="'+name+'"]');
+  var isOpen=child&&child.classList.contains('open');
+  // close all
+  document.querySelectorAll('.acc-children').forEach(function(c){c.classList.remove('open');});
+  document.querySelectorAll('.acc-parent .caret').forEach(function(c){c.parentElement.classList.remove('open');});
+  if(!isOpen && child){ child.classList.add('open'); if(parent) parent.classList.add('open'); }
+}
+function accOpen(name){
+  var child=document.querySelector('.acc-children[data-acc="'+name+'"]');
+  var parent=document.querySelector('.acc-parent[data-parent="'+name+'"]');
+  document.querySelectorAll('.acc-children').forEach(function(c){c.classList.remove('open');});
+  document.querySelectorAll('.acc-parent').forEach(function(c){c.classList.remove('open');});
+  if(child){ child.classList.add('open'); } if(parent){ parent.classList.add('open'); }
+}
+/* ===== Job Requests (post + manage + see interest) ===== */
+function renderJobsView(){
+  var v=document.getElementById('jobsView'); if(!v) return;
+  var canPost=emHasFullAccess();
+  v.innerHTML='<h2>Job requests</h2><div style="font-size:13px;color:var(--tx2);margin-bottom:14px">Post the specific roles you\u2019re hiring for. Verified skilled workers in the pool can see them and express interest.</div>'
+    +(canPost
+      ? '<button class="add" onclick="showJobForm()">+ Post a new job</button><div id="jobFormWrap"></div>'
+      : '<div class="banner" style="color:var(--gold2)">You must be verified with active hiring access to post jobs. <a href="#" onclick="emNavClick(\'organization\',null,\'verification\');return false;" style="color:var(--gold2);font-weight:700">Complete setup →</a></div>')
+    +'<div id="myJobsList" style="margin-top:16px">Loading…</div>';
+  loadMyJobs();
+}
+function showJobForm(){
+  var w=document.getElementById('jobFormWrap'); if(!w) return;
+  w.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-top:12px">'
+    +'<div class="row">'
+    +'<div class="f"><label>Job title *</label><input id="jf_title" placeholder="e.g. Certified Welder"></div>'
+    +'<div class="f"><label>Country *</label><input id="jf_country" placeholder="Destination country"></div>'
+    +'<div class="f"><label>Sector</label><input id="jf_sector" placeholder="e.g. Construction & Trades"></div>'
+    +'<div class="f"><label>Type</label><select id="jf_type"><option>Full-time</option><option>Contract</option><option>Temporary</option><option>Seasonal</option></select></div>'
+    +'<div class="f"><label>Positions</label><input id="jf_positions" type="number" value="1" min="1"></div>'
+    +'<div class="f"><label>Closes</label><input id="jf_closes" type="date"></div>'
+    +'</div>'
+    +'<div class="f" style="margin-top:8px"><label>Description</label><textarea id="jf_description" style="width:100%;min-height:80px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-family:inherit" placeholder="What the role involves…"></textarea></div>'
+    +'<div class="f" style="margin-top:8px"><label>Requirements</label><textarea id="jf_requirements" style="width:100%;min-height:60px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-family:inherit" placeholder="Skills, experience, certifications…"></textarea></div>'
+    +'<button class="add" style="margin-top:12px" onclick="submitJob()">Post job</button> <button class="view" onclick="document.getElementById(\'jobFormWrap\').innerHTML=\'\'">Cancel</button>'
+    +'<span id="jobMsg" style="font-size:12.5px;margin-left:10px"></span></div>';
+}
+function submitJob(){
+  var job={ title:jv('title'), country:jv('country'), sector:jv('sector'), type:jv('type'), positions:jv('positions'), closes:jv('closes'), description:jv('description'), requirements:jv('requirements') };
+  var msg=document.getElementById('jobMsg');
+  if(!job.title||!job.country){ if(msg){msg.style.color='#E86A6A';msg.textContent='Title and country are required.';} return; }
+  if(msg){ msg.style.color='var(--tx3)'; msg.textContent='Posting…'; }
+  fetch(EMPLOYER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'post-job',token:SESSION.token,job:job})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ document.getElementById('jobFormWrap').innerHTML=''; loadMyJobs(); }
+      else if(msg){ msg.style.color='#E86A6A'; msg.textContent=(d&&d.error)||'Could not post.'; }
+    }).catch(function(){ if(msg){ msg.style.color='#E86A6A'; msg.textContent='Could not reach server.'; } });
+}
+function jv(id){ var e=document.getElementById('jf_'+id); return e?e.value.trim():''; }
+function loadMyJobs(){
+  var el=document.getElementById('myJobsList'); if(!el) return;
+  fetch(EMPLOYER_URL+'?action=my-jobs&token='+encodeURIComponent(SESSION.token))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='<div class="empty">Could not load your jobs.</div>'; return; }
+      if(!d.jobs.length){ el.innerHTML='<div class="empty" style="padding:20px">No jobs posted yet. Post your first role above.</div>'; return; }
+      el.innerHTML=d.jobs.map(function(j){
+        var open=(j.status==='Open');
+        return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-bottom:10px">'
+          +'<div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><div><div style="font-size:15px;font-weight:800">'+esc(j.title)+'</div>'
+          +'<div style="font-size:12px;color:var(--tx3)">'+esc(j.country)+(j.sector?(' · '+esc(j.sector)):'')+' · '+esc(j.type)+' · '+esc(j.positions)+' position(s)</div></div>'
+          +'<span class="bdg '+(open?'ver':'tier')+'">'+esc(j.status)+'</span></div>'
+          +(j.description?('<div style="font-size:12.5px;color:var(--tx2);margin-top:8px">'+esc(j.description)+'</div>'):'')
+          +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><button class="view" onclick="viewInterest(\''+j.jobId+'\',\''+esc(j.title).replace(/\x27/g,"")+'\')">👥 '+j.interested+' interested</button>'
+          +(open?'<button class="view" onclick="closeJob(\''+j.jobId+'\')">Close job</button>':'')+'</div>'
+          +'<div id="interest-'+j.jobId+'"></div></div>';
+      }).join('');
+    }).catch(function(){ el.innerHTML='<div class="empty">Could not reach server.</div>'; });
+}
+function closeJob(jobId){
+  fetch(EMPLOYER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'close-job',token:SESSION.token,jobId:jobId})})
+    .then(function(r){return r.json();}).then(function(){ loadMyJobs(); });
+}
+function viewInterest(jobId, title){
+  var box=document.getElementById('interest-'+jobId); if(!box) return;
+  if(box.innerHTML){ box.innerHTML=''; return; }
+  // recruitment revolves around the vacancy: tabs live INSIDE the job
+  box.innerHTML='<div style="border-top:1px solid var(--bdr);margin-top:10px;padding-top:10px">'
+    +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px" id="jobtabs-'+jobId+'">'
+    +jobTab(jobId,'applicants','Applicants',true)
+    +jobTab(jobId,'shortlisted','Shortlisted',false)
+    +jobTab(jobId,'interviews','Interviews',false)
+    +jobTab(jobId,'offers','Offers',false)
+    +jobTab(jobId,'placements','Placements',false)
+    +'</div><div id="jobtabbody-'+jobId+'"></div></div>';
+  showJobTab(jobId,'applicants');
+}
+function jobTab(jobId,key,label,live){
+  return '<button class="view" data-jt="'+key+'" onclick="showJobTab(\''+jobId+'\',\''+key+'\')" style="padding:5px 12px;font-size:12px">'+label+(live?'':' <span style="opacity:.5;font-size:9px">soon</span>')+'</button>';
+}
+function showJobTab(jobId,key){
+  document.querySelectorAll('#jobtabs-'+jobId+' button').forEach(function(b){ b.style.background=(b.getAttribute('data-jt')===key)?'var(--gp)':''; b.style.color=(b.getAttribute('data-jt')===key)?'var(--gold2)':''; });
+  var body=document.getElementById('jobtabbody-'+jobId); if(!body) return;
+  if(key!=='applicants'){
+    body.innerHTML='<div class="empty" style="padding:16px;font-size:12.5px">The <b>'+key+'</b> stage is coming soon. Once built, candidates move through Applicants → Shortlisted → Interviews → Offers → Placements, all within this job.</div>';
+    return;
+  }
+  body.innerHTML='<div class="empty" style="padding:10px">Loading applicants…</div>';
+  fetch(EMPLOYER_URL+'?action=job-interest&token='+encodeURIComponent(SESSION.token)+'&jobId='+encodeURIComponent(jobId))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ body.innerHTML='<div class="empty">Could not load.</div>'; return; }
+      if(!d.interested.length){ body.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:8px 0">No applicants yet. Candidates who express interest in this job appear here.</div>'; return; }
+      body.innerHTML='<div style="font-size:11px;text-transform:uppercase;color:var(--gold2);font-weight:700;margin-bottom:6px">'+d.interested.length+' applicant'+(d.interested.length>1?'s':'')+'</div>'
+        +d.interested.map(function(c){ return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--bdr)"><span>'+esc(c.name||c.wkId)+' <span style="color:var(--tx3)">('+esc(c.wkId)+')</span></span><span><button class="view" style="padding:3px 10px" onclick="viewCand(\''+c.wkId+'\')">View profile</button></span></div>'; }).join('')
+        +'<div style="font-size:11px;color:var(--tx3);margin-top:8px">Review their profile and verification status, then shortlist. Contact details stay masked — you engage through STACS.</div>';
+    }).catch(function(){ body.innerHTML='<div class="empty">Could not reach server.</div>'; });
+}
+function emSoon(){ alert('This section is coming soon. We\u2019re building the Employer Hub in stages — the core onboarding, documents, verification and hiring tools come first.'); }
+/* keep the old showTab working (used elsewhere) by mapping to the router */
+function showTab(t, btn){ emNavClick(t, btn); }
+
+/* ---- employer status + completion (real fields from session; profile% and docs from stored state) ---- */
+var EM_STATE={ profilePct:0, docsDone:0, docsTotal:7, verification:'Pending', access:'Locked', subscription:'Free', country:'', empType:'', company:'' };
+function set(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+/* MISSING PIECE, now fixed: esc() is called throughout this file (dashboard,
+   job cards, org profile, etc.) but was never defined here — every call threw
+   a ReferenceError, which the surrounding try/catch swallowed silently. That
+   silent failure is why the dashboard content area has been rendering blank.
+   Defined here to match candidate-dashboard.html / admin.html exactly. */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+/* Composes the one-line meta under the hero name (company · type · country ·
+   plan) so removing the old sidebar stat rows doesn't silently drop info —
+   it's just consolidated into a single glanceable line instead. */
+function refreshHeroLine(){
+  var cl=document.getElementById('emCompanyLine'); if(!cl) return;
+  var parts=[];
+  if(EM_STATE.company) parts.push(EM_STATE.company);
+  if(EM_STATE.empType) parts.push(EM_STATE.empType);
+  if(EM_STATE.country) parts.push(EM_STATE.country);
+  parts.push((EM_STATE.subscription||'Free')+' plan');
+  cl.textContent=parts.join(' · ');
+}
+function refreshStatusCard(){
+  var s=SESSION||{};
+  EM_STATE.country = EM_STATE.country || s.country || '';
+  EM_STATE.empType = EM_STATE.empType || s.empType || s.type || 'Direct Employer';
+  EM_STATE.company = EM_STATE.company || s.company || '';
+  set('emCountry', EM_STATE.country||'—');
+  set('emRep', s.name||s.rep||'—');
+  set('emType', EM_STATE.empType);
+  set('emVerification', EM_STATE.verification);
+  set('emSub', EM_STATE.subscription);
+  refreshHeroLine();
+  var vb=document.getElementById('emVBadge');
+  if(vb){
+    var vtxt=EM_STATE.verification||'Pending';
+    var isVer=/verified/i.test(vtxt), isReview=/review/i.test(vtxt);
+    vb.textContent = 'Business: '+(isVer ? 'Verified' : (isReview ? 'Under Review' : 'Unverified'));
+    vb.style.background = isVer ? 'var(--grnp)' : (isReview ? 'var(--gp)' : 'var(--card2)');
+    vb.style.color = isVer ? '#1e8a4c' : (isReview ? 'var(--gold2)' : 'var(--tx3)');
+  }
+  set('emProfilePct', EM_STATE.profilePct+'%');
+  set('emDocsCount', EM_STATE.docsDone+' of '+EM_STATE.docsTotal);
+  var acc=document.getElementById('emAccess');
+  if(acc){ var locked=(EM_STATE.access!=='Active'); acc.innerHTML='<span class="lockpill" style="background:'+(locked?'var(--gp)':'var(--grnp)')+';color:'+(locked?'var(--gold2)':'#1e8a4c')+'">'+(locked?'🔒 Locked':'✓ Active')+'</span>'; }
+  var overall=Math.round((EM_STATE.profilePct*0.5)+((EM_STATE.docsDone/EM_STATE.docsTotal)*30)+((/verified/i.test(EM_STATE.verification))?20:0));
+  var meter=document.getElementById('emMeter'); if(meter) meter.style.width=Math.min(overall,100)+'%';
+  EM_STATE.readiness=employerReadiness();
+  // "Getting Started" nav group — only until profile is complete
+  var gs=document.getElementById('gettingStartedNav');
+  if(gs){
+    if(EM_STATE.profilePct>=100 && EM_STATE.docsDone>=EM_STATE.docsTotal && /verified/i.test(EM_STATE.verification)){
+      gs.innerHTML=''; // graduated — hide it
+    } else {
+      gs.innerHTML='<button class="acc-parent" style="cursor:default"><span class="i">🧭</span>Getting Started</button>'
+        +'<div class="acc-children open">'
+        +'<button data-tab="organization" onclick="emNavClick(\'organization\',this,\'profile\')">Complete profile'+(EM_STATE.profilePct>=100?' ✓':'')+'</button>'
+        +'<button data-tab="organization" onclick="emNavClick(\'organization\',this,\'documents\')">Upload documents'+(EM_STATE.docsDone>=EM_STATE.docsTotal?' ✓':'')+'</button>'
+        +'<button data-tab="organization" onclick="emNavClick(\'organization\',this,\'verification\')">Get verified'+(/verified/i.test(EM_STATE.verification)?' ✓':'')+'</button>'
+        +'</div>';
+    }
+  }
+}
+/* Employer Readiness Score (0-100) from real signals */
+function employerReadiness(){
+  var score=0;
+  score += Math.round((EM_STATE.profilePct||0)*0.25);              // profile up to 25
+  score += Math.round(((EM_STATE.docsDone||0)/(EM_STATE.docsTotal||7))*25);  // docs up to 25
+  if(/review/i.test(EM_STATE.verification)) score+=10;
+  if(/verified/i.test(EM_STATE.verification)) score+=25;           // verification up to 25
+  if(EM_STATE.access==='Active') score+=15;                        // access 15
+  if(EM_STATE.jobsPosted>0) score+=10;                             // first job 10
+  return Math.min(score,100);
+}
+
+/* ---- Dashboard (home) view: readiness + recommendations + widgets ---- */
+function renderDashboardView(){
+  var v=document.getElementById('dashboardView'); if(!v) return;
+  var recs=[
+    {t:'Complete Company Profile', s:EM_STATE.profilePct>=100?'Done':'~4 minutes', a:'Continue', act:"emNavClick('organization',null,'profile')", need:EM_STATE.profilePct<100},
+    {t:'Upload Business Registration', s:'Required', a:'Upload', act:"emNavClick('organization',null,'documents')", need:EM_STATE.docsDone<EM_STATE.docsTotal},
+    {t:'Add Company Logo', s:'Recommended', a:'Upload', act:"emNavClick('organization',null,'documents')", need:true},
+    {t:'Complete Verification', s:'Required', a:'Continue', act:"emNavClick('organization',null,'verification')", need:!/verified/i.test(EM_STATE.verification)},
+    {t:'Activate Hiring Access', s:EM_STATE.access==='Active'?'Active':'Available after verification', a:EM_STATE.access==='Active'?'Manage':'Locked', act:"emNavClick('organization',null,'verification')", need:false}
+  ];
+  var recCards=recs.map(function(r){
+    return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px">'
+      +'<div><div style="font-size:13.5px;font-weight:700;color:var(--tx)">'+r.t+'</div><div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+r.s+'</div></div>'
+      +(r.need?'<button class="add" style="white-space:nowrap" onclick="'+r.act+'">'+r.a+' →</button>':'<span style="font-size:11px;color:var(--tx3)">'+r.a+'</span>')+'</div>';
+  }).join('');
+  function bar(label,pct){ return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--tx2)"><span>'+label+'</span><span>'+pct+'%</span></div><div class="meter"><i style="width:'+pct+'%"></i></div></div>'; }
+
+  // ---- Welcome + today's progress + estimated setup time ----
+  var todaySteps=[
+    {label:'Email Verified', done:!!(SESSION&&SESSION.id)},
+    {label:'Complete Organization Profile', done:EM_STATE.profilePct>=100},
+    {label:'Upload Company Documents', done:EM_STATE.docsDone>=EM_STATE.docsTotal},
+    {label:'Activate Hiring Access', done:EM_STATE.access==='Active'}
+  ];
+  var remaining=todaySteps.filter(function(s){return !s.done;}).length;
+  var estMins=remaining*2; // ~2 minutes per outstanding step, floor of "a few minutes"
+  var firstUndone=todaySteps.findIndex(function(s){return !s.done;});
+  var continueMap=['dashboard','orgprofile','documents','verification'];
+  var continueTarget=firstUndone>=0?continueMap[firstUndone]:'browse';
+  var welcomeCard='<div style="background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:18px;margin-bottom:16px">'
+    +'<h2 style="margin:0 0 4px">Welcome back, '+esc((SESSION&&(SESSION.name||SESSION.company))||'there')+'</h2>'
+    +'<div style="font-size:13px;color:var(--tx2);margin-bottom:14px">'+(remaining? 'You created your employer account. Let\u2019s finish getting you ready to hire.' : 'Your organization is fully set up and ready to hire.')+'</div>'
+    +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);font-weight:800;margin-bottom:8px">Today\u2019s progress</div>'
+    +'<div style="display:grid;gap:6px;margin-bottom:'+(remaining?'14px':'0')+'">'
+      +todaySteps.map(function(s){
+        return '<div style="display:flex;align-items:center;gap:9px;font-size:13px;color:'+(s.done?'var(--tx2)':'var(--tx)')+'"><span style="color:'+(s.done?'#2ECC71':'var(--tx3)')+'">'+(s.done?'✔':'○')+'</span>'+s.label+'</div>';
+      }).join('')
+    +'</div>'
+    +(remaining
+      ? '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">'
+        +'<div style="font-size:11.5px;color:var(--tx3)">Estimated setup time: <b style="color:var(--tx2)">'+estMins+' minutes</b></div>'
+        +'<button class="add" onclick="emNavClick(\''+continueTarget+'\')">Continue Setup →</button>'
+      +'</div>'
+      : '<div style="margin-bottom:18px"></div>')
+    +'<div style="border-top:1px solid var(--bdr);padding-top:16px">'
+    +'<div style="font-size:14px;font-weight:800;color:var(--tx);margin-bottom:2px">What would you like to do today?</div>'
+    +'<div style="font-size:12px;color:var(--tx3);margin-bottom:12px">Jump straight into the task that moves your hiring forward.</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">'
+      +bigAct('🏢','Complete Organization Profile','Required to unlock hiring',"emNavClick('organization',null,'profile')")
+      +bigAct('📄','Upload Company Documents','Confirms your business is real',"emNavClick('organization',null,'documents')")
+      +bigAct('🔍','Find Talents','Browse verified African professionals',"emNavClick('browse')")
+      +bigAct('📋','Create Hiring Project','Organize candidates by role',"emNavClick('projects')")
+      +bigAct('🛒','View Hire Cart','Review who you\u2019ve shortlisted',"openCart()")
+      +bigAct('⭐','Promote a Project','Get faster candidate attention',"emNavClick('projects')")
+    +'</div></div>'
+    +'</div>';
+
+  v.innerHTML=welcomeCard
+    // Readiness score band
+    +'<div style="background:linear-gradient(135deg,rgba(200,146,10,.12),rgba(46,204,113,.06));border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">'
+      +'<div style="text-align:center"><div style="font-size:34px;font-weight:800;color:var(--gold2);line-height:1">'+(EM_STATE.readiness||0)+'</div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3)">Readiness</div></div>'
+      +'<div style="flex:1;min-width:200px"><div style="font-size:13.5px;font-weight:700;color:var(--tx)">Employer Readiness Score</div><div style="font-size:12px;color:var(--tx2);margin-top:2px">Grows as you complete your profile, verify, activate access and post jobs. A higher score builds trust with candidates.</div><div class="meter" style="margin-top:8px"><i style="width:'+(EM_STATE.readiness||0)+'%"></i></div></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">'
+      +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px"><div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800;margin-bottom:10px">Hiring readiness</div>'
+        +bar('Organization profile',EM_STATE.profilePct)+bar('Documents',Math.round(EM_STATE.docsDone/EM_STATE.docsTotal*100))+bar('Verification',/verified/i.test(EM_STATE.verification)?100:(/review/i.test(EM_STATE.verification)?50:0))+bar('Subscription',EM_STATE.subscription==='Free'?0:100)+'</div>'
+      +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px"><div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800;margin-bottom:10px">STACS at a glance</div>'
+        +'<div id="marketSnapshot" style="font-size:12.5px;color:var(--tx3)">Loading…</div></div>'
+    +'</div>'
+    // ---- Hiring Access: locked checklist, matches the four Today's-progress steps ----
+    +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:18px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+        +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800">Hiring Access</div>'
+        +'<span class="lockpill" style="background:'+(EM_STATE.access==='Active'?'var(--grnp)':'var(--gp)')+';color:'+(EM_STATE.access==='Active'?'#1e8a4c':'var(--gold2)')+'">'+(EM_STATE.access==='Active'?'✓ Active':'🔒 Locked')+'</span>'
+      +'</div>'
+      +(EM_STATE.access==='Active'
+        ? '<div style="font-size:12.5px;color:var(--tx2)">Your hiring access is active — search, shortlist and engage candidates freely.</div>'
+        : (EM_STATE.paidPendingVerification
+          ? '<div style="font-size:12.5px;color:var(--gold2)">Access Reserved — your payment is recorded. Complete your registration so verification can proceed; hiring access unlocks once your organization is verified.</div>'
+          : '<div>'
+            +'<div style="font-size:12.5px;color:var(--tx2);margin-bottom:10px">Complete these steps, then activate hiring access.</div>'
+            +'<div style="display:grid;gap:6px;margin-bottom:12px">'+todaySteps.map(function(s){
+              return '<div style="display:flex;align-items:center;gap:9px;font-size:13px;color:'+(s.done?'var(--tx2)':'var(--tx)')+'"><span style="color:'+(s.done?'#2ECC71':'var(--tx3)')+'">'+(s.done?'✔':'○')+'</span>'+s.label+'</div>';
+            }).join('')+'</div>'
+            +(todaySteps.every(function(s){return s.done;})
+              ? '<button class="add" onclick="emNavClick(\'organization\',null,\'verification\')">Activate Hiring Access →</button>'
+              : '')
+          +'</div>'))
+    +'</div>'
+    +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800;margin-bottom:10px">Recommended next steps</div>'
+    +'<div style="display:grid;gap:10px">'+recCards+'</div>'
+    +'<div id="interestedHighlight" style="margin-top:20px"></div>'
+    + talentShowcaseHtml();
+  // start the showcase + load real market snapshot + interested candidates
+  setTimeout(fillTalentShowcase, 50);
+  setTimeout(loadMarketSnapshot, 50);
+  setTimeout(loadInterestedHighlight, 50);
+}
+function quickAct(label,onclick){ return '<button onclick="'+onclick+'" style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:11px 16px;font-size:13px;color:var(--tx);cursor:pointer;font-family:inherit">'+label+'</button>'; }
+/* Prominent action card for "What would you like to do today?" — icon + title +
+   one-line benefit, so each option earns attention instead of blending into a
+   row of plain pills that's easy to skim past and ignore. */
+function bigAct(icon,title,sub,onclick){
+  return '<button onclick="'+onclick+'" style="text-align:left;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;padding:13px 14px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:3px;transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--gold2)\'" onmouseout="this.style.borderColor=\'var(--bdr)\'">'
+    +'<div style="font-size:20px;line-height:1">'+icon+'</div>'
+    +'<div style="font-size:13.5px;font-weight:700;color:var(--tx)">'+title+'</div>'
+    +'<div style="font-size:11px;color:var(--tx3)">'+sub+'</div>'
+    +'</button>';
+}
+/* Highlight candidates who expressed interest in this employer's jobs. */
+function loadInterestedHighlight(){
+  var host=document.getElementById('interestedHighlight'); if(!host) return;
+  fetch(EMPLOYER_URL+'?action=my-jobs&token='+encodeURIComponent(SESSION.token))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok||!d.jobs.length){ host.innerHTML=''; EM_STATE.jobsPosted=0; refreshStatusCard(); return; }
+      EM_STATE.jobsPosted=d.jobs.length; refreshStatusCard();
+      var withInterest=d.jobs.filter(function(j){return (j.interested||0)>0;});
+      if(!withInterest.length){ host.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--tx2)">You have '+d.jobs.length+' job'+(d.jobs.length>1?'s':'')+' posted. No candidates have expressed interest yet — they\u2019ll appear here when they do.</div>'; return; }
+      var total=withInterest.reduce(function(a,j){return a+(j.interested||0);},0);
+      host.innerHTML='<div style="background:linear-gradient(135deg,rgba(46,204,113,.1),rgba(200,146,10,.05));border:1px solid var(--bdr);border-radius:14px;padding:16px">'
+        +'<div style="font-size:13.5px;font-weight:800;color:var(--grn);margin-bottom:4px">🎯 '+total+' candidate'+(total>1?'s':'')+' interested in your jobs</div>'
+        +'<div style="font-size:12px;color:var(--tx2);margin-bottom:10px">Review who\u2019s interested, check their verification status, and view their profile.</div>'
+        +withInterest.map(function(j){ return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)"><span style="font-size:13px"><b>'+esc(j.title)+'</b> <span style="color:var(--tx3)">· '+esc(j.country)+'</span></span><button class="add" onclick="emNavClick(\'jobs\')">👥 '+j.interested+' interested →</button></div>'; }).join('')
+        +'</div>';
+    }).catch(function(){ host.innerHTML=''; });
+}
+function loadMarketSnapshot(){
+  var el=document.getElementById('marketSnapshot'); if(!el) return;
+  fetch(SKILLED_POOL_URL+'?action=market-snapshot')
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='Live figures unavailable right now.'; return; }
+      function row(label,val){ return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--tx2)">'+label+'</span><span style="font-weight:800;color:var(--tx)">'+val.toLocaleString()+'</span></div>'; }
+      el.innerHTML=row('Skilled workers',d.workers)+row('In the job pool',d.migrated)+row('Verified',d.verified)+row('Countries',d.countries)+row('Skills',d.skills);
+    }).catch(function(){ el.innerHTML='Live figures unavailable right now.'; });
+}
+/* Preview-only talent showcase — non-interactive, name/photo/contact hidden.
+   Shows a taste of the pool to encourage employers to complete setup & pay. */
+function talentShowcaseHtml(){
+  if(emHasFullAccess()) return '';   // verified+active employers use the real Find Talent, not the teaser
+  return '<div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800;margin:22px 0 10px">A glimpse of available talent</div>'
+    +'<div style="font-size:12.5px;color:var(--tx2);margin-bottom:10px">Verified skilled professionals are ready to be discovered. Complete your setup to view full profiles and connect.</div>'
+    +'<div class="showcase" onclick="emNavClick(\'organization\',null,\'verification\')">'
+    +'<div class="showcase-fade l"></div><div class="showcase-fade r"></div>'
+    +'<div class="showcase-track" id="showcaseTrack"><div class="empty" style="padding:20px">Loading talent…</div></div>'
+    +'<div class="showcase-cta"><div class="msg"><div style="font-size:15px;font-weight:800;color:var(--tx)">🔒 Unlock full profiles</div><div style="font-size:12px;color:var(--tx2);margin-top:6px">Complete your organization profile, upload documents and get verified to view and connect with candidates.</div><div style="margin-top:10px" class="add" style="display:inline-block">Continue setup →</div></div></div>'
+    +'</div>';
+}
+function fillTalentShowcase(){
+  var track=document.getElementById('showcaseTrack'); if(!track) return;
+  var flags={Nigeria:'🇳🇬',Ghana:'🇬🇭',Kenya:'🇰🇪',Egypt:'🇪🇬','South Africa':'🇿🇦',Ethiopia:'🇪🇹',Uganda:'🇺🇬',Tanzania:'🇹🇿',Cameroon:'🇨🇲',Rwanda:'🇷🇼',Morocco:'🇲🇦',Senegal:'🇸🇳'};
+  var src=(POOL&&POOL.length)?POOL:[];
+  if(!src.length){ track.innerHTML='<div class="empty" style="padding:20px">Talent will appear here as candidates join the pool.</div>'; return; }
+  // preview-only card: NO name, NO id, NO photo, NO contact
+  function card(c){
+    var chips=[];
+    if(c.gender) chips.push('<span class="chip">'+(/female/i.test(c.gender)?'♀':/male/i.test(c.gender)?'♂':'⚧')+' '+esc(c.gender)+'</span>');
+    if(c.tier==='Verified') chips.push('<span class="chip" style="color:#2ECC71;border-color:#2ECC71">✓ Verified</span>');
+    if(c.orientation) chips.push('<span class="chip">Orientation ready</span>');
+    if(c.exp) chips.push('<span class="chip">'+esc(c.exp)+'</span>');
+    return '<div class="tcard"><div class="flag">'+(flags[c.country]||'🌍')+'</div>'
+      +'<div class="trade">'+esc(c.skill||'Skilled professional')+'</div>'
+      +'<div class="meta">'+esc(c.country||'')+(c.sector?(' · '+esc(c.sector)):'')+'</div>'
+      +'<div class="chips">'+chips.join('')+'</div>'
+      +'<div class="locked">🔒 Profile hidden — unlock to view</div></div>';
+  }
+  // duplicate the set so the -50% keyframe loops seamlessly
+  var cards=src.map(card).join('');
+  track.innerHTML=cards+cards;
+}
+function renderJourneyView(){
+  var v=document.getElementById('journeyView'); if(!v) return;
+  var steps=[
+    {t:'Account created',done:true},{t:'Email verified',done:!!(SESSION&&SESSION.id)},
+    {t:'Complete organization profile',done:EM_STATE.profilePct>=100},
+    {t:'Upload documents',done:EM_STATE.docsDone>=EM_STATE.docsTotal},
+    {t:'Verification',done:/verified/i.test(EM_STATE.verification)},
+    {t:'Activate hiring access',done:EM_STATE.access==='Active'},
+    {t:'Start hiring',done:false}
+  ];
+  var cur=steps.findIndex(function(x){return !x.done;}); if(cur<0)cur=steps.length-1;
+  v.innerHTML='<h2>Your hiring journey</h2><div style="font-size:13px;color:var(--tx2);margin-bottom:16px">Each step builds trust and unlocks more of the platform.</div>'
+    +'<div style="display:grid;gap:8px">'+steps.map(function(s,i){
+      var st=s.done?'done':(i===cur?'now':'todo');
+      var col=s.done?'#2ECC71':(i===cur?'var(--gold2)':'var(--tx3)');
+      return '<div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px"><span style="width:26px;height:26px;border-radius:50%;background:'+col+'22;color:'+col+';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">'+(s.done?'✓':(i+1))+'</span><span style="font-size:13.5px;color:'+(s.done?'var(--tx2)':'var(--tx)')+';font-weight:'+(i===cur?'700':'400')+'">'+s.t+(i===cur?' <span style="color:var(--gold2);font-size:11px">← you are here</span>':'')+'</span></div>';
+    }).join('')+'</div>';
+}
+function renderOrgProfileView(){
+  var v=document.getElementById('orgprofileView'); if(!v) return;
+  v.innerHTML='<h2>Organization profile</h2><div style="font-size:13px;color:var(--tx2);margin-bottom:16px">Complete your company details. Employers with full profiles are trusted more by skilled workers and are verified faster.</div><div id="orgFormWrap" style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px">Loading…</div>';
+  fetch(EMPLOYER_URL+'?action=my-employer-profile&token='+encodeURIComponent(SESSION.token))
+    .then(function(r){return r.json();}).then(function(d){
+      var p=(d&&d.profile)||{};
+      // sync EM_STATE from real data
+      if(d&&d.profile){ EM_STATE.verification=p.verification||'Waiting'; EM_STATE.access=(p.hiringAccess==='Active')?'Active':'Locked';
+        EM_STATE.docsDone=Object.keys(p.docs||{}).filter(function(k){return p.docs[k];}).length; refreshStatusCard(); }
+      renderOrgForm(p);
+    }).catch(function(){ var w=document.getElementById('orgFormWrap'); if(w) w.innerHTML='<div class="empty">Could not load your profile.</div>'; });
+}
+function orgField(id,label,val,ph,type){
+  return '<div class="f"><label>'+label+'</label>'+(type==='select'
+    ? '<select id="of_'+id+'">'+ph+'</select>'
+    : '<input id="of_'+id+'" value="'+(val?String(val).replace(/"/g,'&quot;'):'')+'" placeholder="'+(ph||'')+'">')+'</div>';
+}
+function renderOrgForm(p){
+  var w=document.getElementById('orgFormWrap'); if(!w) return;
+  function opts(list,cur){ return list.map(function(o){return '<option'+(String(cur)===o?' selected':'')+'>'+o+'</option>';}).join(''); }
+  w.innerHTML='<div class="row">'
+    +orgField('company','Company / organization name',p.company)
+    +orgField('trading','Trading name (if different)',p.trading)
+    +orgField('regno','Business registration / ID no.',p.regno)
+    +orgField('country','Country',p.country)
+    +orgField('city','City',p.city)
+    +orgField('website','Website',p.website,'https://')
+    +orgField('sector','Sector','<option value="">Select…</option>'+opts(['Construction & Trades','Healthcare','Hospitality & Tourism','Logistics, Transport & Supply Chain','Manufacturing','Agriculture','Oil, Gas & Energy','Domestic & Care','IT & Digital','Creative Media & Digital Content','Education','Finance','Other'],p.sector),null,'select')
+    +orgField('size','Company size','<option value="">Select…</option>'+opts(['1–10','11–50','51–200','201–1000','1000+'],p.size),null,'select')
+    +orgField('empType','Employer type','<option value="">Select…</option>'+opts(['Direct Employer','Recruitment Agency','Labour Provider','Government Agency','NGO','International Partner','Educational Institution'],p.empType),null,'select')
+    +'</div>'
+    +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800;margin:14px 0 8px">Contact person</div><div class="row">'
+    +orgField('surname','Surname',p.surname)
+    +orgField('firstname','First name',p.firstname)
+    +orgField('middlename','Middle name',p.middlename)
+    +orgField('preferredname','Preferred name',p.preferredname)
+    +orgField('role','Role / job title',p.role)
+    +orgField('phone','Phone',p.phone)
+    +'</div>'
+    +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800;margin:14px 0 8px">Hiring needs</div><div class="row">'
+    +orgField('destination','Destination country',p.destination)
+    +orgField('hires','Number of hires','<option value="">Select…</option>'+opts(['1–5','6–20','21–50','51–100','100+'],p.hires),null,'select')
+    +orgField('roles','Roles you\u2019re hiring for',p.roles)
+    +orgField('prefer','Preferred nationalities / regions',p.prefer)
+    +'</div>'
+    +'<button class="add" style="margin-top:16px" onclick="saveOrgProfile()">Save profile</button>'
+    +'<span id="orgSaveMsg" style="font-size:12.5px;margin-left:12px"></span>';
+}
+function saveOrgProfile(){
+  var ids=['company','trading','regno','country','city','website','sector','size','empType','surname','firstname','middlename','preferredname','role','phone','destination','hires','roles','prefer'];
+  var fields={}; ids.forEach(function(id){ var e=document.getElementById('of_'+id); if(e) fields[id]=e.value; });
+  var msg=document.getElementById('orgSaveMsg'); if(msg){ msg.style.color='var(--tx3)'; msg.textContent='Saving…'; }
+  fetch(EMPLOYER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save-employer-profile',token:SESSION.token,fields:fields})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ if(msg){msg.style.color='#2ECC71';msg.textContent='✓ Saved';} EM_STATE.profilePct=d.profilePct||EM_STATE.profilePct; refreshStatusCard(); }
+      else if(msg){ msg.style.color='#E86A6A'; msg.textContent=(d&&d.error)||'Not saved'; }
+    }).catch(function(){ if(msg){ msg.style.color='#E86A6A'; msg.textContent='Could not reach server'; } });
+}
+function renderDocumentsView(){
+  var v=document.getElementById('documentsView'); if(!v) return;
+  var docs=['Certificate of Incorporation','Business Registration','Recruitment Licence','Tax Registration','Government ID','Company Logo','Company Profile'];
+  v.innerHTML='<h2>Company documents</h2><div style="font-size:13px;color:var(--tx2);margin-bottom:6px">Upload the documents that let STACS verify your organization.</div><div id="docListWrap" style="margin-top:12px">Loading…</div>';
+  fetch(EMPLOYER_URL+'?action=my-employer-profile&token='+encodeURIComponent(SESSION.token))
+    .then(function(r){return r.json();}).then(function(d){
+      var have=(d&&d.profile&&d.profile.docs)||{};
+      var done=Object.keys(have).filter(function(k){return have[k];}).length;
+      EM_STATE.docsDone=done; refreshStatusCard();
+      var w=document.getElementById('docListWrap');
+      w.innerHTML='<div class="meter" style="max-width:300px;margin-bottom:14px"><i style="width:'+Math.round(done/docs.length*100)+'%"></i></div>'
+        +'<div style="font-size:12px;color:var(--tx2);margin-bottom:10px">'+done+' of '+docs.length+' uploaded'+(done>=docs.length?' ✓':'')+'</div>'
+        +'<div style="display:grid;gap:10px">'+docs.map(function(dn){
+          var ok=have[dn]||have[dn.replace(' (if agency)','')];
+          return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:11px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center"><div style="font-size:13.5px;color:var(--tx)">'+(ok?'✓ ':'')+dn+'</div><label class="add" style="cursor:pointer">'+(ok?'Replace':'Upload')+'<input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadEmpDoc(this,\''+dn.replace(/'/g,"")+'\')"></label></div>';
+        }).join('')+'</div><div id="docMsg" style="font-size:12.5px;margin-top:10px"></div>';
+    }).catch(function(){ var w=document.getElementById('docListWrap'); if(w) w.innerHTML='<div class="empty">Could not load documents.</div>'; });
+}
+function uploadEmpDoc(input, docType){
+  var f=input.files[0]; if(!f) return;
+  if(f.size>8*1024*1024){ alert('File is larger than 8 MB.'); return; }
+  var msg=document.getElementById('docMsg'); if(msg){ msg.style.color='var(--tx3)'; msg.textContent='Uploading '+docType+'…'; }
+  var rd=new FileReader();
+  rd.onload=function(){
+    fetch(EMPLOYER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save-employer-doc',token:SESSION.token,docType:docType,fileB64:rd.result})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){ if(msg){msg.style.color='#2ECC71';msg.textContent='✓ '+docType+' uploaded ('+d.docsDone+'/'+d.docsTotal+')';} EM_STATE.docsDone=d.docsDone; refreshStatusCard(); renderDocumentsView(); }
+        else if(msg){ msg.style.color='#E86A6A'; msg.textContent=(d&&d.error)||'Upload failed'; }
+      }).catch(function(){ if(msg){ msg.style.color='#E86A6A'; msg.textContent='Could not reach server'; } });
+  };
+  rd.readAsDataURL(f);
+}
+function renderVerificationView(){
+  var v=document.getElementById('verificationView'); if(!v) return;
+  v.innerHTML='<div class="empty">Loading your verification status…</div>';
+  fetch(EMPLOYER_URL+'?action=my-employer-profile&token='+encodeURIComponent(SESSION.token))
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.profile){ EM_STATE.verification=d.profile.verification||'Waiting'; EM_STATE.access=(d.profile.hiringAccess==='Active')?'Active':'Locked'; refreshStatusCard(); }
+      paintVerificationView();
+    }).catch(function(){ paintVerificationView(); });
+}
+function paintVerificationView(){
+  var v=document.getElementById('verificationView'); if(!v) return;
+  var states=[['Waiting','Not yet submitted'],['In Review','We\u2019re checking your documents'],['Verified','Your organization is verified'],['Need more information','We need an extra document'],['Rejected','Could not verify \u2014 contact support']];
+  v.innerHTML='<h2>Organization verification</h2><div style="font-size:13px;color:var(--tx2);margin-bottom:16px">Verification confirms your business is real and authorized to hire. Until you\u2019re verified, the talent pool stays in preview only.</div>'
+    +'<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px">'
+    +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);font-weight:800;margin-bottom:10px">Current status</div>'
+    +'<div style="font-size:18px;font-weight:800;color:var(--gold2);margin-bottom:14px">'+EM_STATE.verification+'</div>'
+    +'<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;margin-bottom:6px">Verification stages</div>'
+    +states.map(function(s){ var active=(s[0].toLowerCase()===String(EM_STATE.verification).toLowerCase()); return '<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr)"><span style="color:'+(active?'var(--gold2)':'var(--tx3)')+'">'+(active?'●':'○')+'</span><span style="font-size:13px;color:'+(active?'var(--tx)':'var(--tx2)')+';font-weight:'+(active?'700':'400')+'">'+s[0]+' <span style="color:var(--tx3);font-weight:400">— '+s[1]+'</span></span></div>'; }).join('')
+    +'<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--bdr)"><div style="font-size:12px;color:var(--tx3);text-transform:uppercase;margin-bottom:8px">Hiring access</div>'
+    +'<div style="display:flex;gap:14px;flex-wrap:wrap"><div>Payment status: <b>'+(EM_STATE.access==='Active'?'Paid':'Not paid')+'</b></div><div>Access: <b>'+(EM_STATE.access==='Active'?'✓ Active':'🔒 Locked')+'</b></div></div>'
+    +'<div style="font-size:11.5px;color:var(--tx3);margin-top:8px">Payment alone does not unlock candidates — your organization profile and verification must be complete first. This protects skilled workers from unverified employers.</div></div>'
+    +'</div>';
+}
+function renderProjects(){
+ const v=document.getElementById('projectsView');
+ v.innerHTML=`<div class="banner">You can keep up to <b>5 Projects</b>, each holding up to <b>150 candidates</b>. ${PROJECTS.length}/5 projects used.</div>`+
+  (PROJECTS.length?PROJECTS.map(p=>`<div class="pj"><h4>${p.name}</h4><div class="pm">${p.count} / 150 candidates</div><div class="bar"><i style="width:${Math.min(p.count/150*100,100)}%"></i></div></div>`).join(''):'<div class="empty">No projects yet. Add candidates to your cart and save them into a Project.</div>');
+}
+
+/* ============ MY VERIFICATIONS: acknowledge / rate / flag ============ */
+var MYREQ=[];
+function loadMyRequests(){
+  var v=document.getElementById('verifView'); v.innerHTML='<div class="empty">Loading…</div>';
+  fetch(SKILLED_POOL_URL+'?action=my-requests&token='+encodeURIComponent(SESSION.token))
+   .then(function(r){return r.json();}).then(function(d){ MYREQ=(d&&d.items)||[]; paintMyRequests(); })
+   .catch(function(){ MYREQ=[
+     {ref:'VL-77120033',candidate:'WK-4820193756-NG',slot:1,item:'Industrial Electrician',verifier:'VF-2288-NG',method:'Direct confirmation with issuing body',outcome:'Verified',date:'2026-08-10',ack:'',payout:'Held',needsAck:true},
+     {ref:'VL-66110022',candidate:'WK-5561120987-GH',slot:1,item:'Trade test',verifier:'VF-1042-NG',outcome:'Verified',date:'2026-06-02',ack:'Acknowledged',rating:5,payout:'Released',needsAck:false}
+   ]; paintMyRequests(); });
+}
+function paintMyRequests(){
+  var v=document.getElementById('verifView');
+  if(!MYREQ.length){ v.innerHTML='<div class="empty">You have not requested any verifications yet. Open a candidate and choose <b>Verify this document</b>.</div>'; return; }
+  var pending=MYREQ.filter(function(x){return x.needsAck;});
+  var head = pending.length
+    ? '<div class="banner"><b>'+pending.length+' verification'+(pending.length>1?'s are':' is')+' waiting for your confirmation.</b> The verifier is not paid until you acknowledge — or until the 14-day window lapses with no dispute.</div>'
+    : '<div class="banner">All your verifications are up to date.</div>';
+  v.innerHTML=head+MYREQ.map(function(x,i){
+    var chip=x.outcome==='Verified'?'background:rgba(46,204,113,.15);color:#2ECC71':'background:rgba(232,106,106,.14);color:#E86A6A';
+    var pay=x.payout==='Released'?'color:#2ECC71':x.payout&&x.payout.indexOf('Held —')===0?'color:#E2A53A':'color:var(--tx3)';
+    var actions = x.needsAck
+      ? '<div id="ackBox'+i+'" style="margin-top:12px"><button class="add" style="margin-right:8px" onclick="openAck('+i+')">Confirm receipt &amp; rate</button>'
+        +'<button class="view" onclick="openFlag('+i+')">Flag as erroneous</button></div>'
+      : '<div style="font-size:12px;color:var(--tx3);margin-top:10px">'+(x.ack||'—')+(x.rating?' · rated '+x.rating+'/5':'')+'</div>';
+    return '<div class="pj"><div style="display:flex;align-items:center;gap:9px"><h4 style="margin:0">'+(x.item||'Credential')+'</h4>'
+      +'<span class="bdg" style="'+chip+'">'+(x.outcome||'')+'</span></div>'
+      +'<div class="pm">'+x.candidate+' · slot '+x.slot+' · verifier '+(x.verifier||'')+' · '+String(x.date).slice(0,10)+'</div>'
+      +'<div class="pm" style="'+pay+'">Payout: '+(x.payout||'Held')+'</div>'+actions+'</div>';
+  }).join('');
+}
+function openAck(i){
+  var x=MYREQ[i];
+  document.getElementById('ackBox'+i).innerHTML=
+    '<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px">'
+    +'<div style="font-size:13px;color:var(--tx2);margin-bottom:10px">Confirm you have received this verification. This <b>releases the verifier\'s payment</b>.</div>'
+    +'<div style="margin-bottom:10px"><span style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px">Rating</span><br>'
+    +[1,2,3,4,5].map(function(n){return '<button onclick="setStars('+i+','+n+')" id="st'+i+'_'+n+'" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:2px">\u2605</button>';}).join('')
+    +'</div>'
+    +'<textarea id="ackComment'+i+'" rows="2" placeholder="Comment (optional) — was the report clear and useful?" style="width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-size:13px;font-family:inherit;margin-bottom:10px"></textarea>'
+    +'<button class="add" onclick="submitAck('+i+')">Confirm &amp; release payment</button> '
+    +'<button class="view" onclick="paintMyRequests()">Cancel</button>'
+    +'<div class="msg" id="ackMsg'+i+'" style="font-size:12.5px;border-radius:9px;padding:10px;margin-top:10px;display:none"></div></div>';
+}
+var STARS={};
+function setStars(i,n){ STARS[i]=n; for(var k=1;k<=5;k++){ var el=document.getElementById('st'+i+'_'+k); if(el) el.style.color=(k<=n)?'#E2A53A':'var(--tx3)'; } }
+function submitAck(i){
+  var x=MYREQ[i], rating=STARS[i]||0, comment=(document.getElementById('ackComment'+i)||{}).value||'';
+  fetch(SKILLED_POOL_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'acknowledge',token:SESSION.token,
+    candidate:x.candidate,slot:x.slot,rating:rating,comment:comment})}).catch(function(){});
+  var m=document.getElementById('ackMsg'+i); m.style.display='block';
+  m.style.background='rgba(46,204,113,.12)'; m.style.color='#2ECC71';
+  m.textContent='Confirmed'+(rating?' and rated '+rating+'/5':'')+'. The verifier\'s payment has been released.';
+  x.needsAck=false; x.ack='Acknowledged'; x.rating=rating; x.payout='Released';
+  setTimeout(paintMyRequests,1400);
+}
+function openFlag(i){
+  var x=MYREQ[i];
+  document.getElementById('ackBox'+i).innerHTML=
+    '<div style="background:var(--card2);border:1px solid rgba(232,106,106,.35);border-radius:10px;padding:14px">'
+    +'<div style="font-size:13px;color:#E86A6A;margin-bottom:10px"><b>Flagging holds the verifier\'s payment</b> while our review team examines the report. Please be specific.</div>'
+    +'<textarea id="flagReason'+i+'" rows="3" placeholder="What is wrong with this verification? (at least 15 characters)" style="width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-size:13px;font-family:inherit;margin-bottom:10px"></textarea>'
+    +'<button class="add" style="background:#E86A6A;color:#fff" onclick="submitFlag('+i+')">Submit for review</button> '
+    +'<button class="view" onclick="paintMyRequests()">Cancel</button>'
+    +'<div class="msg" id="ackMsg'+i+'" style="font-size:12.5px;border-radius:9px;padding:10px;margin-top:10px;display:none"></div></div>';
+}
+function submitFlag(i){
+  var x=MYREQ[i], reason=(document.getElementById('flagReason'+i)||{}).value||'';
+  var m=document.getElementById('ackMsg'+i); m.style.display='block';
+  if(reason.trim().length<15){ m.style.background='rgba(232,106,106,.12)'; m.style.color='#E86A6A'; m.textContent='Please describe the problem in at least 15 characters.'; return; }
+  fetch(SKILLED_POOL_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'flag',token:SESSION.token,
+    candidate:x.candidate,slot:x.slot,reason:reason})}).catch(function(){});
+  m.style.background='rgba(200,146,10,.12)'; m.style.color='#E2A53A';
+  m.textContent='Flagged. Payment is held while our review team examines it. You will be notified of the outcome.';
+  x.needsAck=false; x.ack='Flagged as erroneous'; x.payout='Held — QA review';
+  setTimeout(paintMyRequests,1600);
+}
+
+function logout(){localStorage.removeItem('stacs_session');location.href='sign-in.html';}
+init();
+</script>
+<div id="wa-widget" style="position:fixed;bottom:22px;right:22px;z-index:99999;font-family:system-ui,-apple-system,sans-serif">
+ <div id="wa-panel" style="display:none;position:absolute;bottom:70px;right:0;width:300px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.3)">
+  <div style="background:#25D366;padding:16px 18px;color:#fff;position:relative">
+   <div style="font-size:19px;font-weight:800">Hello!</div>
+   <div style="font-size:12.5px;opacity:.96;margin-top:3px;line-height:1.4">Click a contact below to chat on WhatsApp</div>
+   <button onclick="waToggle()" aria-label="Close" style="position:absolute;top:11px;right:12px;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1">&times;</button>
+  </div>
+  <a href="https://wa.me/2348022268113" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:#111;background:#f6f6f3">
+   <img src="data:image/jpeg;base64,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" alt="" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid #dcdcd6;object-fit:cover">
+   <div style="flex:1"><div style="font-weight:700;font-size:14px">Leivotest STACS Support</div><div style="font-size:12px;color:#25D366">● Online · usually replies fast</div></div>
+   <svg viewBox="0 0 32 32" width="22" height="22" fill="#25D366"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.7.9 3.6 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7.7.7-3.6-.2-.4C6.5 18.5 6 16.8 6 15c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10zm5.5-7.5c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg>
+  </a>
+ </div>
+ <button id="wa-btn" onclick="waToggle()" style="display:flex;align-items:center;gap:9px;background:#25D366;color:#fff;border:none;border-radius:100px;padding:11px 18px 11px 13px;box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer;font-size:14px;font-weight:600">
+  <svg viewBox="0 0 32 32" width="26" height="26" fill="#fff"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.7.9 3.6 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7.7.7-3.6-.2-.4C6.5 18.5 6 16.8 6 15c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10zm5.5-7.5c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg><span id="wa-btn-txt">How can I help you?</span>
+ </button>
+</div>
+<script>function waToggle(){var p=document.getElementById('wa-panel');var o=p.style.display==='block';p.style.display=o?'none':'block';document.getElementById('wa-btn-txt').textContent=o?'How can I help you?':'Chat with us';}</script>
+<button id="themeBtn" onclick="stacsTheme()" aria-label="Toggle day / night view" title="Day / Night view" style="position:fixed;bottom:22px;left:22px;z-index:9998;width:46px;height:46px;border-radius:50%;background:var(--s1,#12502A);color:var(--gold2,#E2A53A);border:1px solid var(--bdr2,rgba(255,255,255,.22));cursor:pointer;font-size:19px;box-shadow:0 6px 16px rgba(0,0,0,.28)">&#127769;</button>
+<script>function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
+(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}catch(e){}})();</script>
+</body></html>

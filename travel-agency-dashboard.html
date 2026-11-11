@@ -1,0 +1,443 @@
+<!DOCTYPE html><html lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Travel Agency</title>
+<style>
+:root{--bg:#062514;--card:#0D3D1E;--card2:#0F4423;--bdr:rgba(255,255,255,.14);--bdr2:rgba(255,255,255,.28);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.66);--tx3:rgba(240,240,236,.4)}
+:root[data-theme="light"]{--bg:#F3F1EA;--card:#FFFFFF;--card2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#4f574a;--tx3:#6c7466;--gold:#8A6508;--gold2:#7A5A07;--grn:#1B7A43;--rd:#B3352F}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+/* SHARP EDGES on interactive controls (per brand upgrade request) */
+.btn,.chip,.pill,.nav button,input,select,textarea,.statcard,.filechip{border-radius:0}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(135deg,#0B3B21,#12502A);border-bottom:1px solid rgba(255,255,255,.1)}
+.topbar img{width:38px;height:38px;border-radius:50%;background:#fff;object-fit:cover;border:1.5px solid var(--gold)}
+.topbar .t b{font-size:14px;color:#fff;display:block}.topbar .t small{font-size:8.5px;letter-spacing:.22em;color:var(--gold2)}
+.topbar .sp{margin-left:auto;display:flex;align-items:center;gap:14px}
+.taid{font-size:12px;color:var(--gold2);font-family:ui-monospace,monospace}
+.lnk{background:none;border:none;color:rgba(255,255,255,.8);font-size:12.5px;cursor:pointer}
+.wrap{max-width:1060px;margin:0 auto;padding:18px;display:grid;grid-template-columns:230px 1fr;gap:18px}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}}
+.nav{display:flex;flex-direction:column;gap:6px;align-self:start;position:sticky;top:78px}
+@media(max-width:820px){.nav{flex-direction:row;flex-wrap:wrap;position:static}}
+.nav button{text-align:left;background:var(--card);border:1px solid var(--bdr);color:var(--tx);padding:11px 14px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:9px}
+.nav button .ic{font-size:15px}
+.nav button.on{background:var(--gold);border-color:var(--gold);color:#231a02;font-weight:800}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:20px;margin-bottom:16px}
+h1{font-size:21px;margin-bottom:4px}h2{font-size:16px;margin-bottom:10px}
+.sub{font-size:13px;color:var(--tx2);line-height:1.55;margin-bottom:14px}
+.sec{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);font-weight:700;margin:18px 0 10px;border-bottom:1px solid var(--bdr);padding-bottom:6px}
+label{font-size:11.5px;color:var(--tx);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--bdr);padding:10px 12px;color:var(--tx);font-size:13.5px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+textarea{min-height:74px;resize:vertical;line-height:1.5}
+.field{margin-bottom:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:620px){.grid,.grid3{grid-template-columns:1fr}}
+.btn{background:var(--gold);color:#231a02;border:none;padding:12px 20px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit}
+.btn:hover{background:var(--gold2)}.btn.ghost{background:transparent;border:1px solid var(--bdr2);color:var(--tx)}
+.btn.sm{padding:7px 12px;font-size:12.5px}
+.chk{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--tx2);margin-bottom:6px;text-transform:none;letter-spacing:0}
+.chk input{width:auto}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:4px}
+.statcard{background:var(--card2);border:1px solid var(--bdr);padding:14px}
+.statcard .n{font-size:24px;font-weight:800;color:var(--gold2)}
+.statcard .l{font-size:11.5px;color:var(--tx2);margin-top:2px}
+.statrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--bdr);font-size:13px}
+.statrow:last-child{border-bottom:none}.statrow span:first-child{color:var(--tx2)}
+.pill{display:inline-block;padding:4px 11px;font-size:11px;font-weight:800}
+.pill.rev{background:rgba(226,165,58,.16);color:var(--gold2)}.pill.ok{background:rgba(46,204,113,.16);color:var(--grn)}.pill.ret{background:rgba(232,106,106,.16);color:var(--rd)}
+.msg{font-size:12.5px;border-radius:4px;padding:10px 12px;margin-top:12px;display:none;line-height:1.5}
+.msg.err{background:rgba(232,106,106,.12);color:var(--rd);display:block}.msg.ok{background:rgba(46,204,113,.12);color:var(--grn);display:block}.msg.warn{background:rgba(226,165,58,.14);color:var(--gold2);display:block}
+.note{font-size:11.5px;color:var(--tx3);line-height:1.5;margin-top:4px}
+.feeline{display:grid;grid-template-columns:1fr 150px;gap:10px;align-items:center;margin-bottom:8px}
+.feeline label{margin:0;text-transform:none;letter-spacing:0;font-size:13px;color:var(--tx2)}
+.osrow{display:grid;grid-template-columns:1fr 1.4fr 110px auto auto;gap:8px;align-items:center;margin-bottom:8px}
+@media(max-width:620px){.osrow{grid-template-columns:1fr 1fr}}
+.total{background:var(--card2);border:1px solid var(--gold2);padding:14px 16px;margin-top:10px}
+/* chip picker */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#231a02;padding:5px 10px;font-size:12px;font-weight:700}
+.chip b{cursor:pointer;font-weight:900}
+/* profile corner */
+.cover{position:relative;height:170px;background:linear-gradient(135deg,#0B3B21,#12502A);background-size:cover;background-position:center;border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
+.coverlogo{position:absolute;left:18px;bottom:-26px;width:84px;height:84px;border-radius:50%;border:3px solid var(--card);background:#fff;object-fit:cover}
+.editbtn{position:absolute;right:14px;top:14px}
+.profhead{padding:34px 6px 4px 112px}
+.profhead h1{font-size:20px}.profhead .m{font-size:12.5px;color:var(--tx2)}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:620px){.hl{grid-template-columns:1fr}.profhead{padding:34px 6px 4px 6px}}
+.hlitem{background:var(--card2);border:1px solid var(--bdr);padding:11px 13px}
+.hlitem .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
+.hlitem .v{font-size:13.5px;margin-top:3px}
+.passport{width:72px;height:88px;object-fit:cover;border:1px solid var(--bdr);background:var(--card2)}
+/* modal */
+.modalback{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 14px}
+.modalback.on{display:flex}
+.modal{width:min(720px,100%);background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:22px}
+.uprow{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+.uprow img{border:1px solid var(--bdr);background:var(--card2)}
+</style></head><body>
+<div class="topbar">
+ <img src="https://www.leivotest.com/stacs/images/logo.jpg" alt="STACS" onerror="this.style.display='none'">
+ <div class="t"><b>STACS · Travel Agency</b><small>LEIVOTEST</small></div>
+ <div class="sp"><span class="taid" id="taid"></span><button class="lnk" onclick="stacsTheme()" id="themeBtn">&#127769;</button><button class="lnk" onclick="signOut()">Sign out</button></div>
+</div>
+<div class="wrap">
+ <div class="nav">
+  <button class="on" data-p="overview" onclick="go('overview',this)"><span class="ic">&#128202;</span>Overview</button>
+  <button data-p="profile" onclick="go('profile',this)"><span class="ic">&#127970;</span>Profile</button>
+  <button data-p="packages" onclick="go('packages',this)"><span class="ic">&#128230;</span>My Packages</button>
+  <button data-p="build" onclick="go('build',this)"><span class="ic">&#10133;</span>Create Package</button>
+  <button data-p="progress" onclick="go('progress',this)"><span class="ic">&#128506;</span>Progress &amp; Status</button>
+  <button data-p="payouts" onclick="go('payouts',this)"><span class="ic">&#128179;</span>My Payouts</button>
+ </div>
+ <div class="main">
+
+  <!-- OVERVIEW -->
+  <div class="panel on" id="p-overview">
+   <div class="card">
+    <h1 id="welcome">Welcome</h1>
+    <div class="sub" id="welcomeSub">Your Travel Partner workspace.</div>
+    <div class="statgrid" id="statGrid"></div>
+   </div>
+   <div class="card">
+    <h2>Profile highlights</h2>
+    <div class="hl" id="ovHighlights"></div>
+    <div style="margin-top:14px"><button class="btn sm" onclick="go('profile',document.querySelector('[data-p=profile]'))">View &amp; edit profile</button></div>
+   </div>
+   <div class="card">
+    <h2>Getting set up</h2>
+    <div class="statrow"><span>1. Email verified</span><span class="pill ok">Done</span></div>
+    <div class="statrow"><span>2. Complete your agency profile</span><span id="stProfile" class="pill rev">To do</span></div>
+    <div class="statrow"><span>3. Compliance accreditation</span><span class="pill rev">After review</span></div>
+    <div class="statrow"><span>4. Build your mobility packages</span><span class="pill rev">After accreditation</span></div>
+   </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="panel" id="p-profile">
+   <div class="card" style="padding:0;overflow:visible">
+    <div class="cover" id="coverBox">
+     <button class="btn sm editbtn" onclick="openEdit()">Edit Profile</button>
+     <img class="coverlogo" id="coverLogo" src="" alt="" onerror="this.style.visibility='hidden'">
+    </div>
+    <div class="profhead">
+     <h1 id="pName">Agency</h1>
+     <div class="m" id="pMeta">—</div>
+    </div>
+    <div style="padding:14px 20px 20px">
+     <div class="hl" id="profHighlights"></div>
+     <div style="margin-top:14px"><strong style="font-size:12px;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em">About</strong><div class="note" id="pAbout" style="margin-top:6px;font-size:13px;color:var(--tx2)">—</div></div>
+    </div>
+   </div>
+  </div>
+
+  <!-- BUILD PACKAGE -->
+  <div class="panel" id="p-build">
+   <div class="card">
+    <h1 id="buildTitle">Create a Managed Destination Mobility Package</h1>
+    <div class="sub">Build a clear, sectioned package. Candidates compare packages and select one, then sign the agreement. Enter your own fees; STACS platform fees are applied on top and included in the candidate price. Your agency name is never shown to candidates.</div>
+
+    <div class="sec">1. Package overview</div>
+    <div class="field"><label>Package title</label><input id="ov_title" placeholder="e.g. Canada Care Worker Mobility Package"></div>
+    <div class="grid">
+     <div class="field"><label>Destination country</label><select id="ov_destination"><option value="">Select…</option></select></div>
+     <div class="field"><label>Visa category</label><input id="ov_visaCategory" placeholder="e.g. Work permit"></div>
+    </div>
+    <div class="field"><label>Employment types (pick one or more)</label>
+      <div class="chips" id="chips_emp"></div>
+      <select id="sel_emp" onchange="addChip('emp',this.value);this.value='';"><option value="">Add an employment type…</option></select>
+    </div>
+    <div class="grid">
+     <div class="field"><label>Expected processing time</label><select id="ov_processingTime"><option value="">Select…</option></select></div>
+     <div class="field"><label>Package valid until</label><input id="ov_validUntil" type="date" style="color-scheme:dark"></div>
+    </div>
+    <div class="field"><label>Medical requirements (pick all that apply)</label>
+      <div class="chips" id="chips_med"></div>
+      <select id="sel_med" onchange="addChip('med',this.value);this.value='';"><option value="">Add a medical requirement…</option></select>
+    </div>
+    <div class="grid3">
+     <div class="field"><label>Available slots</label><input id="ov_slots" type="number" placeholder="e.g. 20"></div>
+     <div class="field"><label>Tied to an employer?</label><select id="ov_tiedEmployer"><option>No</option><option>Yes</option></select></div>
+     <div class="field"><label>Language requirement</label><input id="ov_language" placeholder="e.g. IELTS 6.0"></div>
+     <div class="field"><label>Accommodation included?</label><select id="ov_accommodation"><option>No</option><option>Yes</option><option>Optional</option></select></div>
+     <div class="field"><label>Airport pickup?</label><select id="ov_pickup"><option>No</option><option>Yes</option><option>Optional</option></select></div>
+     <div class="field"><label>Insurance?</label><select id="ov_insurance"><option>No</option><option>Yes</option><option>Optional</option></select></div>
+    </div>
+    <div class="note">Orientation: the STACS Global Mobility Orientation is mandatory for every candidate before advanced processing. This is built into every package.</div>
+
+    <div class="sec">2. Financial breakdown (your fees, in NGN)</div>
+    <div id="feesBox"></div>
+    <div class="total"><div class="statrow" style="border:none;padding:4px 0"><span>Your fees subtotal</span><strong id="feeSubtotal">₦0</strong></div>
+      <div class="note">STACS platform fees are added on top of this and folded into the candidate price. Government and embassy fees pass through without markup by default.</div></div>
+
+    <div class="sec">3. Payment structure</div>
+    <div class="grid3">
+     <div class="field"><label>Initial deposit (NGN)</label><input id="pay_deposit" type="number" placeholder="Starts documentation"></div>
+     <div class="field"><label>Working documentation deposit (NGN)</label><input id="pay_working" type="number" placeholder="Held by LEIVOTEST"></div>
+     <div class="field"><label>Balance</label><input id="pay_balance" value="Payable after visa approval"></div>
+    </div>
+
+    <div class="sec">4. Refund framework</div>
+    <div class="note" style="margin-bottom:8px">Standard STACS refund framework applies: funds are held in the client protection process. On an unsuccessful outcome, 80% of the client deposit is refundable and 20% is non refundable, with 10% of that released to the agency where there is clear evidence the process did not fail through agency error. You can add any package specific notes below.</div>
+    <div class="field"><textarea id="refund_notes" placeholder="Optional package specific refund notes"></textarea></div>
+
+    <div class="sec">5. Other optional services</div>
+    <div id="osBox"></div>
+    <button class="btn ghost sm" onclick="addOS()">+ Add optional service</button>
+
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+     <button class="btn" onclick="savePackage()">Submit for review</button>
+     <button class="btn ghost" onclick="resetBuilder()">Clear form</button>
+    </div>
+    <div class="msg" id="buildMsg"></div>
+   </div>
+  </div>
+
+  <!-- MY PACKAGES -->
+  <div class="panel" id="p-packages">
+   <div class="card"><h1>My Packages</h1><div class="sub">Every package you submit is reviewed by our Compliance Team before candidates can see it.</div><div id="pkgList">Loading…</div></div>
+  </div>
+
+  <!-- PROGRESS & STATUS -->
+  <div class="panel" id="p-progress">
+   <div class="card">
+    <h1>Progress &amp; Status</h1>
+    <div class="sub">Once candidates select your packages, each case appears here with its current stage and the next target, so you always know what to push next.</div>
+    <div id="progList"><div class="note">No active candidate cases yet. When a candidate selects one of your approved packages and signs the agreement, their case will show here.</div></div>
+    <div class="sec">The stages a case moves through</div>
+    <div class="note" style="line-height:1.8">
+     Package selected → Agreement signed → Deposit received → Orientation completed → Documents submitted → Documents verified → Employer documents submitted → Embassy application → Biometrics → Medical → Decision pending → Visa approved → Balance paid → Flight scheduled → Travel completed → Case closed.
+    </div>
+   </div>
+  </div>
+
+  <!-- PAYOUTS -->
+  <div class="panel" id="p-payouts">
+   <div class="card">
+    <h1>My Payouts</h1>
+    <div class="sub">Candidate funds are held in the STACS client protection process and released to you as each case reaches its agreed milestones. Your payouts and their status will appear here.</div>
+    <div class="note">No payouts yet. Payout details setup and milestone releases will be enabled once your agency is accredited and your first case is in progress.</div>
+   </div>
+  </div>
+
+ </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modalback" id="editBack" onclick="if(event.target===this)closeEdit()">
+ <div class="modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0">Edit agency profile</h2><button class="btn ghost sm" onclick="closeEdit()">Close</button></div>
+  <div class="sec">Branding</div>
+  <div class="uprow"><img id="prevLogo" width="64" height="64" style="object-fit:cover" src=""><div><label>Organization logo</label><input type="file" accept="image/*" onchange="uploadAsset('logo',this)"><div class="note" id="st_logo"></div></div></div>
+  <div class="uprow"><img id="prevCover" width="110" height="56" style="object-fit:cover" src=""><div><label>Cover image</label><input type="file" accept="image/*" onchange="uploadAsset('cover',this)"><div class="note" id="st_cover"></div></div></div>
+  <div class="uprow"><img id="prevPassport" width="56" height="68" style="object-fit:cover" src=""><div><label>Registering agent passport photo</label><input type="file" accept="image/*" onchange="uploadAsset('passport',this)"><div class="note" id="st_passport"></div></div></div>
+  <div class="sec">Registered details</div>
+  <div class="grid">
+   <div class="field"><label>Organization</label><input id="b_org" readonly></div>
+   <div class="field"><label>Country</label><input id="b_country" readonly></div>
+   <div class="field"><label>Registering agent Full name</label><input id="b_agent" readonly></div>
+   <div class="field"><label>Organization email</label><input id="b_email" readonly></div>
+  </div>
+  <div class="sec">Accreditation</div>
+  <div class="grid">
+   <div class="field"><label>Year established</label><input id="pf_year" type="number" placeholder="e.g. 2015"></div>
+   <div class="field"><label>Licence / registration number</label><input id="pf_licence" placeholder="Your official number"></div>
+   <div class="field"><label>Regulatory / accrediting body</label><input id="pf_regbody" placeholder="e.g. NANTA, IATA, government"></div>
+   <div class="field"><label>Operations contact (phone)</label><input id="pf_opsphone" placeholder="Best number for processing"></div>
+  </div>
+  <div class="sec">Services you offer</div>
+  <div id="servicesBox" class="grid3"></div>
+  <div class="sec">Destinations you serve</div>
+  <div class="chips" id="chips_dest"></div>
+  <select id="sel_dest" onchange="addChip('dest',this.value);this.value='';"><option value="">Add a destination country…</option></select>
+  <div class="sec">About your agency</div>
+  <div class="field"><textarea id="pf_about" placeholder="A short description of your agency and track record"></textarea></div>
+  <button class="btn" onclick="saveProfile()">Save profile</button>
+  <div class="msg" id="profileMsg"></div>
+ </div>
+</div>
+<script>
+const TRAVEL_URL="https://script.google.com/macros/s/AKfycbzv4v5pktq9j3fIzwaB5zCpySYJO9DjfMzV78lftWjZoFoKMVIpN1_zRb3OVzdOv5FQjg/exec";
+var S=null; try{S=JSON.parse(localStorage.getItem('stacs_session'));}catch(e){}
+if(!S||S.role!=='travel'||!S.token){ location.href='sign-in.html'; }
+
+var COUNTRIES=["Australia","Austria","Bahrain","Belgium","Canada","Cyprus","Czechia","Denmark","Estonia","Finland","France","Germany","Greece","Hungary","Iceland","Ireland","Italy","Japan","Kuwait","Latvia","Lithuania","Luxembourg","Malta","Netherlands","New Zealand","Norway","Oman","Poland","Portugal","Qatar","Romania","Saudi Arabia","Singapore","Slovakia","Slovenia","South Korea","Spain","Sweden","Switzerland","United Arab Emirates","United Kingdom","United States","Other"];
+var SERVICES=["Flight Booking","Airport Pickup","Accommodation","Temporary Housing","Document Translation","Courier","Airport Escort","Insurance","Language Coaching","Winter Clothing","Settlement Assistance","Visa Processing Support"];
+var EMPLOYMENT=["Healthcare & Nursing","Care & Support Work","Hospitality & Catering","Construction & Building Trades","Engineering","Oil, Gas & Energy","Agriculture & Farming","Driving & Logistics","Manufacturing & Production","Cleaning & Facilities","Retail & Sales","IT & Software","Finance & Accounting","Education & Teaching","Welding & Fabrication","Electrical","Plumbing","Automotive & Mechanics","Beauty & Wellness","Security","Warehouse & Packaging","Marine & Seafaring","Aviation","Domestic Work","Social Work","Pharmacy","Laboratory & Diagnostics","Sports & Coaching","Creative & Media","Other"];
+var PROCESSING=["4 to 6 weeks","6 to 8 weeks","8 to 12 weeks","3 to 4 months","4 to 6 months","6 to 9 months","9 to 12 months","Over 12 months"];
+var MEDICAL=["None required","Basic medical","Full medical examination","Chest X-ray / TB screening","Yellow fever vaccination","COVID-19 vaccination","Hepatitis screening","HIV test","Drug / substance screening","Occupational health assessment","Mental health assessment","Pregnancy test"];
+var FEEKEYS=[["government","Government Fees"],["embassy","Embassy Fees"],["medical","Medical"],["translation","Translation"],["agencyAdmin","Travel Agency Administrative Fee"],["orientation","Orientation Programme"],["documentation","Documentation Processing"],["visa","Visa Package"],["other","Other Optional Services"]];
+var EDIT_ID='';
+var ASSETS={logo:'',cover:'',passport:''};
+var PICK={emp:[],med:[],dest:[]};
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function ngn(n){return '₦'+Number(n||0).toLocaleString('en-NG');}
+function go(p,btn){document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('on');});document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.nav button').forEach(function(b){b.classList.remove('on');});if(btn)btn.classList.add('on');if(p==='packages')loadPackages();window.scrollTo({top:0,behavior:'smooth'});}
+function signOut(){localStorage.removeItem('stacs_session');location.href='sign-in.html';}
+function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}document.getElementById("themeBtn").innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
+
+// chip pickers
+function fillSelect(id,arr){var s=document.getElementById(id);arr.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});}
+function addChip(kind,val){if(!val)return;if(PICK[kind].indexOf(val)<0)PICK[kind].push(val);renderChips(kind);}
+function removeChip(kind,val){PICK[kind]=PICK[kind].filter(function(x){return x!==val;});renderChips(kind);}
+function renderChips(kind){var box=document.getElementById('chips_'+kind);box.innerHTML=PICK[kind].map(function(v){return '<span class="chip">'+esc(v)+' <b onclick="removeChip(\''+kind+'\',\''+esc(v).replace(/'/g,"")+'\')">×</b></span>';}).join('');}
+
+// build dropdowns + boxes
+(function(){
+ var ds=document.getElementById('ov_destination');COUNTRIES.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;ds.appendChild(o);});
+ fillSelect('sel_emp',EMPLOYMENT);fillSelect('sel_med',MEDICAL);fillSelect('sel_dest',COUNTRIES);fillSelect('ov_processingTime',PROCESSING);
+ var sb=document.getElementById('servicesBox');SERVICES.forEach(function(s){sb.insertAdjacentHTML('beforeend','<label class="chk"><input type="checkbox" class="svc" value="'+esc(s)+'"> '+esc(s)+'</label>');});
+ var fb=document.getElementById('feesBox');FEEKEYS.forEach(function(f){fb.insertAdjacentHTML('beforeend','<div class="feeline"><label>'+esc(f[1])+'</label><input type="number" min="0" class="fee" data-k="'+f[0]+'" placeholder="0" oninput="feeSum()"></div>');});
+ addOS();
+ document.getElementById('taid').textContent=S.id||'';
+ document.getElementById('themeBtn').innerHTML=(document.documentElement.getAttribute('data-theme')==='light')?'&#9728;&#65039;':'&#127769;';
+})();
+
+function feeSum(){var t=0;document.querySelectorAll('.fee').forEach(function(i){t+=Number(i.value)||0;});document.getElementById('feeSubtotal').textContent=ngn(t);}
+function addOS(name,desc,fee,mand){var box=document.getElementById('osBox');var div=document.createElement('div');div.className='osrow';div.innerHTML='<input class="os-name" placeholder="Service" value="'+esc(name||'')+'"><input class="os-desc" placeholder="Description" value="'+esc(desc||'')+'"><input class="os-fee" type="number" placeholder="Fee ₦" value="'+(fee!=null?esc(fee):'')+'"><label class="chk" style="margin:0"><input type="checkbox" class="os-mand" '+(mand?'checked':'')+'> Mandatory</label><button class="btn ghost sm" onclick="this.parentNode.remove()">×</button>';box.appendChild(div);}
+function collectOS(){var out=[];document.querySelectorAll('#osBox .osrow').forEach(function(r){var n=r.querySelector('.os-name').value.trim();if(!n)return;out.push({name:n,desc:r.querySelector('.os-desc').value.trim(),fee:Number(r.querySelector('.os-fee').value)||0,mandatory:r.querySelector('.os-mand').checked});});return out;}
+function msg(id,cls,txt){var m=document.getElementById(id);m.className='msg '+cls;m.innerHTML=txt;m.scrollIntoView({behavior:'smooth',block:'center'});}
+
+// session check
+fetch(TRAVEL_URL+'?action=session&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){if(d&&d.ok===false){signOut();}}).catch(function(){});
+
+// profile
+var BASE={},PROF={};
+function loadProfile(){
+ fetch(TRAVEL_URL+'?action=agency-profile&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
+   if(!d||!d.ok)return;BASE=d.base||{};PROF=d.profile||{};
+   var nm=BASE.orgName||S.name||'';
+   document.getElementById('welcome').textContent='Welcome, '+nm;
+   document.getElementById('welcomeSub').textContent='Your Travel Partner workspace. '+(BASE.status||'');
+   document.getElementById('taid').textContent=S.id||'';
+   // overview stats + highlights
+   renderStats();renderHighlights();
+   // profile corner
+   document.getElementById('pName').textContent=nm;
+   document.getElementById('pMeta').textContent=(S.id||'')+(BASE.country?(' · '+BASE.country):'')+(BASE.status?(' · '+BASE.status):'');
+   ASSETS.logo=PROF.logoUrl||'';ASSETS.cover=PROF.coverUrl||'';ASSETS.passport=PROF.passportUrl||'';
+   if(PROF.coverUrl)document.getElementById('coverBox').style.backgroundImage='url('+PROF.coverUrl+')';
+   var cl=document.getElementById('coverLogo');if(PROF.logoUrl){cl.src=PROF.logoUrl;cl.style.visibility='visible';}else{cl.style.visibility='hidden';}
+   document.getElementById('pAbout').textContent=PROF.about||'Not added yet.';
+   // edit form prefill
+   document.getElementById('b_org').value=BASE.orgName||'';document.getElementById('b_country').value=BASE.country||'';
+   document.getElementById('b_agent').value=BASE.agent||'';document.getElementById('b_email').value=BASE.orgEmail||'';
+   document.getElementById('pf_year').value=PROF.year||'';document.getElementById('pf_licence').value=PROF.licence||'';
+   document.getElementById('pf_regbody').value=PROF.regbody||'';document.getElementById('pf_opsphone').value=PROF.opsphone||'';
+   document.getElementById('pf_about').value=PROF.about||'';
+   if(PROF.logoUrl)document.getElementById('prevLogo').src=PROF.logoUrl;
+   if(PROF.coverUrl)document.getElementById('prevCover').src=PROF.coverUrl;
+   if(PROF.passportUrl)document.getElementById('prevPassport').src=PROF.passportUrl;
+   document.querySelectorAll('.svc').forEach(function(c){c.checked=false;});
+   (PROF.services||[]).forEach(function(s){var el=document.querySelector('.svc[value="'+s.replace(/"/g,'')+'"]');if(el)el.checked=true;});
+   PICK.dest=Array.isArray(PROF.destinations)?PROF.destinations.slice():(PROF.destinations?String(PROF.destinations).split(',').map(function(x){return x.trim();}).filter(Boolean):[]);
+   renderChips('dest');
+   var done=!!(PROF.licence&&PROF.year&&(PROF.services&&PROF.services.length));
+   document.getElementById('stProfile').className='pill '+(done?'ok':'rev');document.getElementById('stProfile').textContent=done?'Done':'To do';
+ }).catch(function(){});
+}
+function completeness(){var items=[PROF.year,PROF.licence,PROF.regbody,(PROF.services&&PROF.services.length),(PROF.destinations&&PROF.destinations.length),PROF.about,PROF.logoUrl,PROF.passportUrl];var done=items.filter(Boolean).length;return Math.round(done/items.length*100);}
+function renderStats(){
+ fetch(TRAVEL_URL+'?action=my-packages&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
+   var ps=(d&&d.packages)||[];var appr=ps.filter(function(p){return p.status==='Approved';}).length;var pend=ps.filter(function(p){return /pending/i.test(p.status);}).length;
+   var g=document.getElementById('statGrid');
+   g.innerHTML=[['Packages',ps.length],['Approved',appr],['Pending review',pend],['Active cases',0],['Profile complete',completeness()+'%']].map(function(s){return '<div class="statcard"><div class="n">'+s[1]+'</div><div class="l">'+s[0]+'</div></div>';}).join('');
+ }).catch(function(){document.getElementById('statGrid').innerHTML='';});
+}
+function renderHighlights(){
+ var items=[['Organization',BASE.orgName],['Country',BASE.country],['Registering agent Full name',BASE.agent],['Year established',PROF.year],['Licence / registration',PROF.licence],['Regulatory body',PROF.regbody]];
+ var html=items.map(function(i){return '<div class="hlitem"><div class="k">'+esc(i[0])+'</div><div class="v">'+esc(i[1]||'Not added')+'</div></div>';}).join('');
+ document.getElementById('ovHighlights').innerHTML=html;
+ // profile page highlights (with passport + services + destinations)
+ var passport=PROF.passportUrl?('<img class="passport" src="'+esc(PROF.passportUrl)+'">'):'<div class="note">No photo</div>';
+ var svc=(PROF.services||[]).map(function(s){return '<span class="chip">'+esc(s)+'</span>';}).join(' ')||'<span class="note">None listed</span>';
+ var dest=((Array.isArray(PROF.destinations)?PROF.destinations:[])).map(function(s){return '<span class="chip">'+esc(s)+'</span>';}).join(' ')||'<span class="note">None listed</span>';
+ document.getElementById('profHighlights').innerHTML=
+   '<div class="hlitem"><div class="k">Registering agent Full name</div><div class="v" style="display:flex;gap:10px;align-items:center;margin-top:6px">'+passport+'<span>'+esc(BASE.agent||'—')+'</span></div></div>'
+  +'<div class="hlitem"><div class="k">Organization email</div><div class="v">'+esc(BASE.orgEmail||'—')+'</div></div>'
+  +'<div class="hlitem"><div class="k">Year established</div><div class="v">'+esc(PROF.year||'—')+'</div></div>'
+  +'<div class="hlitem"><div class="k">Licence / registration</div><div class="v">'+esc(PROF.licence||'—')+'</div></div>'
+  +'<div class="hlitem" style="grid-column:1/-1"><div class="k">Services offered</div><div class="chips" style="margin-top:6px">'+svc+'</div></div>'
+  +'<div class="hlitem" style="grid-column:1/-1"><div class="k">Destinations served</div><div class="chips" style="margin-top:6px">'+dest+'</div></div>';
+}
+function openEdit(){document.getElementById('editBack').classList.add('on');document.body.style.overflow='hidden';}
+function closeEdit(){document.getElementById('editBack').classList.remove('on');document.body.style.overflow='';}
+function uploadAsset(kind,input){
+ var f=input.files&&input.files[0];if(!f)return;var st=document.getElementById('st_'+kind);st.textContent='Uploading…';
+ var rd=new FileReader();rd.onload=function(){
+   fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'agency-asset-upload',token:S.token,kind:kind,base64:rd.result,mime:f.type})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ASSETS[kind]=d.url;st.textContent='Uploaded.';var pv=document.getElementById('prev'+kind.charAt(0).toUpperCase()+kind.slice(1));if(pv)pv.src=d.url;}
+      else{st.textContent=(d&&d.error)||'Upload failed.';}
+    }).catch(function(){st.textContent='Network error during upload.';});
+ };rd.readAsDataURL(f);
+}
+function saveProfile(){
+ var services=[];document.querySelectorAll('.svc:checked').forEach(function(c){services.push(c.value);});
+ var prof={year:document.getElementById('pf_year').value.trim(),licence:document.getElementById('pf_licence').value.trim(),
+   regbody:document.getElementById('pf_regbody').value.trim(),opsphone:document.getElementById('pf_opsphone').value.trim(),
+   destinations:PICK.dest.slice(),about:document.getElementById('pf_about').value.trim(),services:services,
+   logoUrl:ASSETS.logo||'',coverUrl:ASSETS.cover||'',passportUrl:ASSETS.passport||''};
+ fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'agency-profile-save',token:S.token,profile:prof})})
+  .then(function(r){return r.json();}).then(function(d){if(d&&d.ok){msg('profileMsg','ok','Profile saved. Thank you.');loadProfile();setTimeout(closeEdit,700);}else{msg('profileMsg','err',(d&&d.error)||'Could not save.');}})
+  .catch(function(){msg('profileMsg','err','Network error. Please try again.');});
+}
+loadProfile();
+
+// package builder
+function gatherPkg(){
+ var fees={};document.querySelectorAll('.fee').forEach(function(i){fees[i.getAttribute('data-k')]=Number(i.value)||0;});
+ return {overview:{title:document.getElementById('ov_title').value.trim(),destination:document.getElementById('ov_destination').value,
+    employmentTypes:PICK.emp.slice(),visaCategory:document.getElementById('ov_visaCategory').value.trim(),
+    processingTime:document.getElementById('ov_processingTime').value,validUntil:document.getElementById('ov_validUntil').value,
+    slots:document.getElementById('ov_slots').value,tiedEmployer:document.getElementById('ov_tiedEmployer').value,
+    accommodation:document.getElementById('ov_accommodation').value,pickup:document.getElementById('ov_pickup').value,
+    insurance:document.getElementById('ov_insurance').value,orientation:'Mandatory',
+    language:document.getElementById('ov_language').value.trim(),medical:PICK.med.slice()},
+  fees:fees,payment:{deposit:Number(document.getElementById('pay_deposit').value)||0,workingDeposit:Number(document.getElementById('pay_working').value)||0,balanceNote:document.getElementById('pay_balance').value.trim()},
+  refund:{notes:document.getElementById('refund_notes').value.trim()},optionalServices:collectOS()};
+}
+function savePackage(){
+ var p=gatherPkg();
+ if(!p.overview.title){msg('buildMsg','err','Please give the package a title.');return;}
+ if(!p.overview.destination){msg('buildMsg','err','Please choose a destination country.');return;}
+ var body=Object.assign({action:'package-save',token:S.token},p);if(EDIT_ID)body.packageId=EDIT_ID;
+ msg('buildMsg','warn','Submitting your package…');
+ fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){var pr=d.pricing||{};msg('buildMsg','ok','Package '+d.packageId+' submitted for review. Your fees: '+ngn(pr.agencySubtotal)+'. Candidate price (STACS fees included): '+ngn(pr.candidateTotal)+'.');EDIT_ID='';document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';loadPackages();}
+    else{msg('buildMsg','err',(d&&d.error)||'Could not submit the package.');}
+  }).catch(function(){msg('buildMsg','err','Network error. Please try again.');});
+}
+function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';PICK.emp=[];PICK.med=[];renderChips('emp');renderChips('med');document.querySelectorAll('.fee').forEach(function(i){i.value='';});document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
+
+function loadPackages(){
+ var el=document.getElementById('pkgList');el.innerHTML='Loading…';
+ fetch(TRAVEL_URL+'?action=my-packages&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
+   if(!d||!d.ok){el.innerHTML='Could not load packages.';return;}
+   if(!d.packages.length){el.innerHTML='<div class="note">No packages yet. Use Create Package to build your first one.</div>';return;}
+   el.innerHTML=d.packages.map(function(p){var cls=p.status==='Approved'?'ok':(/return/i.test(p.status)?'ret':'rev');
+     return '<div class="card" style="margin:0 0 12px;padding:14px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong style="font-size:14px">'+esc(p.title)+'</strong><div class="note">'+esc(p.destination)+' · '+esc(p.packageId)+'</div></div><span class="pill '+cls+'">'+esc(p.status)+'</span></div><div class="statrow" style="margin-top:8px"><span>Your fees</span><strong>'+ngn(p.agencySubtotal)+'</strong></div><div class="statrow"><span>Candidate price (STACS fees included)</span><strong>'+ngn(p.candidateTotal)+'</strong></div>'+(p.adminNote?('<div class="msg warn" style="display:block;margin-top:8px">Reviewer note: '+esc(p.adminNote)+'</div>'):'')+'<div style="margin-top:10px"><button class="btn ghost sm" onclick="editPkg(\''+p.packageId+'\')">Edit</button></div></div>';}).join('');
+   window._PKGS=d.packages;
+ }).catch(function(){el.innerHTML='Network error.';});
+}
+function editPkg(id){var p=(window._PKGS||[]).filter(function(x){return x.packageId===id;})[0];if(!p)return;var o=p.data&&p.data.overview||{},f=p.data&&p.data.fees||{},pay=p.data&&p.data.payment||{},rf=p.data&&p.data.refund||{},os=p.data&&p.data.optionalServices||[];
+ EDIT_ID=id;document.getElementById('buildTitle').textContent='Edit package '+id;
+ document.getElementById('ov_title').value=o.title||'';document.getElementById('ov_destination').value=o.destination||'';
+ document.getElementById('ov_visaCategory').value=o.visaCategory||'';document.getElementById('ov_processingTime').value=o.processingTime||'';
+ document.getElementById('ov_validUntil').value=o.validUntil||'';document.getElementById('ov_slots').value=o.slots||'';
+ document.getElementById('ov_tiedEmployer').value=o.tiedEmployer||'No';document.getElementById('ov_accommodation').value=o.accommodation||'No';
+ document.getElementById('ov_pickup').value=o.pickup||'No';document.getElementById('ov_insurance').value=o.insurance||'No';document.getElementById('ov_language').value=o.language||'';
+ PICK.emp=Array.isArray(o.employmentTypes)?o.employmentTypes.slice():(o.employmentType?[o.employmentType]:[]);renderChips('emp');
+ PICK.med=Array.isArray(o.medical)?o.medical.slice():(o.medical?[o.medical]:[]);renderChips('med');
+ document.querySelectorAll('.fee').forEach(function(i){i.value=f[i.getAttribute('data-k')]||'';});feeSum();
+ document.getElementById('pay_deposit').value=pay.deposit||'';document.getElementById('pay_working').value=pay.workingDeposit||'';document.getElementById('pay_balance').value=pay.balanceNote||'Payable after visa approval';
+ document.getElementById('refund_notes').value=rf.notes||'';
+ document.getElementById('osBox').innerHTML='';if(os.length)os.forEach(function(s){addOS(s.name,s.desc,s.fee,s.mandatory);});else addOS();
+ go('build',document.querySelector('[data-p=build]'));
+}
+</script>
+</body></html>

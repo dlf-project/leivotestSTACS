@@ -1,0 +1,310 @@
+<!DOCTYPE html><html lang="en"><head><script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Translator Registration</title>
+<style>
+:root{--bg:#0A2E16;--bg2:#0D3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.13);--bdr2:rgba(255,255,255,.24);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.68);--tx3:rgba(240,240,236,.44)}
+:root[data-theme="light"]{--bg:#F3F1EA;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#4f574a;--tx3:#6c7466;--gold:#8A6508;--gold2:#7A5A07;--grn:#1B7A43;--rd:#B3352F}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);line-height:1.55}
+.logo{width:44px;height:44px;border-radius:50%;background:#fff;object-fit:cover;border:2px solid var(--gold2)}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:14px 22px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:10}
+.bname{font-size:14px;font-weight:800}.btag{font-size:9px;letter-spacing:.2em;color:var(--gold2)}
+.hdr-nav{margin-left:auto;display:flex;gap:16px;align-items:center}
+.hdr-nav a{color:var(--tx2);font-size:13px;text-decoration:none}.hdr-nav a:hover{color:var(--gold2)}
+.hdr-nav .signin{background:var(--gold);color:#231a02;padding:7px 15px;border-radius:100px;font-weight:700}
+@media(max-width:640px){.hdr-nav .navlink{display:none}}
+.wrap{max-width:780px;margin:0 auto;padding:26px 20px 80px}
+h1{font-size:27px;margin-bottom:6px}.lede{color:var(--tx2);font-size:14.5px;margin-bottom:18px}
+.note{background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.34);border-radius:11px;padding:13px 16px;font-size:13px;color:var(--gold2);margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:22px;margin-bottom:16px}
+.sec{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--gold2);text-transform:uppercase;margin-bottom:16px}
+.sec b{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+label{font-size:12px;color:var(--tx);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px}
+.req::after{content:" *";color:var(--gold2)}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:14px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+.full{grid-column:1/-1}
+.hint{font-size:11.5px;color:var(--tx3);margin-top:5px}
+.tier{background:var(--card2);border:1px solid var(--bdr);border-radius:11px;padding:13px;margin-bottom:9px;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+.tier:hover{border-color:var(--gold2)}
+.tier input{width:auto;margin-top:3px}
+.tier .t{font-size:14px;font-weight:700}.tier .d{font-size:12.3px;color:var(--tx2)}
+.up{border:1.5px dashed var(--bdr2);border-radius:10px;padding:15px;text-align:center;cursor:pointer;font-size:13px;color:var(--tx2)}
+.up:hover{border-color:var(--gold2)}
+.decl{display:flex;gap:10px;align-items:flex-start;font-size:12.6px;color:var(--tx2);margin-bottom:11px}
+.decl input{width:auto;margin-top:3px}
+.submit{width:100%;background:var(--gold);color:#231a02;border:none;border-radius:11px;padding:15px;font-weight:800;font-size:15px;cursor:pointer;margin-top:6px}
+.submit:hover{background:var(--gold2)}
+.msg{font-size:13px;border-radius:10px;padding:12px 14px;margin-top:12px;display:none}
+.msg.err{background:rgba(232,106,106,.12);color:var(--rd);display:block}.msg.ok{background:rgba(46,204,113,.12);color:var(--grn);display:block}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:64px!important}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gold2);font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 6px;text-transform:uppercase;letter-spacing:.4px}
+</style></head><body>
+<div class="hdr"><a href="index.html" class="brandlink" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit" title="Back to STACS home"><img class="logo" src="logo.jpg" alt="LEIVOTEST STACS"><div><div class="bname">LEIVOTEST — STACS</div></a><div class="btag">TRANSLATOR HUB</div></div>
+ <div class="hdr-nav"><a class="navlink" href="index.html">Home</a><a class="navlink" href="join.html">All hubs</a><a class="navlink" href="faq.html">Help</a><a class="signin" href="sign-in.html">Sign in</a></div></div>
+<div class="wrap">
+ <h1>Join the STACS Translator Hub</h1>
+ <div class="lede">Certified translation of credentials and legal documents for workers moving across borders. Your work goes before employers, councils and embassies — so it is accredited, tiered and auditable.</div>
+ <div class="note"><b>Every translation requires a signed certificate of accuracy.</b> The platform will not accept a submission without one. Your name and translator ID are stamped onto every record, and your work may be checked against the source at any time.</div>
+
+ <div class="card">
+  <div class="sec"><b>1</b> Your identity</div>
+  <div class="grid">
+   <div><label class="req">Surname</label><input id="surname"></div>
+   <div><label class="req">First name</label><input id="firstname"></div>
+   <div><label class="req">Email</label><input id="email" type="email"></div>
+   <div><label class="req">Confirm email</label><input id="email2" type="email"></div>
+   <div><label class="req">Phone</label><input id="phone"></div>
+   <div><label class="req">Country</label>
+     <div id="countryPicker"></div><input type="hidden" id="country">
+     <div class="hint">Tap your country from the list.</div>
+   <div><label class="req">Gender</label>
+     <select id="gender"><option value="">Select…</option><option>Male</option><option>Female</option></select></div>
+   <div><label class="req">City / LGA / District / Community</label>
+     <input id="locality" placeholder="e.g. Ikeja LGA, Surulere, Nsukka"></div>
+   <div class="full"><label>Full address <span style="text-transform:none;color:var(--tx3)">(optional)</span></label>
+     <textarea id="address" rows="2" placeholder="House number, street, area"></textarea></div>
+   <div class="full"><label>Shipping address <span style="text-transform:none;color:var(--tx3)">(optional)</span></label>
+     <label style="text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--tx2);display:flex;gap:8px;align-items:center;margin-bottom:7px">
+       <input type="checkbox" id="shipSame" style="width:auto"> Same as my full address</label>
+     <textarea id="shipping" rows="2" placeholder="Where documents should be delivered to you"></textarea>
+     <div class="hint">Used when originals are requested for physical clearance, or documents must reach you.</div></div></div>
+  </div>
+ </div>
+
+ <div class="card" data-stage="2">
+  <div class="sec"><b>2</b> What best describes you?</div>
+  <label class="tier"><input type="radio" name="tier" value="TR-1" checked><span><span class="t">I translate general documents</span><span class="d">CVs, references, letters and general correspondence.</span></span></label>
+  <label class="tier"><input type="radio" name="tier" value="TR-2"><span><span class="t">I hold professional translator certification</span><span class="d">You are certified by a recognised translator body, and translate academic and professional documents.</span></span></label>
+  <label class="tier"><input type="radio" name="tier" value="TR-3"><span><span class="t">I am a sworn or court-appointed translator</span><span class="d">You may translate court documents, affidavits and civil registry records.</span></span></label>
+  <label class="tier"><input type="radio" name="tier" value="TR-4"><span><span class="t">My translations are accepted by embassies</span><span class="d">You appear on an embassy or consulate list for documents submitted to them.</span></span></label>
+  <div id="tierEcho" style="font-size:12.5px;color:var(--gold2);background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.3);border-radius:9px;padding:10px 12px;margin:10px 0 0"></div>
+  <div class="hint">We may approve you at a lower tier than you apply for. You will only ever be offered work inside the tier you are granted.</div>
+ </div>
+
+ <div class="card" data-stage="2">
+  <div class="sec"><b>3</b> Accreditation</div>
+  <div class="grid">
+   <div><label class="req">Certifying body / association</label><input id="certBody" placeholder="e.g. NITI, ITI, ATA, sworn court register"></div>
+   <div><label class="req">Certification / membership number</label><input id="certNo"></div>
+   <div id="swornWrap" style="display:none"><label class="req">Sworn / court appointment reference</label><input id="swornRef" placeholder="Court or notarial registration number"></div>
+   <div id="embassyWrap" style="display:none"><label class="req">Embassy acceptance reference</label><input id="embassyRef" placeholder="Mission name and reference on their accepted-translator list"></div>
+   <div class="full"><label class="req">Independent confirmation contact</label><input id="orgContact" placeholder="Official email or phone of the certifying body, so we can confirm you"></div>
+  </div>
+ </div>
+
+ <div class="card" data-stage="2">
+  <div class="sec"><b>4</b> What you translate</div>
+  <div class="grid">
+   <div class="full"><label class="req">Language pairs</label>
+     <div id="pairsBox"></div><input type="hidden" id="pairs">
+     <div class="hint">Tap to build each pair &mdash; no typing, so nothing is mis-recorded. You can search in English or in the language&rsquo;s own name (e.g. <b>Fran&ccedil;ais</b>, <b>&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</b>).</div></div>
+   <div class="full"><label class="req">Document categories</label>
+     <div id="docPicker"></div><input type="hidden" id="docCategories">
+     <div class="hint">Type a word (e.g. <b>degree</b>, <b>affidavit</b>, <b>licence</b>) and tap to add. Pick only what you are accredited to translate.</div></div>
+   <div><label class="req">Average capacity</label>
+     <select id="capacity"><option value="">Select…</option><option>Less than 25 pages per week</option><option>25–50 pages per week</option><option>50–100 pages per week</option><option>100–300 pages per week</option><option>More than 300 pages per week</option></select></div>
+   <div><label class="req">Standard rate per page (USD)</label><input id="ratePage" type="number" min="1" step="0.5" placeholder="e.g. 12">
+     <div class="hint">Your own rate. Platform fees are added on top; the payer sees one all-in total.</div></div>
+   <div><label class="req">Standard turnaround</label>
+     <select id="standardDays"><option value="">Select…</option><option>1 day</option><option>2 days</option><option>3 days</option><option>5 days</option><option>7 days</option><option>10 days</option><option>14 days</option></select></div>
+   <div><label>Express turnaround <span style="text-transform:none;color:var(--tx3)">(optional)</span></label>
+     <select id="expressDays"><option value="">Not offered</option><option>Same day</option><option>12 hours</option><option>24 hours</option><option>48 hours</option><option>72 hours</option></select></div>
+   <div><label>Express rate per page (USD) <span style="text-transform:none;color:var(--tx3)">(optional)</span></label><input id="rateExpress" type="number" min="1" step="0.5" placeholder="e.g. 20"></div>
+   <div><label>Minimum job fee (USD) <span style="text-transform:none;color:var(--tx3)">(optional)</span></label><input id="minFee" type="number" min="1" step="0.5" placeholder="e.g. 25"></div>
+  </div>
+ </div>
+
+ <div class="card" data-stage="2">
+  <div class="sec"><b>5</b> Evidence</div>
+  <label class="req">Certification / sworn status document</label>
+  <div class="up" id="upCertBox" onclick="document.getElementById('upCert').click()"><span id="certTxt">Click to upload (PDF, JPG or PNG · max 5 MB)</span></div>
+  <input id="upCert" type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+  <div style="height:12px"></div>
+  <label class="req">Sample certified translation</label>
+  <div class="up" id="upSampleBox" onclick="document.getElementById('upSample').click()"><span id="sampleTxt">Click to upload (PDF, JPG or PNG · max 5 MB)</span></div>
+  <input id="upSample" type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+  <div class="hint">Assessed at approval. Include your certificate of accuracy if you normally attach one.</div>
+ </div>
+
+ <div class="card">
+  <div class="sec"><b>6</b> Security</div>
+  <label class="req">Create a password</label><input id="pw" type="password" placeholder="8–16 chars · upper, lower, number, symbol">
+ </div>
+
+ 
+ <div class="card">
+  <div style="font-size:12.5px;color:var(--tx2);line-height:1.6;margin:4px 0 12px">By creating an account you agree to our <a href="legal.html#p3" target="_blank" style="color:var(--gold2)">Terms of Use</a> and <a href="legal.html#p9" target="_blank" style="color:var(--gold2)">Privacy Policy</a>. The full declarations — including anti-fraud and physical clearance — are presented when you submit your completed profile for approval.</div>
+  <button class="submit" onclick="register()" id="regBtn">Create New Account</button>
+ </div>
+<div class="card" id="declCard" data-stage="2">
+  <div class="sec"><b>7</b> Declarations</div>
+  <div class="decl"><input type="checkbox" id="d1"><label style="text-transform:none;letter-spacing:0;font-size:12.6px;color:var(--tx2)">I am qualified and, where required, legally authorised to translate in the language pairs and document categories I have listed.</label></div>
+  <div class="decl"><input type="checkbox" id="d2"><label style="text-transform:none;letter-spacing:0;font-size:12.6px;color:var(--tx2)"><b>Accuracy mandate:</b> every translation I submit will be a complete and faithful rendering of the source. I will attach a signed <b>certificate of accuracy</b>, and I will not summarise, omit, embellish or "correct" the source.</label></div>
+  <div class="decl"><input type="checkbox" id="d3"><label style="text-transform:none;letter-spacing:0;font-size:12.6px;color:var(--tx2)">I will keep the contents of every document confidential, and will not sub-contract work without disclosing it.</label></div>
+  <div class="decl"><input type="checkbox" id="d4"><label style="text-transform:none;letter-spacing:0;font-size:12.6px;color:var(--tx2)">I understand a materially inaccurate translation is treated under the <b>anti-fraud policy</b>, and that my records are auditable at any time.</label></div>
+  <div class="decl"><input type="checkbox" id="d5"><label style="text-transform:none;letter-spacing:0;font-size:12.6px;color:var(--tx2)"><b>Physical clearance:</b> I understand original documents may be requested at any time and must be available for shipping to the LEIVOTEST–STACS Unit. Failure to provide them may be treated as a perception of illegal practice implicating fraud.</label></div>
+  <div class="decl"><input type="checkbox" id="d6"><label style="text-transform:none;letter-spacing:0;font-size:12.6px;color:var(--tx2)">I am 18+ and the information I provide is true and accurate. I accept the <a href="legal.html#p7" target="_blank" style="color:var(--gold2)">Code of Conduct</a>, <a href="legal.html#p3" target="_blank" style="color:var(--gold2)">Terms of Use</a> and <a href="legal.html#p9" target="_blank" style="color:var(--gold2)">Privacy Policy</a>.</label></div>
+  <div style="font-size:11.5px;color:var(--tx3);margin:8px 0 2px">Read the full <a href="legal.html" target="_blank" style="color:var(--gold2)">Legal Center</a> including your Translator Agreement.</div>
+  
+  <div class="msg" id="err"></div>
+  <div class="msg" id="ok"></div>
+ </div>
+</div>
+<script src="data/taxonomy.js"></script>
+<script src="data/geo.js"></script>
+<script src="data/languages.js"></script>
+<script src="data/picker.js"></script>
+<script src="data/pairs.js"></script>
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbYBRY75JwvvyHGjtlgkzKGn47HTSA3fyqfWrF5DbQ3swjFIMDzAMfQ8jMWsu0lf3g4/exec";
+const val=id=>{var e=document.getElementById(id);return e?e.value.trim():'';};
+let certB64="", sampleB64="";
+function register(){
+ const err=document.getElementById('err'),ok=document.getElementById('ok');err.style.display='none';ok.style.display='none';
+ const req=['surname','firstname','email','email2','phone','country','gender','locality','pw'];
+ for(const id of req){ if(!val(id)){err.textContent='Please complete all required fields.';err.style.display='block';document.getElementById(id).focus();return;} }
+ if(val('email')!==val('email2')){err.textContent='Email addresses do not match.';err.style.display='block';return;}
+ 
+ const pw=val('pw'); if(!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$/.test(pw)){err.textContent='Password must be 8–16 chars with upper, lower, number and symbol.';err.style.display='block';return;}
+ const tierEl=document.querySelector('input[name="tier"]:checked');
+ const data={surname:val('surname'),firstname:val('firstname'),email:val('email'),phone:val('phone'),country:val('country'),gender:val('gender'),locality:val('locality'),address:val('address'),shipping:val('shipping'),
+   tier:tierEl?tierEl.value:'TR-1', certBody:val('certBody'),certNo:val('certNo'),swornRef:val('swornRef'),embassyRef:val('embassyRef'),
+   orgContact:val('orgContact'),pairs:val('pairs'),docCategories:val('docCategories'),
+   capacity:val('capacity'),ratePage:val('ratePage'),standardDays:val('standardDays'),expressDays:val('expressDays'),
+   password:pw, certB64:certB64, sampleB64:sampleB64};
+ const btn=document.getElementById('regBtn');btn.disabled=true;btn.textContent='Creating your account…';
+ fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'register-translator',data:data})})
+  .then(done).catch(done);
+ function done(){
+   ok.innerHTML=`<b>Your account is created.</b><div style="margin:14px 0 4px;font-size:13px;color:var(--tx2)">Two quick things, then you can finish your profile:</div><div style="display:flex;gap:11px;align-items:flex-start;margin-top:10px"><span style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">1</span><div><b>Check your email and click the verification link.</b><br><span style="font-size:12.5px;color:var(--tx2)">Look in your spam folder too. Nothing moves until this is done.</span></div></div><div style="display:flex;gap:11px;align-items:flex-start;margin-top:10px"><span style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">2</span><div><b>Sign in to complete your profile.</b><br><span style="font-size:12.5px;color:var(--tx2)">You can save your progress and come back as often as you like. Submit for approval only when you are ready.</span></div></div><div style="margin-top:18px"><a href="sign-in.html" style="display:inline-block;background:var(--gold);color:#231a02;border-radius:10px;padding:13px 24px;font-weight:800;font-size:14px;text-decoration:none">Go to sign in &rarr;</a></div>`;
+   ok.style.display='block';btn.style.display='none';
+ }
+}
+/* document-category picker */
+(function(){
+  function go(){ if(!window.STACSPicker||!document.getElementById('docPicker')) return;
+    STACSPicker.mount({el:'docPicker',hidden:'docCategories',source:'documents',max:12,primary:false,
+      placeholder:'Search documents: degree, affidavit, licence, transcript…'});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go); else go();
+})();
+</script>
+<script>
+/* ===== STACS upload guard: type + size limits ===== */
+var STACS_LIMITS={image:2*1024*1024, pdf:5*1024*1024};
+function stacsHumanSize(b){return b>=1048576?(b/1048576).toFixed(1)+' MB':Math.round(b/1024)+' KB';}
+function stacsUploadError(input,msg){
+  var box=input.parentNode.querySelector('.up-err');
+  if(!box){box=document.createElement('div');box.className='up-err';box.style.cssText='font-size:11.5px;color:#E05050;margin-top:5px';input.parentNode.appendChild(box);}
+  box.textContent=msg||''; box.style.display=msg?'block':'none';
+}
+function stacsReadFile(input,file,cb){
+  stacsUploadError(input,'');
+  if(!file)return;
+  var isImg=/^image\//.test(file.type), isPdf=file.type==='application/pdf';
+  if(!isImg&&!isPdf){ stacsUploadError(input,'Please upload a PDF, JPG or PNG file.'); input.value=''; return; }
+  var cap=isImg?STACS_LIMITS.image:STACS_LIMITS.pdf;
+  if(file.size>cap){ stacsUploadError(input,'That file is '+stacsHumanSize(file.size)+'. Maximum for '+(isImg?'images is 2 MB':'PDFs is 5 MB')+' — please compress it and try again.'); input.value=''; return; }
+  var r=new FileReader(); r.onload=function(){ cb(r.result); }; r.readAsDataURL(file);
+}
+document.getElementById('upCert').addEventListener('change',function(e){
+  var f=e.target.files[0]; if(!f)return;
+  stacsReadFile(this,f,function(b64){ certB64=b64; document.getElementById('certTxt').innerHTML='&#10003; '+f.name; });
+});
+document.getElementById('upSample').addEventListener('change',function(e){
+  var f=e.target.files[0]; if(!f)return;
+  stacsReadFile(this,f,function(b64){ sampleB64=b64; document.getElementById('sampleTxt').innerHTML='&#10003; '+f.name; });
+});
+</script>
+<div id="wa-widget" style="position:fixed;bottom:22px;right:22px;z-index:99999;font-family:system-ui,sans-serif">
+ <div id="wa-panel" style="display:none;position:absolute;bottom:70px;right:0;width:300px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.3)">
+  <div style="background:#25D366;padding:16px 18px;color:#fff;position:relative">
+   <div style="font-size:19px;font-weight:800">Hello!</div>
+   <div style="font-size:12.5px;opacity:.96;margin-top:3px;line-height:1.4">Click a contact below to chat on WhatsApp</div>
+   <button onclick="waToggle()" aria-label="Close" style="position:absolute;top:11px;right:12px;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1">&times;</button>
+  </div>
+  <a href="https://wa.me/2348022268113" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:#111;background:#f6f6f3">
+   <img src="logo.jpg" alt="" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid #dcdcd6;object-fit:cover">
+   <div style="flex:1"><div style="font-weight:700;font-size:14px">Leivotest STACS Support</div><div style="font-size:12px;color:#25D366">&#9679; Online &middot; usually replies fast</div></div>
+  </a>
+ </div>
+ <button id="wa-btn" onclick="waToggle()" style="display:flex;align-items:center;gap:9px;background:#25D366;color:#fff;border:none;border-radius:100px;padding:11px 18px 11px 13px;box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer;font-size:14px;font-weight:600">
+  <svg viewBox="0 0 32 32" width="26" height="26" fill="#fff"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.7.9 3.6 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7.7.7-3.6-.2-.4C6.5 18.5 6 16.8 6 15c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10z"/></svg><span id="wa-btn-txt">How can I help you?</span>
+ </button>
+</div>
+<script>function waToggle(){var p=document.getElementById('wa-panel');var o=p.style.display==='block';p.style.display=o?'none':'block';document.getElementById('wa-btn-txt').textContent=o?'How can I help you?':'Chat with us';}</script>
+<button id="themeBtn" onclick="stacsTheme()" aria-label="Toggle day / night view" style="position:fixed;bottom:22px;left:22px;z-index:9998;width:46px;height:46px;border-radius:50%;background:var(--card2);color:var(--gold2);border:1px solid var(--bdr2);cursor:pointer;font-size:19px;box-shadow:0 6px 16px rgba(0,0,0,.28)">&#127769;</button>
+<script>function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
+(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}catch(e){}})();</script>
+<script>
+/* ---- show / hide password on every password field ---- */
+(function(){
+  function attach(){
+    var ins=document.querySelectorAll('input[type=password]');
+    for(var i=0;i<ins.length;i++){
+      (function(inp){
+        if(inp.getAttribute('data-eye'))return;
+        inp.setAttribute('data-eye','1');
+        var w=document.createElement('div'); w.className='pw-wrap';
+        inp.parentNode.insertBefore(w,inp); w.appendChild(inp);
+        var b=document.createElement('button');
+        b.type='button'; b.className='pw-eye'; b.textContent='Show';
+        b.setAttribute('aria-label','Show or hide password');
+        b.onclick=function(){ var sh=inp.type==='password'; inp.type=sh?'text':'password'; b.textContent=sh?'Hide':'Show'; };
+        w.appendChild(b);
+      })(ins[i]);
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach); else attach();
+})();
+</script>
+<script>
+(function(){ function go(){ if(!window.STACSPicker||!document.getElementById('countryPicker')) return;
+  STACSPicker.mount({el:'countryPicker',hidden:'country',source:'countries',max:1,
+    placeholder:'Search country: Nigeria, Ghana, Kenya\u2026'});
+} if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go); else go(); })();
+</script>
+<script>
+/* translator smart fields: pairs, tier echo, conditional accreditation */
+(function(){
+  var TIERS={'TR-1':'General Translator','TR-2':'Certified Translator','TR-3':'Sworn / Legal Translator','TR-4':'Official / Embassy-accepted Translator'};
+  function go(){
+    if(window.STACSPairs) STACSPairs.mount({el:'pairsBox', hidden:'pairs', max:12});
+    function apply(){
+      var el=document.querySelector('input[name="tier"]:checked'); if(!el) return;
+      var t=el.value;
+      var echo=document.getElementById('tierEcho');
+      if(echo) echo.innerHTML='Based on your answer we will review you for <b>'+t+' \u2014 '+TIERS[t]+'</b>. '
+        +'Our team confirms this with your certifying body, and may approve you at a different tier.';
+      var sw=document.getElementById('swornWrap'), em=document.getElementById('embassyWrap');
+      if(sw) sw.style.display=(t==='TR-3'||t==='TR-4')?'block':'none';
+      if(em) em.style.display=(t==='TR-4')?'block':'none';
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="tier"]'), function(r){
+      r.addEventListener('change', apply);
+    });
+    apply();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go();
+})();
+</script>
+<script>
+(function(){
+  function go(){
+    var c=document.getElementById('shipSame'), a=document.getElementById('address'), s=document.getElementById('shipping');
+    if(!c||!a||!s) return;
+    function sync(){ if(c.checked){ s.value=a.value; s.readOnly=true; s.style.opacity='.65'; } else { s.readOnly=false; s.style.opacity='1'; } }
+    c.addEventListener('change', sync);
+    a.addEventListener('input', function(){ if(c.checked) s.value=a.value; });
+    sync();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go();
+})();
+</script>
+<script src="data/stage1.js"></script>
+<script>(function(){function go(){if(window.STACSStage1)STACSStage1.init({});}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go();})();</script>
+</body></html>

@@ -1,0 +1,596 @@
+<!DOCTYPE html><html lang="en"><head><script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Skilled Worker Pool — Registration</title>
+<style>
+:root{--bg:#0A2E16;--bg2:#0D3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.12);--bdr2:rgba(255,255,255,.22);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.66);--tx3:rgba(240,240,236,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5;padding-bottom:60px}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:14px 22px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:10}
+.logo{width:44px;height:44px;border-radius:50%;background:#fff;object-fit:cover;border:2px solid var(--gold2)}
+.hdr-nav{margin-left:auto;display:flex;gap:16px;align-items:center}.hdr-nav a{color:var(--tx2);font-size:13px;text-decoration:none}.hdr-nav a:hover{color:var(--gold2)}.hdr-nav .signin{background:var(--gold);color:#231a02;padding:7px 15px;border-radius:100px;font-weight:700}
+@media(max-width:640px){.hdr-nav .navlink{display:none}}
+.bname{font-size:14px;font-weight:800;line-height:1.1}.btag{font-size:9px;color:var(--gold2);letter-spacing:.5px}
+.wrap{max-width:880px;margin:22px auto;padding:0 18px}
+.h1{font-size:23px;font-weight:800;margin-bottom:6px}.lead{font-size:13px;color:var(--tx2);margin-bottom:14px}
+.notice{background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.3);border-radius:11px;padding:12px 15px;font-size:12px;color:var(--gold2);line-height:1.6;margin-bottom:16px;display:flex;gap:9px}
+.notice i{flex-shrink:0}
+.journey{background:var(--card2);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-bottom:22px}
+.journey h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--gold2);margin-bottom:10px}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stage{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:10px}
+.stage.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.stage .n{font-size:10px;font-weight:700;color:var(--gold2)}
+.stage .t{font-size:12px;font-weight:700;margin:3px 0}
+.stage .d{font-size:10.5px;color:var(--tx3);line-height:1.45}
+.stage .now{display:inline-block;margin-top:6px;font-size:9px;font-weight:700;background:var(--gold);color:#fff;padding:1px 7px;border-radius:20px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:18px 18px 6px;margin-bottom:16px}
+.sec{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec b{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.f{margin-bottom:13px}.f.full{grid-column:1/-1}
+.f label{display:block;font-size:12px;color:var(--tx);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px}
+.f label .req{color:var(--gold2)}
+.f input,.f select,.f textarea{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--tx);font-family:inherit}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--gold)}
+.f textarea{resize:vertical;min-height:62px}.f .hint{font-size:10.5px;color:var(--tx3);margin-top:4px}
+.file{border:1px dashed var(--bdr2);border-radius:9px;padding:11px 12px;font-size:12px;color:var(--tx2);background:var(--card2)}
+.rules{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px}
+.rule{font-size:10.5px;color:var(--tx3);display:flex;align-items:center;gap:4px}.rule.ok{color:var(--grn)}
+.pw-wrap{position:relative}.pw-eye{position:absolute;right:11px;top:9px;color:var(--tx3);cursor:pointer;font-size:16px;user-select:none}
+.chk{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--tx2);margin-bottom:11px;line-height:1.5}
+.chk input{margin-top:2px;flex-shrink:0;width:16px;height:16px;accent-color:var(--gold)}
+.chk .req{color:var(--gold2)}
+.lnk{color:var(--gold2);text-decoration:underline;cursor:pointer;font-weight:600}
+.submit{width:100%;background:var(--gold);color:#fff;border:none;border-radius:11px;padding:15px;font-size:15px;font-weight:800;cursor:pointer;margin-top:6px}
+.submit:hover{background:var(--gold2)}
+.msg{border-radius:11px;padding:14px 16px;font-size:13px;margin-top:14px;display:none;line-height:1.6}
+.msg.err{background:rgba(232,106,106,.12);border:1px solid rgba(232,106,106,.35);color:var(--rd)}
+.msg.ok{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.4);color:var(--grn)}
+.msg .id{font-family:ui-monospace,monospace;font-weight:700;color:var(--gold2)}
+/* payment */
+.pay-item{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--bdr)}
+.pay-item:last-child{border-bottom:none}
+.pay-item .pi-t{font-size:13px;font-weight:600}.pay-item .pi-d{font-size:11px;color:var(--tx3)}
+.pay-item .pi-a{font-size:13px;font-weight:700;color:var(--gold2);white-space:nowrap}
+.pi-free{color:var(--grn)!important}
+.mand{font-size:9px;background:rgba(232,106,106,.15);color:var(--rd);padding:1px 7px;border-radius:20px;margin-left:6px;font-weight:700}
+.opts{display:flex;flex-direction:column;gap:9px;margin:12px 0}
+.opt{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;cursor:pointer}
+.opt.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.opt input{margin-top:3px;accent-color:var(--gold)}
+.opt .o-t{font-size:13px;font-weight:700}.opt .o-d{font-size:11px;color:var(--tx3)}
+.opt .o-a{margin-left:auto;font-size:15px;font-weight:800;color:var(--gold2);white-space:nowrap}
+.o-save{font-size:9px;background:var(--grn);color:#04260f;padding:1px 7px;border-radius:20px;margin-left:6px;font-weight:800}
+.cur{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--tx2);margin:12px 0}
+.cur select{background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;color:var(--tx);font-size:12px}
+.total{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--gold);border-radius:10px;padding:13px 15px;margin-top:6px}
+.total .tl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--tx2)}
+.total .tv{font-size:22px;font-weight:800;color:var(--gold2)}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(4,18,9,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.ov.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:16px;max-width:640px;width:100%;max-height:82vh;overflow-y:auto;padding:24px}
+.modal h2{font-size:18px;color:var(--gold2);margin-bottom:4px}
+.modal .msub{font-size:11px;color:var(--tx3);margin-bottom:14px}
+.modal p,.modal li{font-size:12.5px;color:var(--tx2);line-height:1.65;margin-bottom:8px}
+.modal ul{padding-left:18px}
+.modal .draftnote{font-size:11px;font-style:italic;color:var(--gold2);background:rgba(200,146,10,.1);border-radius:8px;padding:9px 11px;margin:12px 0}
+.modal .close{margin-top:14px;width:100%;background:var(--gold);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+.modal.small{max-width:460px;text-align:center}
+.modal.small .pico{width:54px;height:54px;border-radius:50%;background:rgba(200,146,10,.15);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px}
+.ppreview{display:flex;align-items:center;gap:14px;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;padding:13px 16px;margin-bottom:16px}
+.pavatar{width:60px;height:60px;border-radius:50%;flex-shrink:0;background:var(--card) center/cover no-repeat;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:22px;overflow:hidden}
+.pavatar img{width:100%;height:100%;object-fit:cover}
+.pname{font-size:15px;font-weight:700}.pmeta{font-size:11px;color:var(--tx3);margin-top:2px}
+.pbadge{margin-left:auto;font-size:9px;font-weight:700;color:var(--gold2);border:1px solid var(--gold);border-radius:20px;padding:3px 9px}
+
+.tx-picker{position:relative;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:6px 6px 2px}
+.tx-chips{display:flex;flex-wrap:wrap;gap:6px}
+.tx-chip{display:inline-flex;align-items:center;gap:7px;background:var(--gold);color:#231a02;border-radius:100px;padding:5px 9px 5px 12px;font-size:12.5px;font-weight:700;margin-bottom:4px}
+.tx-chip small{font-weight:500;opacity:.75;font-size:10.5px}
+.tx-chip.primary{box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+.tx-chip button{background:rgba(0,0,0,.22);color:#231a02;border:none;border-radius:50%;width:17px;height:17px;cursor:pointer;font-size:12px;line-height:1;padding:0}
+.tx-search{width:100%;background:transparent;border:none;color:var(--tx);font-size:14px;padding:7px 6px;outline:none;font-family:inherit}
+.tx-results{position:absolute;left:0;right:0;top:100%;margin-top:5px;background:#0b3b21;border:1px solid rgba(255,255,255,.2);border-radius:10px;max-height:290px;overflow-y:auto;z-index:40;display:none;box-shadow:0 14px 34px rgba(0,0,0,.45)}
+.tx-results.show{display:block}
+.tx-opt{padding:9px 13px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.06)}
+.tx-opt:hover,.tx-opt.active{background:rgba(200,146,10,.16)}
+.tx-opt .nm{font-size:13.5px;font-weight:600;color:var(--tx)}
+.tx-opt .ctx{font-size:11px;color:var(--tx3)}
+.tx-hint{font-size:11.5px;color:var(--tx3);margin-top:7px}
+:root[data-theme="light"]{--bg:#F3F1EA;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F5F4EE;--s1:#FFFFFF;--s2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#4f574a;--tx3:#6c7466;--gp:rgba(200,146,10,.13);--grnp:rgba(46,204,113,.14);--gold:#8A6508;--gold2:#7A5A07;--grn:#1B7A43;--rd:#B3352F}</style></head><body>
+<div class="hdr"><a href="index.html" class="brandlink" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit" title="Back to STACS home"><img class="logo" src="data:image/jpeg;base64,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" alt="LEIVOTEST STACS"><div><div class="bname">LEIVOTEST — STACS</div></a><div class="btag">SKILLED WORKER POOL</div></div><div class="hdr-nav"><a class="navlink" href="index.html">Home</a><a class="navlink" href="STACS_Employer_Registration_Form.html">For employers</a><a class="navlink" href="https://leivotest.com/skilled-tradepersons-talent-pool/" target="_blank" rel="noopener">Our Story</a><a class="navlink" href="faq.html">Help</a><a class="signin" href="sign-in.html">Sign in</a></div></div>
+<div class="wrap">
+ <div class="h1">Join the Skilled Worker Pool</div>
+ <div class="lead">Register your profile to be discovered by verified employers and to migrate for work if sponsored.</div>
+ <div class="notice"><i>&#9432;</i><span>Your profile stays private — visible to no one but you — until it is approved against basic lawful requirements. On approval you receive a unique STACS ID and a welcome email. Your email is verified by a secure link before review. You can add more skill slots after approval.</span></div>
+ <div class="journey">
+  <h3>Your journey — a 4-stage cross-border career pipeline</h3>
+  <div class="stages">
+   <div class="stage on"><div class="n">STAGE 1</div><div class="t">Onboarding &amp; Readiness</div><div class="d">Account opening, profile assessment, mandatory orientation. → Entry into the global employer pool.</div><div class="now">Payable now</div></div>
+   <div class="stage"><div class="n">STAGE 2</div><div class="t">Verification &amp; Compliance</div><div class="d">Credential verification, legalization, translations, lawyer reviews. → Audit-ready profile.</div></div>
+   <div class="stage"><div class="n">STAGE 3</div><div class="t">Legal Mobilization &amp; Visa</div><div class="d">Self-filing or a platform-verified visa agency. → Approved work visa &amp; biometrics.</div></div>
+   <div class="stage"><div class="n">STAGE 4</div><div class="t">Relocation &amp; Integration</div><div class="d">Airport pickup, housing, employer onboarding. → Successful settlement.</div></div>
+  </div>
+ </div>
+ <div class="ppreview">
+  <div class="pavatar" id="pAvatar">&#9679;</div>
+  <div><div class="pname" id="pName">Your profile</div><div class="pmeta">Skilled Worker Pool · pending profile</div></div>
+  <div class="pbadge">PREVIEW</div>
+ </div>
+ <div class="card">
+  <div class="sec"><b>1</b> Account</div>
+  <div class="grid">
+   <div class="f"><label>Surname <span class="req">*</span></label><input id="surname" placeholder="e.g. Okafor"></div>
+   <div class="f"><label>First name <span class="req">*</span></label><input id="firstname" placeholder="e.g. John"></div>
+   <div class="f"><label>Preferred username</label><input id="username" placeholder="3–20 characters"></div>
+   <div class="f"><label>Phone (with country code) <span class="req">*</span></label><input id="phone" placeholder="+234 …"></div>
+   <div class="f"><label>Email address <span class="req">*</span></label><input id="email" type="email" placeholder="you@email.com"><div class="hint">Verified by link before review.</div></div>
+   <div class="f"><label>Confirm email <span class="req">*</span></label><input id="email2" type="email" placeholder="Repeat your email"></div>
+   <div class="f full"><label>Password <span class="req">*</span></label><div class="pw-wrap"><input id="pw" type="password" placeholder="Create a password"><span class="pw-eye" onclick="tgl()">&#128065;</span></div><div class="rules" id="rules"></div></div>
+  </div>
+ </div>
+ <div class="card" data-stage="2">
+  <div class="sec"><b>2</b> Personal</div>
+  <div class="grid">
+   <div class="f"><label>Nationality <span class="req">*</span></label>
+     <div id="natPicker"></div><input type="hidden" id="nationality">
+     <div class="hint">Type your nationality (e.g. <b>Nigerian</b>) and tap it from the list.</div></div>
+   <div class="f"><label>Date of birth <span class="req">*</span></label>
+     <div style="display:flex;gap:8px;align-items:center">
+       <input id="dobText" inputmode="numeric" placeholder="DD/MM/YYYY" maxlength="10" style="flex:1">
+       <input id="dob" type="date" style="width:44px;padding:10px 6px;flex:0 0 auto" title="Or pick from a calendar" aria-label="Pick date of birth from calendar">
+     </div>
+     <div class="hint">Type it as <b>DD/MM/YYYY</b>, or tap the calendar icon to choose. You must be 18 or older.</div></div>
+   <div class="f"><label>Gender <span class="req">*</span></label>
+     <select id="gender"><option value="">Select…</option><option>Male</option><option>Female</option></select>
+     <div class="hint">Some destination countries and employers require this for visa and accommodation arrangements.</div></div>
+   <div class="f"><label>Country of residence <span class="req">*</span></label>
+     <div id="resPicker"></div><input type="hidden" id="residence">
+     <div class="hint">Tap your country from the list.</div></div>
+   <div class="f"><label>State / Province <span style="text-transform:none;color:var(--tx3)">(or city)</span></label>
+     <div id="statePicker"></div><input type="hidden" id="city">
+     <div class="hint" id="stateHint">Choose your country of residence first.</div></div>
+   <div class="f"><label>City / LGA / District / Community <span class="req">*</span></label>
+     <input id="locality" placeholder="e.g. Ikeja LGA, Surulere, Nsukka">
+     <div class="hint">The town, local government area, district or community where you live.</div></div>
+   <div class="f full"><label>Full address <span style="text-transform:none;color:var(--tx3)">(optional)</span></label>
+     <textarea id="address" rows="2" placeholder="House number, street, area"></textarea>
+     <div class="hint">Helps with verification and local coordination. You can leave it blank for now.</div></div>
+   <div class="f full"><label>Shipping address <span style="text-transform:none;color:var(--tx3)">(optional)</span></label>
+     <label style="text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--tx2);display:flex;gap:8px;align-items:center;margin-bottom:7px">
+       <input type="checkbox" id="shipSame" style="width:auto"> Same as my full address</label>
+     <textarea id="shipping" rows="2" placeholder="Where documents or items should be delivered to you"></textarea>
+     <div class="hint">Used only when something must reach you physically &mdash; or when originals are requested for physical clearance. Include a landmark if that helps a courier find you.</div></div>
+  </div>
+ </div>
+ <div class="card" data-stage="2">
+  <div class="sec"><b>3</b> Your skills — professional slots (1–9)</div>
+  <div class="grid">
+   <div class="f" style="grid-column:1/-1">
+     <label>Your profession(s) / trade(s) <span class="req">*</span></label>
+     <div id="mainTrade"></div>
+     <div style="margin-top:12px"><label style="font-size:11.5px">Other trades you also work in <span style="text-transform:none;color:var(--tx3)">(optional)</span></label>
+       <div id="extraTrades"></div></div>
+     <div class="tx-hint">Type a word like <b>electrician</b>, <b>nurse</b>, <b>driver</b> or <b>chef</b> and tap your trade from the list. Pick your <b>main trade</b> — the work you would do tomorrow. You can add further skills (slots 2–9) from your dashboard after approval. <br><b>Can’t find yours?</b> Pick the closest match — you can tell us the exact title later, and nothing here is final.</div>
+     <input type="hidden" id="profession"><input type="hidden" id="sector"><input type="hidden" id="skillSlots"><input type="hidden" id="mainTradeVal"><input type="hidden" id="extraTradesVal">
+   </div>
+   <div class="f"><label>Years of experience <span class="req">*</span></label><select id="experience"><option value="">Select…</option><option>Less than 1</option><option>1–2</option><option>3–5</option><option>6–10</option><option>10+</option></select></div>
+   <div class="f"><label>Highest qualification <span class="req">*</span></label><select id="qualification"><option value="">Select…</option><option>Primary</option><option>Secondary</option><option>Trade school / Vocational</option><option>Diploma / OND</option><option>Degree / HND</option><option>Masters</option><option>PhD</option><option>None</option></select></div>
+   <div class="f"><label>Current working status <span class="req">*</span></label><select id="workstatus"><option value="">Select…</option><option>Employed</option><option>Self-employed</option><option>Unemployed</option><option>Student</option></select></div>
+   <div class="f"><label>Current employer &amp; designation</label><input id="employer" placeholder="e.g. BrightPower Ltd · Senior Electrician"></div>
+   <div class="f full"><label>Key certifications / licences</label><textarea id="certs" placeholder="List any certificates, trade tests or licences you hold."></textarea></div>
+  </div>
+ </div>
+ <div class="card" data-stage="2">
+  <div class="sec"><b>4</b> Languages &amp; migration</div>
+  <div class="grid">
+   <div class="f"><label>Languages spoken <span class="req">*</span></label><input id="languages" placeholder="e.g. English, Yoruba"></div>
+   <div class="f"><label>Passport status <span class="req">*</span></label><select id="passport"><option value="">Select…</option><option>Valid</option><option>In process</option><option>None</option><option>Expired</option></select></div>
+   <div class="f"><label>Willing to relocate <span class="req">*</span></label><select id="relocate"><option value="">Select…</option><option>Anywhere</option><option>Specific countries</option><option>Region only</option><option>No</option></select></div>
+   <div class="f full"><label>Preferred destination countries / continent(s)</label>
+     <div id="destPicker"></div><input type="hidden" id="destinations">
+     <div class="hint">Pick as many as you like — a whole region (e.g. <b>Europe</b>) or specific countries (e.g. <b>Canada</b>, <b>United Arab Emirates</b>).</div></div>
+  </div>
+ </div>
+ <div class="card" data-stage="2">
+  <div class="sec"><b>5</b> Uploads</div>
+  <div class="grid">
+   <div class="f full"><label>Passport photograph <span class="req">*</span> — becomes your profile picture</label><input class="file" type="file" id="upPhoto" accept="image/*"><div class="hint">Your passport photograph is automatically used as your profile picture and across all your documentation. You cannot upload a separate profile photo.</div></div>
+   <div class="f"><label>ID or passport <span class="req">*</span></label><input class="file" type="file" id="upID" accept=".pdf,.jpg,.jpeg,.png"><div class="hint">PDF, JPG or PNG · max 5 MB.</div></div>
+   <div class="f"><label>Certificates / trade test</label><input class="file" type="file" id="upCert" accept=".pdf,.jpg,.jpeg,.png"><div class="hint">PDF, JPG or PNG · max 5 MB.</div></div>
+   <div class="f full"><label>CV / résumé</label><input class="file" type="file" id="upCV" accept=".pdf,.jpg,.jpeg,.png"><div class="hint">PDF preferred · max 5 MB. We generate a global-standard, contact-free version of your CV that employers see.</div></div>
+  </div>
+ </div>
+ 
+ <div class="card">
+  <div style="font-size:12.5px;color:var(--tx2);line-height:1.6;margin:4px 0 12px">By creating an account you agree to our <a href="legal.html#p3" target="_blank" style="color:var(--gold2)">Terms of Use</a> and <a href="legal.html#p9" target="_blank" style="color:var(--gold2)">Privacy Policy</a>. The full declarations — including anti-fraud and physical clearance — are presented when you submit your completed profile for approval.</div>
+  <button class="submit" onclick="submitFree()" id="regBtn">Create New Account</button>
+  
+ <div style="text-align:center;font-size:11.5px;color:var(--tx3);margin-top:9px">Registration is free. You'll verify your email, then you can choose to migrate into the Job Pool.</div>
+ </div>
+<div class="card" id="declCard" data-stage="2">
+  <div class="sec"><b>6</b> Declarations</div>
+  <label class="chk"><input type="checkbox" id="d1"><span>I confirm I am 18 years and above and I have the legal right to seek work. <span class="req">*</span></span></label>
+  <label class="chk"><input type="checkbox" id="d2"><span>I confirm that I can disclose any conviction affecting eligibility to seek for a job on this platform. <span class="req">*</span></span></label>
+  <label class="chk"><input type="checkbox" id="d3"><span>I hereby declare the information I have given is true, complete and lawful. <span class="req">*</span></span></label>
+  <label class="chk"><input type="checkbox" id="d4"><span>I understand that if I provide illegal, fake or misleading information or documents on this platform, for any reason or purpose, I will be disqualified and my account banned from use. <span class="req">*</span></span></label>
+  <label class="chk"><input type="checkbox" id="d5"><span>I understand my profile stays private and invisible to others until my account is approved, that STACS does not guarantee any job or visa, and that I will communicate with employers only through the platform. <span class="req">*</span></span></label>
+  <label class="chk"><input type="checkbox" id="d6"><span>I understand my passport photograph will be used as my profile picture and across my documentation on the platform. <span class="req">*</span></span></label>
+  <label class="chk"><input type="checkbox" id="d7"><span>I have read and accept the <a class="lnk" href="legal.html#p7" target="_blank" rel="noopener">Code of Conduct</a>, <a class="lnk" href="legal.html#p3" target="_blank" rel="noopener">Terms of Use</a> &amp; <a class="lnk" href="legal.html#p9" target="_blank" rel="noopener">Privacy Policy</a>. <span class="req">*</span></span></label>
+  <label class="chk"><input type="checkbox" id="d8"><span><b>Physical clearance:</b> I understand my <b>original documents may be requested at any time</b> and must be available for shipping to the LEIVOTEST–STACS Unit for physical clearance. Failure to provide them when requested may be treated as a perception of illegal practice implicating fraud — a crime not permitted on this platform. <span class="req">*</span></span></label>
+ </div>
+ 
+ <div class="msg err" id="msgErr"></div>
+ <div class="msg ok" id="msgOk"></div>
+ <div id="regDebug" style="display:none;margin-top:10px;padding:9px 12px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;color:#cfd4cd;word-break:break-word"></div>
+
+ <!-- MIGRATE INTO JOB POOL — revealed after free registration -->
+ <div class="card" id="migrateCard" style="display:none;border-color:var(--gold);margin-top:18px">
+  <div class="sec"><b>&#9992;</b> Migrate into Job Pool <span style="font-weight:600;color:var(--tx3);text-transform:none;letter-spacing:0">· Stage 1</span><span style="margin-left:auto;background:#2ECC71;color:#04260f;font-size:10px;font-weight:800;padding:3px 11px;border-radius:100px;letter-spacing:.04em">LAUNCH · 40% OFF</span></div>
+  <div style="font-size:12.5px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Your free account is created. To be seen by employers, migrate into the Job Pool by completing Stage 1 — Onboarding &amp; Readiness. You can do this now or after your account is approved. Later stages are paid as your journey progresses.</div>
+  <div class="pay-item"><div><div class="pi-t">Account Opening</div><div class="pi-d">Your secured STACS account.</div></div><div class="pi-a pi-free">FREE</div></div>
+  <div class="pay-item"><div><div class="pi-t">Profile Assessment Support</div><div class="pi-d">We review and strengthen your profile for global standards.</div></div><div class="pi-a" data-usd="10">$10.00</div></div>
+  <div class="pay-item"><div><div class="pi-t">Registration &amp; Queueing into Employer's Pool</div><div class="pi-d">Your profile is registered and queued into the pool employers search.</div></div><div class="pi-a" data-usd="15">$15.00</div></div>
+  <div class="pay-item"><div><div class="pi-t">International Jobseeker Orientation Program <span class="mand">MANDATORY</span></div><div class="pi-d">The readiness programme and certificate that prepare you to work abroad.</div></div><div class="pi-a" data-usd="25">$25.00</div></div>
+  <div class="opts">
+   <label class="opt sel" id="optBundle"><input type="radio" name="payopt" value="bundle" checked onchange="selOpt()"><div><div class="o-t">All-Inclusive "Global Readiness" Bundle <span class="o-save">SAVE $10</span></div><div class="o-d">All Stage 1 services above, in one payment.</div></div><div class="o-a" data-usd="39.99">$39.99</div></label>
+   <label class="opt" id="optItems"><input type="radio" name="payopt" value="items" onchange="selOpt()"><div><div class="o-t">Pay individually</div><div class="o-d">The three paid services above, billed separately.</div></div><div class="o-a" data-usd="50">$50.00</div></label>
+  </div>
+  <div class="cur"><span>Currency (auto-detected by your location):</span><select id="cur" onchange="renderPrices()"><option value="USD">US Dollar (USD)</option><option value="NGN">Nigerian Naira (NGN)</option></select><span id="curNote" style="color:var(--tx3);font-size:11px"></span></div>
+  <div class="total"><div><div class="tl">Total to join the pool (Stage 1)</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">Secured by Paystack</div></div><div class="tv" id="totalVal">$39.99</div></div>
+  <label class="chk" style="margin-top:14px"><input type="checkbox" id="feeConsent"><span>I consent to the Stage 1 fees I have selected, payable now, before these services are rendered. <span class="req">*</span></span></label>
+  <button class="submit" onclick="migratePay()" id="payBtn">Pay with Paystack to join the pool — <span id="btnAmt">$39.99</span></button>
+  <div class="msg err" id="mErr"></div>
+  <div class="msg ok" id="mOk"></div>
+ </div>
+</div>
+
+<!-- passport photo popup -->
+<div class="ov" id="ovPhoto"><div class="modal small">
+ <div class="pico">&#128247;</div>
+ <h2>Your passport photograph = your profile picture</h2>
+ <p>The passport photograph you upload will be made to appear as your <b>profile picture</b>, and will also be made available across <b>all your documentation</b> on the platform. You will not upload a separate profile photo. Please make sure it is a clear, recent passport-style photograph.</p>
+ <button class="close" onclick="closeOv('ovPhoto')">OK, I Understand</button>
+</div></div>
+
+<!-- legal docs -->
+<div class="ov" id="ovDoc"><div class="modal">
+ <h2 id="docTitle"></h2><div class="msub" id="docSub"></div>
+ <div id="docBody"></div>
+ <div class="draftnote">Draft for onboarding — the final version will be issued by STACS and reviewed by legal counsel before it becomes binding.</div>
+ <button class="close" onclick="closeOv('ovDoc')">Close</button>
+</div></div>
+<script src="https://js.paystack.co/v2/inline.js"></script>
+<script src="data/taxonomy.js"></script>
+<script src="data/geo.js"></script>
+<script src="data/picker.js"></script>
+<script>
+/* ===== Backend config (set these to go live) ===== */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZc5fZdv6zVA7Nmf6s3AXafllsSxkKTdavjY7xT7320A_FfM7JYqykPLsfCsxskRy8jA/exec"; // deployed Apps Script Web App
+const PAYSTACK_PUBLIC_KEY = "pk_live_157aad7152a515664df444b0f67f21587ae2629d";
+const NGN_PER_USD = 1550; // update from your live FX source
+
+/* password */
+function tgl(){const f=document.getElementById('pw');f.type=f.type==='password'?'text':'password';}
+function checkPw(v){return{len:v.length>=8&&v.length<=16,up:/[A-Z]/.test(v),lo:/[a-z]/.test(v),num:/[0-9]/.test(v),sym:/[^A-Za-z0-9]/.test(v)};}
+function drawRules(){const c=checkPw(document.getElementById('pw').value);
+ const R=[["len","8–16 chars"],["up","Uppercase"],["lo","Lowercase"],["num","Number"],["sym","Symbol"]];
+ document.getElementById('rules').innerHTML=R.map(([k,l])=>`<div class="rule ${c[k]?'ok':''}">${c[k]?'&#10003;':'&#8226;'} ${l}</div>`).join('');}
+document.getElementById('pw').addEventListener('input',drawRules);drawRules();
+
+/* passport photo popup + live profile preview */
+let PHOTO_B64="",PHOTO_TYPE="";
+document.getElementById('upPhoto').addEventListener('change',function(){
+  if(this.files&&this.files.length){
+    const f=this.files[0];PHOTO_TYPE='image/jpeg';
+    var input=this;
+    stacsReadFile(input,f,function(url){
+      openOv('ovPhoto');
+      PHOTO_B64=String(url).split(',')[1]||'';
+      document.getElementById('pAvatar').innerHTML='<img src="'+url+'" alt="profile">';
+    });
+  }});
+function updateName(){const s=document.getElementById('surname').value.trim(),f=document.getElementById('firstname').value.trim();
+  document.getElementById('pName').textContent=(f||s)?((s?s+' ':'')+f).trim():'Your profile';}
+document.getElementById('surname').addEventListener('input',updateName);
+document.getElementById('firstname').addEventListener('input',updateName);
+function openOv(id){document.getElementById(id).classList.add('show');}
+function closeOv(id){document.getElementById(id).classList.remove('show');}
+
+/* currency + prices */
+const LAUNCH_DISCOUNT=0.40; // 40% launch offer — set to 0 to return to baseline pricing
+function baseFmt(usd,cur){usd=parseFloat(usd);return cur==='NGN'?('\u20A6'+Math.round(usd*NGN_PER_USD).toLocaleString()):('$'+usd.toFixed(2));}
+function fmt(usd,cur){return baseFmt(parseFloat(usd)*(1-LAUNCH_DISCOUNT),cur);}
+function selectedUsd(){return document.querySelector('input[name=payopt]:checked').value==='bundle'?39.99:50;}
+function renderPrices(){const cur=document.getElementById('cur').value;
+ document.querySelectorAll('[data-usd]').forEach(el=>{const u=el.getAttribute('data-usd');el.innerHTML='<s style="opacity:.45;font-weight:400;margin-right:5px">'+baseFmt(u,cur)+'</s>'+fmt(u,cur);});
+ const t=fmt(selectedUsd(),cur);document.getElementById('totalVal').innerHTML=t;document.getElementById('btnAmt').textContent=t;
+ document.getElementById('curNote').textContent=cur==='NGN'?'(Naira · 40% launch discount applied)':'(USD · 40% launch discount applied)';}
+function selOpt(){document.getElementById('optBundle').classList.toggle('sel',document.querySelector('input[name=payopt]:checked').value==='bundle');
+ document.getElementById('optItems').classList.toggle('sel',document.querySelector('input[name=payopt]:checked').value==='items');renderPrices();}
+(function detect(){let cur='USD';try{const tz=(Intl.DateTimeFormat().resolvedOptions().timeZone||'');if(/Lagos|Africa\/Lagos/i.test(tz))cur='NGN';}catch(e){}document.getElementById('cur').value=cur;renderPrices();})();
+
+/* legal docs */
+const DOCS={
+ coc:{t:"Code of Conduct",s:"How every member is expected to act on STACS.",b:`<ul>
+  <li>Provide only true, lawful information and genuine documents at all times.</li>
+  <li>Treat employers, partners and STACS staff with honesty and respect.</li>
+  <li>Communicate only through the STACS platform; do not attempt to bypass it or contact parties privately until permitted.</li>
+  <li>Never offer, solicit or pay a bribe, or pay anyone to unlawfully influence a process.</li>
+  <li>Complete the mandatory orientation and uphold its standards abroad.</li>
+  <li>Respect the laws of your home and destination countries at all times.</li>
+  <li>Report any fraud, abuse or unsafe conduct you encounter.</li>
+  <li>Understand that breaching this Code may lead to suspension or a permanent ban.</li></ul>`},
+ tou:{t:"Terms of Use",s:"The basis on which you use the STACS platform.",b:`<ul>
+  <li>STACS is a trust and workforce-mobility platform — not an employer, agency or government body.</li>
+  <li>STACS improves the quality, visibility and integrity of your application; it does not guarantee any job, sponsorship or visa. Those decisions rest solely with employers and government authorities.</li>
+  <li>Your account remains private and invisible to others until it is approved against basic lawful requirements.</li>
+  <li>Fees for services are payable as described before those services are rendered; some fees may be non-refundable once a service has begun.</li>
+  <li>You are responsible for the accuracy and legality of your information and documents.</li>
+  <li>STACS may suspend or permanently ban accounts that provide false, illegal or misleading information or documents.</li>
+  <li>These terms are governed by the laws of the Federal Republic of Nigeria.</li></ul>`},
+ pp:{t:"Privacy Policy",s:"How STACS handles your information.",b:`<ul>
+  <li>We collect the information and documents you provide to build and verify your profile.</li>
+  <li>We use them to verify your identity and credentials, match you with employers, and deliver the services you request.</li>
+  <li>Your profile is invisible to others until approved; contact details are masked and shared only through controlled, witnessed channels.</li>
+  <li>We share data only with the parties needed to deliver services (verifiers, employers you engage, lawyers, agencies) and as required by law.</li>
+  <li>Your passport photograph is used as your profile picture and across your documentation on the platform.</li>
+  <li>Payments are processed by Paystack; we do not store your full card details.</li>
+  <li>We keep your data only as long as needed, and you may request access or deletion subject to legal limits.</li></ul>`}};
+function openDoc(k){const d=DOCS[k];document.getElementById('docTitle').textContent=d.t;document.getElementById('docSub').textContent=d.s;document.getElementById('docBody').innerHTML=d.b;openOv('ovDoc');}
+
+/* validation + submit */
+function age(d){if(!d)return 0;const t=new Date(),b=new Date(d);let a=t.getFullYear()-b.getFullYear();const m=t.getMonth()-b.getMonth();if(m<0||(m===0&&t.getDate()<b.getDate()))a--;return a;}
+const val=id=>document.getElementById(id).value.trim();
+function collect(){return{role:"WK",surname:val('surname'),firstname:val('firstname'),username:val('username'),phone:val('phone'),
+ email:val('email'),password:document.getElementById('pw').value,nationality:val('nationality'),dob:val('dob'),
+ residence:val('residence'),city:val('city'),profession:val('profession'),gender:val('gender'),locality:val('locality'),address:val('address'),shipping:val('shipping'),sector:val('sector'),skillSlots:(document.getElementById('skillSlots')?document.getElementById('skillSlots').value:''),experience:val('experience'),
+ qualification:val('qualification'),workstatus:val('workstatus'),employer:val('employer'),certs:val('certs'),
+ languages:val('languages'),passport:val('passport'),relocate:val('relocate'),destinations:val('destinations'),
+ photoBase64:PHOTO_B64,photoType:PHOTO_TYPE};}
+
+function submitFree(){
+ const err=document.getElementById('msgErr'),ok=document.getElementById('msgOk');err.style.display='none';ok.style.display='none';
+ const req={surname:'Surname',firstname:'First name',phone:'Phone',email:'Email',email2:'Confirm email',nationality:'Nationality',dob:'Date of birth',residence:'Country of residence',profession:'Primary profession',sector:'Sector',experience:'Years of experience',qualification:'Highest qualification',workstatus:'Working status',languages:'Languages',passport:'Passport status',relocate:'Willing to relocate'};
+ let problems=[];
+ for(const k in req){var _el=document.getElementById(k); if(_el&&_el.closest('[data-stage="2"]'))continue; if(!val(k))problems.push('Missing: '+req[k]);}
+ const em=val('email'),em2=val('email2');
+ if(em&&em2&&em!==em2)problems.push('Emails do not match.');
+ if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em))problems.push('Enter a valid email.');
+ if(!Object.values(checkPw(document.getElementById('pw').value)).every(Boolean))problems.push('Password does not meet all the rules.');
+ if(problems.length){err.innerHTML='<b>Please fix the following:</b><br>'+problems.slice(0,9).join('<br>');err.style.display='block';window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});return;}
+ const btn=document.getElementById('regBtn');btn.disabled=true;btn.textContent='Creating your account…';
+ const done=()=>{
+   ok.innerHTML=`<b>Your account is created.</b><div style="margin:14px 0 4px;font-size:13px;color:var(--tx2)">Two quick things, then you can finish your profile:</div><div style="display:flex;gap:11px;align-items:flex-start;margin-top:10px"><span style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">1</span><div><b>Check your email and click the verification link.</b><br><span style="font-size:12.5px;color:var(--tx2)">Look in your spam folder too. Nothing moves until this is done.</span></div></div><div style="display:flex;gap:11px;align-items:flex-start;margin-top:10px"><span style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">2</span><div><b>Sign in to complete your profile.</b><br><span style="font-size:12.5px;color:var(--tx2)">You can save your progress and come back as often as you like. Submit for approval only when you are ready.</span></div></div><div style="margin-top:18px"><a href="sign-in.html" style="display:inline-block;background:var(--gold);color:#231a02;border-radius:10px;padding:13px 24px;font-weight:800;font-size:14px;text-decoration:none">Go to sign in \u2192</a></div>`;
+   ok.style.display='block';btn.disabled=false;btn.textContent='Account created \u2713';
+   setTimeout(()=>ok.scrollIntoView({behavior:'smooth',block:'center'}),300);
+ };
+ if(APPS_SCRIPT_URL){
+   // Read the server's real answer instead of firing blind. Apps Script returns a
+   // CORS-readable JSON body for text/plain POSTs, so we can show true success/failure.
+   var dbg=document.getElementById('regDebug');
+   if(dbg){ dbg.style.display='block'; dbg.textContent='Sending registration to the server…'; }
+   fetch(APPS_SCRIPT_URL,{
+     method:'POST',
+     headers:{'Content-Type':'text/plain;charset=utf-8'}, // text/plain keeps it a CORS-simple request
+     body:JSON.stringify({action:'register',data:collect()})
+   })
+   .then(function(r){ return r.text(); })
+   .then(function(txt){
+     var res=null; try{ res=JSON.parse(txt); }catch(e){}
+     if(res && res.ok){
+       if(dbg){ dbg.style.color='#2ECC71'; dbg.textContent='✓ Saved. Server said: '+(res.message||'Registered')+(res.mail?(' · email: '+res.mail):''); }
+       done();
+     } else {
+       // Server reached, but it reported a problem — show it instead of a false success.
+       btn.disabled=false; btn.textContent='Create New Account';
+       var msg = (res && (res.error||res.message)) ? (res.error||res.message) : ('Unexpected server reply: '+String(txt).slice(0,180));
+       err.innerHTML='<b>Registration could not be completed.</b><br>'+msg;
+       err.style.display='block';
+       if(dbg){ dbg.style.color='#E86A6A'; dbg.textContent='✗ Server responded but not ok: '+msg; }
+       window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+     }
+   })
+   .catch(function(e){
+     // Network / CORS / reachability failure — the POST did not complete.
+     btn.disabled=false; btn.textContent='Create New Account';
+     err.innerHTML='<b>Could not reach the server.</b><br>Please check your connection and try again. ('+String(e)+')';
+     err.style.display='block';
+     if(dbg){ dbg.style.color='#E86A6A'; dbg.textContent='✗ fetch failed: '+String(e)+' — the POST did not reach the script.'; }
+     window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+   });
+ } else { done(); } // prototype: no receiver set yet
+}
+
+function migratePay(){
+ const err=document.getElementById('mErr'),ok=document.getElementById('mOk');err.style.display='none';ok.style.display='none';
+ if(!document.getElementById('feeConsent').checked){err.innerHTML='Please consent to the Stage 1 fees to continue.';err.style.display='block';return;}
+ const email=val('email'); if(!email){err.innerHTML='Your email is missing — please complete registration above first.';err.style.display='block';return;}
+ const cur=document.getElementById('cur').value, usd=selectedUsd();
+ const subunit = cur==='NGN' ? Math.round(usd*NGN_PER_USD)*100 : Math.round(usd*100);
+ if(!window.PaystackPop){err.innerHTML='Payment library not loaded — please refresh and try again.';err.style.display='block';return;}
+ const paystack=new PaystackPop();
+ paystack.newTransaction({
+   key:PAYSTACK_PUBLIC_KEY, email:email, amount:subunit, currency:cur,
+   metadata:{ role:'WK', item:'Stage 1 — Onboarding' },
+   onSuccess:function(tx){
+     try{ fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'record-payment',reference:tx.reference,email:email,amount:usd,currency:cur,item:'Stage 1 — Onboarding'})}); }catch(e){}
+     ok.innerHTML='<b>Payment received.</b><br>Reference <b>'+tx.reference+'</b>. Your profile is being queued into the employer pool, and you will get a confirmation email.';
+     ok.style.display='block';
+   },
+   onCancel:function(){ err.innerHTML='Payment was cancelled — you can complete it any time.'; err.style.display='block'; }
+ });
+}
+</script>
+<div id="wa-widget" style="position:fixed;bottom:22px;right:22px;z-index:99999;font-family:system-ui,-apple-system,sans-serif">
+ <div id="wa-panel" style="display:none;position:absolute;bottom:70px;right:0;width:300px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.3)">
+  <div style="background:#25D366;padding:16px 18px;color:#fff;position:relative">
+   <div style="font-size:19px;font-weight:800">Hello!</div>
+   <div style="font-size:12.5px;opacity:.96;margin-top:3px;line-height:1.4">Click a contact below to chat on WhatsApp</div>
+   <button onclick="waToggle()" aria-label="Close" style="position:absolute;top:11px;right:12px;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1">&times;</button>
+  </div>
+  <a href="https://wa.me/2348022268113" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:#111;background:#f6f6f3">
+   <img src="data:image/jpeg;base64,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" alt="" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid #dcdcd6;object-fit:cover">
+   <div style="flex:1"><div style="font-weight:700;font-size:14px">Leivotest STACS Support</div><div style="font-size:12px;color:#25D366">● Online · usually replies fast</div></div>
+   <svg viewBox="0 0 32 32" width="22" height="22" fill="#25D366"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.7.9 3.6 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7.7.7-3.6-.2-.4C6.5 18.5 6 16.8 6 15c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10zm5.5-7.5c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg>
+  </a>
+ </div>
+ <button id="wa-btn" onclick="waToggle()" style="display:flex;align-items:center;gap:9px;background:#25D366;color:#fff;border:none;border-radius:100px;padding:11px 18px 11px 13px;box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer;font-size:14px;font-weight:600">
+  <svg viewBox="0 0 32 32" width="26" height="26" fill="#fff"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.7.9 3.6 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7.7.7-3.6-.2-.4C6.5 18.5 6 16.8 6 15c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10zm5.5-7.5c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg><span id="wa-btn-txt">How can I help you?</span>
+ </button>
+</div>
+<script>
+(function(){
+  /* main trade = single-select; extra trades = up to 8 more (slots 2-9) */
+  function sync(){
+    var main = mainApi ? mainApi.get() : [];
+    var extra = extraApi ? extraApi.get() : [];
+    document.getElementById('profession').value = main.length ? main[0].name : '';
+    document.getElementById('sector').value     = main.length ? main[0].sector : '';
+    document.getElementById('skillSlots').value = JSON.stringify(main.concat(extra));
+  }
+  var mainApi=null, extraApi=null;
+  function go(){
+    if(!window.STACSPicker) return;
+    mainApi = STACSPicker.mount({el:'mainTrade', hidden:'mainTradeVal', source:'professions', max:1, primary:true,
+      placeholder:'Search your main trade: electrician, nurse, welder, chef\u2026', onChange:sync});
+    extraApi = STACSPicker.mount({el:'extraTrades', hidden:'extraTradesVal', source:'professions', max:8,
+      placeholder:'Add another trade only if you truly work in it\u2026', onChange:sync});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go();
+})();
+</script>
+<script>function waToggle(){var p=document.getElementById('wa-panel');var o=p.style.display==='block';p.style.display=o?'none':'block';document.getElementById('wa-btn-txt').textContent=o?'How can I help you?':'Chat with us';}</script>
+<button id="themeBtn" onclick="stacsTheme()" aria-label="Toggle day / night view" title="Day / Night view" style="position:fixed;bottom:22px;left:22px;z-index:9998;width:46px;height:46px;border-radius:50%;background:var(--s1,#12502A);color:var(--gold2,#E2A53A);border:1px solid var(--bdr2,rgba(255,255,255,.22));cursor:pointer;font-size:19px;box-shadow:0 6px 16px rgba(0,0,0,.28)">&#127769;</button>
+<script>function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
+(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}catch(e){}})();</script>
+<script>
+/* ===== STACS upload guard: type + size limits, auto-shrink images ===== */
+var STACS_LIMITS={image:2*1024*1024, pdf:5*1024*1024};
+function stacsHumanSize(b){return b>=1048576?(b/1048576).toFixed(1)+' MB':Math.round(b/1024)+' KB';}
+function stacsUploadError(input,msg){
+  var box=input.parentNode.querySelector('.up-err');
+  if(!box){box=document.createElement('div');box.className='up-err';box.style.cssText='font-size:11.5px;color:#E05050;margin-top:5px';input.parentNode.appendChild(box);}
+  box.textContent=msg||''; box.style.display=msg?'block':'none';
+}
+/* Reads a file safely: validates type/size, shrinks large images, returns base64 via callback */
+function stacsReadFile(input,file,cb){
+  stacsUploadError(input,'');
+  if(!file)return;
+  var isImg=/^image\//.test(file.type), isPdf=file.type==='application/pdf';
+  if(!isImg&&!isPdf){ stacsUploadError(input,'Please upload a PDF, JPG or PNG file.'); input.value=''; return; }
+  var cap=isImg?STACS_LIMITS.image:STACS_LIMITS.pdf;
+  if(file.size>cap){
+    stacsUploadError(input,'That file is '+stacsHumanSize(file.size)+'. Maximum for '+(isImg?'images is 2 MB':'PDFs is 5 MB')+' — please compress it and try again.');
+    input.value=''; return;
+  }
+  var r=new FileReader();
+  r.onload=function(){
+    if(!isImg){ cb(r.result); return; }
+    /* auto-shrink images: longest side 1400px, JPEG q0.82 */
+    var img=new Image();
+    img.onload=function(){
+      var max=1400,w=img.width,h=img.height;
+      if(w>max||h>max){ if(w>h){h=Math.round(h*max/w);w=max;} else {w=Math.round(w*max/h);h=max;} }
+      try{
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        cb(c.toDataURL('image/jpeg',0.82));
+      }catch(e){ cb(r.result); }
+    };
+    img.onerror=function(){ cb(r.result); };
+    img.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+
+/* auto-validate EVERY file input on the page (type + size), even those read at submit time */
+(function(){
+  function attach(){
+    var ins=document.querySelectorAll('input[type=file]');
+    for(var i=0;i<ins.length;i++){
+      (function(inp){
+        if(inp.getAttribute('data-guarded'))return;
+        inp.setAttribute('data-guarded','1');
+        inp.addEventListener('change',function(){
+          var f=inp.files&&inp.files[0]; if(!f)return;
+          var isImg=/^image\//.test(f.type), isPdf=f.type==='application/pdf';
+          if(!isImg&&!isPdf){ stacsUploadError(inp,'Please upload a PDF, JPG or PNG file.'); inp.value=''; return; }
+          var cap=isImg?STACS_LIMITS.image:STACS_LIMITS.pdf;
+          if(f.size>cap){ stacsUploadError(inp,'That file is '+stacsHumanSize(f.size)+'. Maximum for '+(isImg?'images is 2 MB':'PDFs is 5 MB')+' — please compress it and try again.'); inp.value=''; return; }
+          stacsUploadError(inp,'');
+        },true);
+      })(ins[i]);
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach); else attach();
+})();
+</script>
+
+<script>
+/* ===== geo pickers + DOB ===== */
+(function(){
+  function go(){
+    if(!window.STACSPicker) return;
+    var P=window.STACSPicker, stateApi=null;
+
+    P.mount({el:'natPicker', hidden:'nationality', source:'nationalities', max:1,
+      placeholder:'Search nationality: Nigerian, Ghanaian, Kenyan\u2026'});
+
+    P.mount({el:'resPicker', hidden:'residence', source:'countries', max:1,
+      placeholder:'Search country: Nigeria, Ghana, Kenya\u2026',
+      onChange:function(sel){
+        var c = sel.length? sel[0].name : '';
+        var hint=document.getElementById('stateHint');
+        if(stateApi && c){
+          stateApi.setCountry(c);
+          hint.innerHTML = stateApi.free()
+            ? 'We do not have a state list for <b>'+c+'</b> \u2014 type your state or city and tap "Use what I typed".'
+            : 'Tap your state or province in <b>'+c+'</b>.';
+        } else if(hint){ hint.textContent='Choose your country of residence first.'; }
+      }});
+
+    stateApi = P.mount({el:'statePicker', hidden:'city', source:'states', country:'', max:1,
+      placeholder:'Choose your country first', allowFree:true});
+
+    /* DOB: typed DD/MM/YYYY <-> calendar, kept in sync */
+    var t=document.getElementById('dobText'), d=document.getElementById('dob');
+    if(t&&d){
+      t.addEventListener('input',function(){
+        var v=t.value.replace(/[^0-9]/g,'').slice(0,8);
+        if(v.length>4) v=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);
+        else if(v.length>2) v=v.slice(0,2)+'/'+v.slice(2);
+        t.value=v;
+        var m=v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if(m){ d.value=m[3]+'-'+m[2]+'-'+m[1]; }
+      });
+      d.addEventListener('change',function(){
+        if(!d.value) return;
+        var p=d.value.split('-');
+        if(p.length===3) t.value=p[2]+'/'+p[1]+'/'+p[0];
+      });
+    }
+
+    P.mount({el:'destPicker', hidden:'destinations', source:'destinations', max:12,
+      placeholder:'Search a region or country: Europe, Canada, United Arab Emirates\u2026'});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go();
+})();
+</script>
+<script>
+/* shipping address: mirror the full address when ticked */
+(function(){
+  function go(){
+    var c=document.getElementById('shipSame'), a=document.getElementById('address'), s=document.getElementById('shipping');
+    if(!c||!a||!s) return;
+    function sync(){ if(c.checked){ s.value=a.value; s.readOnly=true; s.style.opacity='.65'; } else { s.readOnly=false; s.style.opacity='1'; } }
+    c.addEventListener('change', sync);
+    a.addEventListener('input', function(){ if(c.checked) s.value=a.value; });
+    sync();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go();
+})();
+</script>
+<script src="data/stage1.js"></script>
+<script>(function(){function go(){if(window.STACSStage1)STACSStage1.init({});}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go();})();</script>
+</body></html>

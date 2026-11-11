@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Employer Hub — Registration</title>
+<script src="geo.js"></script>
+<style>
+:root{--bg:#0A2E16;--bg2:#0D3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.12);--bdr2:rgba(255,255,255,.22);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.66);--tx3:rgba(240,240,236,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5;padding-bottom:60px}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:14px 22px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:10}
+.logo{width:44px;height:44px;border-radius:50%;background:#fff;object-fit:cover;border:2px solid var(--gold2)}
+.bname{font-size:14px;font-weight:800;line-height:1.1}.btag{font-size:9px;color:var(--gold2);letter-spacing:.5px}
+.hdr-nav{margin-left:auto;display:flex;gap:16px;align-items:center}.hdr-nav a{color:var(--tx2);font-size:13px;text-decoration:none}.hdr-nav a:hover{color:var(--gold2)}.hdr-nav .signin{background:var(--gold);color:#231a02;padding:7px 15px;border-radius:100px;font-weight:700}
+.wrap{max-width:680px;margin:26px auto;padding:0 18px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:22px;margin-bottom:18px}
+.sec{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec b{background:var(--gold);color:#231a02;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.f{display:flex;flex-direction:column}
+.f.full{grid-column:1/-1}
+label{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx);margin-bottom:5px}
+label .opt{color:var(--tx3);text-transform:none;letter-spacing:0}
+input,select{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13.5px;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:var(--gold2)}
+.hint{font-size:11px;color:var(--tx3);margin-top:4px}
+.toggle{display:flex;gap:10px;margin-bottom:4px}
+.toggle .opt-btn{flex:1;text-align:center;border:1.5px solid var(--bdr);border-radius:10px;padding:12px;cursor:pointer;background:var(--card2);font-size:13px}
+.toggle .opt-btn.on{border-color:var(--gold);background:rgba(200,146,10,.1);color:var(--gold2);font-weight:700}
+.upbox{border:1.5px dashed var(--bdr2);border-radius:10px;padding:14px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--tx2)}
+.submit{width:100%;background:var(--gold);color:#231a02;border:none;border-radius:11px;padding:15px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit}
+.pwreq{font-size:10.5px;color:var(--tx3);margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.pwreq span.ok{color:var(--grn)}
+.msg{border-radius:9px;padding:11px 13px;font-size:12.5px;margin-top:12px;display:none}
+.legal{font-size:11.5px;color:var(--tx2);line-height:1.6;margin-bottom:12px}.legal a{color:var(--gold2)}
+#regDebug{display:none;margin-top:10px;padding:9px 12px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;color:#cfd4cd;word-break:break-word}
+</style></head><body>
+<div class="hdr">
+  <img class="logo" src="images/logo.jpg" alt="STACS" onerror="this.style.display='none'">
+  <div><div class="bname">LEIVOTEST — STACS</div><div class="btag">EMPLOYER HUB</div></div>
+  <div class="hdr-nav"><a href="index.html">Home</a><a href="STACS_Skilled_Registration_Form.html">Join as a worker</a><a href="our-story.html">Our Story</a><a class="signin" href="sign-in.html">Sign in</a></div>
+</div>
+<div class="wrap">
+ <div class="card">
+  <div class="sec"><b>1</b> Your organization</div>
+  <div class="row">
+   <div class="f full"><label>Company / organization legal name *</label><input id="company" placeholder="As registered"></div>
+   <div class="f"><label>Trading name <span class="opt">(if different)</span></label><input id="trading"></div>
+   <div class="f"><label>Business registration / ID number *</label><input id="regno"></div>
+   <div class="f"><label>Country of registration *</label><div id="countryPick"></div><input type="hidden" id="country"></div>
+   <div class="f"><label>City *</label><input id="city"></div>
+   <div class="f"><label>Website <span class="opt">(optional)</span></label><input id="website" placeholder="https://"></div>
+   <div class="f"><label>Sector / industry *</label><select id="sector"><option value="">Select…</option><option>Construction &amp; Trades</option><option>Healthcare</option><option>Hospitality &amp; Tourism</option><option>Logistics, Transport &amp; Supply Chain</option><option>Manufacturing</option><option>Agriculture</option><option>Oil, Gas &amp; Energy</option><option>Domestic &amp; Care</option><option>IT &amp; Digital</option><option>Creative Media &amp; Digital Content</option><option>Education</option><option>Finance</option><option>Other</option></select></div>
+   <div class="f"><label>Company size *</label><select id="size"><option value="">Select…</option><option>1–10</option><option>11–50</option><option>51–200</option><option>201–1000</option><option>1000+</option></select></div>
+  </div>
+  <label style="margin-top:6px">Employer type *</label>
+  <div class="toggle" id="empTypeToggle">
+   <div class="opt-btn on" data-v="Direct Employer" onclick="pickType(this)">Direct Employer<div class="hint" style="margin-top:4px">You hire for your own organization.</div></div>
+   <div class="opt-btn" data-v="Recruitment Agency" onclick="pickType(this)">Recruitment Agency<div class="hint" style="margin-top:4px">You recruit on behalf of client companies.</div></div>
+  </div>
+  <input type="hidden" id="empType" value="Direct Employer">
+ </div>
+
+ <div class="card">
+  <div class="sec"><b>2</b> Contact person &amp; account</div>
+  <div class="row">
+   <div class="f"><label>Surname *</label><input id="surname"></div>
+   <div class="f"><label>First name *</label><input id="firstname"></div>
+   <div class="f"><label>Middle name <span class="opt">(optional)</span></label><input id="middlename"></div>
+   <div class="f"><label>Preferred name <span class="opt">(optional)</span></label><input id="preferredname" placeholder="What we should call you"></div>
+   <div class="f"><label>Role / job title *</label><input id="role_title" placeholder="e.g. Director"></div>
+   <div class="f"><label>Gender</label><select id="gender"><option value="">Select…</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div>
+   <div class="f"><label>Phone (with country code) *</label><input id="phone" placeholder="+234…"></div>
+   <div class="f"><label>Personal email *</label><input id="email" type="email" placeholder="you@example.com"></div>
+   <div class="f"><label>Confirm personal email *</label><input id="email2" type="email"></div>
+   <div class="f"><label>Password *</label><input id="pw" type="password"></div>
+  </div>
+  <div class="pwreq" id="pwreq"><span data-r="len">8–16 chars</span><span data-r="up">Uppercase</span><span data-r="lo">Lowercase</span><span data-r="num">Number</span><span data-r="sym">Symbol</span></div>
+  <div class="hint" style="margin-top:6px">You'll verify your email by link before review.</div>
+ </div>
+
+ <div class="card">
+  <div class="sec"><b>3</b> Hiring needs</div>
+  <div class="row">
+   <div class="f"><label>Destination country of employment *</label><div id="destPick"></div><input type="hidden" id="destination"></div>
+   <div class="f"><label>Number of hires planned *</label><select id="hires"><option value="">Select…</option><option>1–5</option><option>6–20</option><option>21–50</option><option>51–100</option><option>100+</option></select></div>
+   <div class="f full"><label>Roles you're hiring for *</label><input id="roles" placeholder="e.g. Welders, Nurses, Drivers"></div>
+   <div class="f full"><label>Preferred nationalities / regions <span class="opt">(optional)</span></label><input id="prefer"></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="sec"><b>4</b> Business licence &amp; logo</div>
+  <label>Business registration / trade licence * <span class="opt">(verified before access)</span></label>
+  <div class="upbox" onclick="document.getElementById('licence').click()"><span id="licTxt">Click to upload your licence (PDF, JPG or PNG)</span></div>
+  <input type="file" id="licence" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+  <label style="margin-top:12px">Company logo <span class="opt">(optional)</span></label>
+  <div class="upbox" onclick="document.getElementById('logo').click()"><span id="logoTxt">Click to upload your logo</span></div>
+  <input type="file" id="logo" accept=".jpg,.jpeg,.png" style="display:none">
+ </div>
+
+ <div class="card">
+  <div class="legal">By creating an account you agree to our <a href="legal.html#p3" target="_blank">Terms of Use</a> and <a href="legal.html#p9" target="_blank">Privacy Policy</a>. Your account stays private until it is approved and business-verified. Full declarations — including anti-fraud and authorization to recruit — are presented when you submit for verification.</div>
+  <button class="submit" id="regBtn" onclick="submitEmployer()">Create New Account</button>
+  <div class="hint" style="text-align:center;margin-top:9px">Registration is free. You'll verify your email, then activate hiring access when you're ready.</div>
+  <div class="msg" id="msgErr" style="background:rgba(232,106,106,.14);color:var(--rd)"></div>
+  <div class="msg" id="msgOk" style="background:rgba(46,204,113,.14);color:var(--grn)"></div>
+  <div id="regDebug"></div>
+ </div>
+</div>
+<script>
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbwPlLG5bdp5MsTFUU6RYLdz6g5zWJLRkmjmkkenqqWBz4Xy9PoSIZVRDA4iZSRBHRBq/exec";
+var LICENCE_B64='', LOGO_B64='', LOGO_TYPE='';
+function pickType(el){ document.querySelectorAll('#empTypeToggle .opt-btn').forEach(function(b){b.classList.remove('on');}); el.classList.add('on'); document.getElementById('empType').value=el.getAttribute('data-v'); }
+/* country pickers from geo.js */
+function geoCountries(){ return (window.STACS_GEO&&window.STACS_GEO.countries)||[]; }
+function buildPicker(wrapId, hiddenId, ph){
+  var wrap=document.getElementById(wrapId); if(!wrap) return;
+  wrap.style.position='relative';
+  wrap.innerHTML='<input id="'+wrapId+'_in" autocomplete="off" placeholder="'+ph+'" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13.5px">'
+    +'<div id="'+wrapId+'_list" style="display:none;position:absolute;z-index:20;left:0;right:0;max-height:200px;overflow-y:auto;background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;margin-top:4px"></div>';
+  var inp=document.getElementById(wrapId+'_in'), list=document.getElementById(wrapId+'_list'), hid=document.getElementById(hiddenId);
+  inp.oninput=function(){ var q=inp.value.toLowerCase().trim(); hid.value=inp.value.trim();
+    if(!q){ list.style.display='none'; return; }
+    var m=geoCountries().filter(function(c){return c.name.toLowerCase().indexOf(q)>=0;}).slice(0,40);
+    list.style.display='block';
+    list.innerHTML=m.length?m.map(function(c){return '<div style="padding:9px 12px;cursor:pointer;font-size:13px" onmousedown="document.getElementById(\''+wrapId+'_in\').value=\''+c.name.replace(/'/g,"")+'\';document.getElementById(\''+hiddenId+'\').value=\''+c.name.replace(/'/g,"")+'\';document.getElementById(\''+wrapId+'_list\').style.display=\'none\'">'+c.name+'</div>';}).join(''):'<div style="padding:9px 12px;font-size:12.5px;color:var(--tx3)">No match — you can type it manually.</div>';
+  };
+  inp.onblur=function(){ setTimeout(function(){ list.style.display='none'; }, 160); hid.value=inp.value.trim(); };
+}
+buildPicker('countryPick','country','Search country…');
+buildPicker('destPick','destination','Search destination country…');
+/* password strength indicator */
+document.getElementById('pw').addEventListener('input',function(){
+  var v=this.value, r={len:/^.{8,16}$/.test(v),up:/[A-Z]/.test(v),lo:/[a-z]/.test(v),num:/\d/.test(v),sym:/[^A-Za-z0-9]/.test(v)};
+  document.querySelectorAll('#pwreq span').forEach(function(s){ s.classList.toggle('ok', !!r[s.getAttribute('data-r')]); });
+});
+/* file readers */
+function readFile(input, cb){ var f=input.files[0]; if(!f) return; if(f.size>8*1024*1024){ alert('File is larger than 8 MB.'); input.value=''; return; } var rd=new FileReader(); rd.onload=function(){ cb(rd.result, f.name, f.type); }; rd.readAsDataURL(f); }
+document.getElementById('licence').addEventListener('change',function(){ readFile(this,function(d,n){ LICENCE_B64=d; document.getElementById('licTxt').textContent=n; }); });
+document.getElementById('logo').addEventListener('change',function(){ readFile(this,function(d,n,t){ LOGO_B64=d; LOGO_TYPE=t; document.getElementById('logoTxt').textContent=n; }); });
+function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
+function submitEmployer(){
+  var err=document.getElementById('msgErr'), ok=document.getElementById('msgOk'), dbg=document.getElementById('regDebug');
+  err.style.display='none'; ok.style.display='none';
+  var req={company:'Company name',regno:'Business registration number',country:'Country',city:'City',sector:'Sector',size:'Company size',surname:'Surname',firstname:'First name',role_title:'Role',phone:'Phone',email:'Personal email',email2:'Confirm email',destination:'Destination country',hires:'Number of hires',roles:'Roles'};
+  for(var k in req){ if(!val(k)){ err.textContent='Please complete: '+req[k]+'.'; err.style.display='block'; window.scrollTo({top:0,behavior:'smooth'}); return; } }
+  if(val('email')!==val('email2')){ err.textContent='The two email addresses do not match.'; err.style.display='block'; return; }
+  var pw=document.getElementById('pw').value;
+  if(!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$/.test(pw)){ err.textContent='Password must be 8–16 characters with upper, lower, number and symbol.'; err.style.display='block'; return; }
+  if(!LICENCE_B64){ err.textContent='Please upload your business registration / trade licence.'; err.style.display='block'; return; }
+  var btn=document.getElementById('regBtn'); btn.disabled=true; btn.textContent='Creating your account…';
+  dbg.style.display='block'; dbg.textContent='Sending registration…';
+  var payload={action:'register-employer', data:{
+    company:val('company'), trading:val('trading'), country:val('country'), city:val('city'), regno:val('regno'), website:val('website'),
+    sector:val('sector'), size:val('size'), empType:val('empType'),
+    surname:val('surname'), firstname:val('firstname'), middlename:val('middlename'), preferredname:val('preferredname'),
+    role_title:val('role_title'), gender:val('gender'), phone:val('phone'), email:val('email'), password:pw,
+    destination:val('destination'), hires:val('hires'), roles:val('roles'), prefer:val('prefer'),
+    licenceBase64:LICENCE_B64, logoBase64:LOGO_B64, logoType:LOGO_TYPE }};
+  fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+    .then(function(r){return r.text();}).then(function(txt){
+      var res=null; try{ res=JSON.parse(txt); }catch(e){}
+      if(res&&res.ok){
+        dbg.style.color='#2ECC71'; dbg.textContent='✓ '+(res.message||'Registered');
+        ok.innerHTML='<b>Your account is created.</b><br>Check your email for the verification link (look in spam too). Nothing moves until that\'s done. Then sign in to complete your profile and activate hiring access.'; ok.style.display='block';
+        window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+      } else {
+        btn.disabled=false; btn.textContent='Create New Account';
+        var m=(res&&(res.error||res.message))?(res.error||res.message):('Unexpected reply: '+String(txt).slice(0,160));
+        err.innerHTML='<b>Registration could not be completed.</b><br>'+m; err.style.display='block';
+        dbg.style.color='#E86A6A'; dbg.textContent='✗ '+m;
+        window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+      }
+    }).catch(function(e){
+      btn.disabled=false; btn.textContent='Create New Account';
+      err.innerHTML='<b>Could not reach the server.</b><br>Please check your connection and try again. ('+e+')'; err.style.display='block';
+      dbg.style.color='#E86A6A'; dbg.textContent='✗ fetch failed: '+e;
+    });
+}
+</script></body></html>

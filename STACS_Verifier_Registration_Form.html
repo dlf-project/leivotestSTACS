@@ -1,0 +1,180 @@
+<!DOCTYPE html><html lang="en"><head><script src="data/taxonomy.js"></script>
+<script src="data/geo.js"></script>
+<script src="data/picker.js"></script>
+<script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Assessor & Verifier Registration</title>
+<style>
+:root{--bg:#0A2E16;--bg2:#0D3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.13);--bdr2:rgba(255,255,255,.24);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.84);--tx3:rgba(240,240,236,.64)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);line-height:1.55}
+.logo{width:44px;height:44px;border-radius:50%;background:#fff;object-fit:cover;border:2px solid var(--gold2)}
+.hdr-nav{margin-left:auto;display:flex;gap:16px;align-items:center}.hdr-nav a{color:var(--tx2);font-size:13px;text-decoration:none}.hdr-nav a:hover{color:var(--gold2)}.hdr-nav .signin{background:var(--gold);color:#231a02;padding:7px 15px;border-radius:100px;font-weight:700}
+@media(max-width:640px){.hdr-nav .navlink{display:none}}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:14px 22px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:10}
+.bname{font-size:14px;font-weight:800}.btag{font-size:9px;letter-spacing:.2em;color:var(--gold2)}
+.wrap{max-width:760px;margin:0 auto;padding:26px 20px 70px}
+h1{font-size:26px;margin-bottom:6px}.lede{color:var(--tx2);font-size:14px;margin-bottom:18px}
+.note{background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.34);border-radius:11px;padding:12px 15px;font-size:12.5px;color:var(--gold2);margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:22px;margin-bottom:16px}
+.sec{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--gold2);text-transform:uppercase;margin-bottom:16px}
+.sec b{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+label{font-size:12px;color:var(--tx);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px}
+.req::after{content:" *";color:var(--gold2)}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:14px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+.full{grid-column:1/-1}
+.submit{width:100%;background:var(--gold);color:#231a02;border:none;border-radius:11px;padding:15px;font-weight:800;font-size:15px;cursor:pointer;margin-top:6px}
+.submit:hover{background:var(--gold2)}
+.submit:disabled{opacity:.6;cursor:not-allowed}
+.msg{font-size:13px;border-radius:10px;padding:12px 14px;margin-top:12px;display:none}
+.msg.err{background:rgba(232,106,106,.12);color:var(--rd);display:block}.msg.ok{background:rgba(46,204,113,.12);color:var(--grn);display:block}
+:root[data-theme="light"]{--bg:#F3F1EA;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F5F4EE;--s1:#FFFFFF;--s2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#39412f;--tx3:#565e4b;--gp:rgba(200,146,10,.13);--grnp:rgba(46,204,113,.14);--gold:#8A6508;--gold2:#7A5A07;--grn:#1B7A43;--rd:#B3352F}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:64px!important}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gold2);font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 6px;text-transform:uppercase;letter-spacing:.4px}
+
+/* stepper */
+.stepper-lede{font-size:12.5px;color:var(--tx2);margin-bottom:16px}
+.steps{display:flex;flex-wrap:wrap;gap:8px}
+.step-pill{display:flex;align-items:center;gap:7px;background:var(--card2);border:1px solid var(--bdr);border-radius:100px;padding:7px 13px 7px 8px;font-size:12px;color:var(--tx3)}
+.step-pill .n{width:20px;height:20px;border-radius:50%;background:var(--bdr2,rgba(255,255,255,.2));color:var(--tx3);display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;flex-shrink:0}
+.step-pill.active{background:rgba(200,146,10,.14);border-color:var(--gold);color:var(--tx)}
+.step-pill.active .n{background:var(--gold);color:#231a02}
+.step-title{font-size:13.5px;font-weight:800;color:var(--gold2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+</style></head><body>
+<div class="hdr"><a href="index.html" class="brandlink" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit" title="Back to STACS home"><img class="logo" src="data:image/jpeg;base64,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" alt="LEIVOTEST STACS"><div><div class="bname">LEIVOTEST — STACS</div></a><div class="btag">ASSESSOR &amp; VERIFIER HUB</div></div>
+ <div class="hdr-nav"><a class="navlink" href="index.html">Home</a><a class="navlink" href="STACS_Skilled_Registration_Form.html">Skilled Worker Pool</a><a class="navlink" href="https://leivotest.com/skilled-tradepersons-talent-pool/" target="_blank" rel="noopener">Our Story</a><a class="signin" href="sign-in.html">Sign in</a></div></div>
+<div class="wrap">
+ <h1>Become a STACS Verifier</h1>
+ <div class="lede">Assessors &amp; verifiers are the trust engine of STACS. You confirm candidates' credentials against real issuing bodies — and every confirmation you log is kept as legal-grade proof.</div>
+ <div class="note"><b>Evidence is mandatory.</b> Every verification you submit must be backed by a confirmatory document from the establishment, agency, organization or authority that issued or can confirm the credential — with its reference — plus your remarks. These records may be checked, and anyone may contact the issuing body over what was submitted.</div>
+
+ <div class="card">
+  <div class="step-title">Step 1 of 2 — open your account</div>
+  <div class="stepper-lede">We only need your details and a password to get started. Once you verify your email and sign in, you can complete the rest of your profile — accreditation, what you can verify, and your proof document — at your own pace, and submit it for approval only when you are ready.</div>
+  <div class="steps">
+   <span class="step-pill active"><span class="n">1</span> Open your account</span>
+   <span class="step-pill"><span class="n">2</span> Verify email</span>
+   <span class="step-pill"><span class="n">3</span> Sign in</span>
+   <span class="step-pill"><span class="n">4</span> Complete your profile</span>
+  </div>
+  <div class="steps" style="margin-top:8px">
+   <span class="step-pill"><span class="n">5</span> Submit for approval</span>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="sec"><b>1</b> Your identity</div>
+  <div class="grid">
+   <div><label class="req">Surname</label><input id="surname"></div>
+   <div><label class="req">First name</label><input id="firstname"></div>
+   <div><label class="req">Email</label><input id="email" type="email"></div>
+   <div><label class="req">Confirm email</label><input id="email2" type="email"></div>
+   <div><label class="req">Phone</label><input id="phone"></div>
+   <div><label class="req">Country</label>
+     <div id="countryPicker"></div><input type="hidden" id="country">
+     <div class="hint" style="font-size:11px;color:var(--tx3);margin-top:4px">Tap your country from the list.</div></div>
+   <div><label class="req">Gender</label>
+     <select id="gender"><option value="">Select…</option><option>Male</option><option>Female</option></select></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="sec"><b>2</b> Security</div>
+  <label class="req">Create a password</label><input id="pw" type="password" placeholder="8–16 chars · upper, lower, number, symbol">
+ </div>
+
+ <div class="card">
+  <div style="font-size:12.5px;color:var(--tx2);line-height:1.6;margin:4px 0 12px">By creating an account you agree to our <a href="legal.html#p3" target="_blank" style="color:var(--gold2)">Terms of Use</a> and <a href="legal.html#p9" target="_blank" style="color:var(--gold2)">Privacy Policy</a>. Once you have completed your accreditation, scope and proof document, you will be asked to accept the full declarations — including the anti-fraud and physical clearance terms — before your profile is submitted for approval.</div>
+  <button class="submit" onclick="register()" id="regBtn">Create New Account</button>
+  <div class="msg" id="err"></div>
+  <div class="msg" id="ok"></div>
+ </div>
+</div>
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyh4HEurpOl9T_Ap5HXpGZlro0jCz3xBet7yQMFZcVwUFa7bQD5PtzkWJe4iABUkgf/exec";
+const val=id=>document.getElementById(id).value.trim();
+async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");}
+/* STACSPicker sometimes leaves its raw JSON selection in the hidden field
+   instead of a plain value — extract just the name defensively, whatever
+   shape it's actually in, rather than trusting it's already a plain string. */
+function plainCountry(raw){
+ if(!raw) return '';
+ try{
+   var parsed = JSON.parse(raw);
+   if(Array.isArray(parsed) && parsed[0] && parsed[0].name) return parsed[0].name;
+   if(parsed && parsed.name) return parsed.name;
+ }catch(e){}
+ return raw;
+}
+async function register(){
+ const err=document.getElementById('err'),ok=document.getElementById('ok');err.style.display='none';ok.style.display='none';
+ const req=['surname','firstname','email','email2','phone','country','gender','pw'];
+ for(const id of req){ if(!val(id)){err.textContent='Please complete all required fields.';err.style.display='block';document.getElementById(id).focus();return;} }
+ if(val('email')!==val('email2')){err.textContent='Email addresses do not match.';err.style.display='block';return;}
+ const pw=val('pw'); if(!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$/.test(pw)){err.textContent='Password must be 8–16 chars with upper, lower, number and symbol.';err.style.display='block';return;}
+ const data={surname:val('surname'),firstname:val('firstname'),email:val('email'),phone:val('phone'),country:plainCountry(val('country')),
+   gender:val('gender'),password:pw};
+ const btn=document.getElementById('regBtn');btn.disabled=true;btn.textContent='Creating your account…';
+ try{
+   const r=await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'register-verifier',data:data})});
+   const d=await r.json();
+   if(!d||!d.ok){ err.textContent=(d&&d.error)||'Could not create your account. Please try again.'; err.style.display='block'; btn.disabled=false; btn.textContent='Create New Account'; return; }
+   done();
+ }catch(e){ err.textContent='Could not reach the server. Please try again.'; err.style.display='block'; btn.disabled=false; btn.textContent='Create New Account'; }
+ function done(){
+   ok.innerHTML=`<b>Your account is created.</b><div style="margin:14px 0 4px;font-size:13px;color:var(--tx2)">A few quick steps, then you're ready to receive verification work:</div><div style="display:flex;gap:11px;align-items:flex-start;margin-top:10px"><span style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">1</span><div><b>Check your email and click the verification link.</b><br><span style="font-size:12.5px;color:var(--tx2)">Look in your spam folder too. Nothing moves until this is done.</span></div></div><div style="display:flex;gap:11px;align-items:flex-start;margin-top:10px"><span style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">2</span><div><b>Sign in to complete your profile.</b><br><span style="font-size:12.5px;color:var(--tx2)">Add your professional body and accreditation number, the sectors and document types you can verify, and upload your accreditation document — at your own pace.</span></div></div><div style="display:flex;gap:11px;align-items:flex-start;margin-top:10px"><span style="width:24px;height:24px;border-radius:50%;background:var(--gold);color:#231a02;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">3</span><div><b>Accept the declarations and submit for approval.</b><br><span style="font-size:12.5px;color:var(--tx2)">Once your profile is complete, you'll review and accept the full terms — including the anti-fraud and physical clearance declarations — before it goes to our team.</span></div></div><div style="margin-top:18px"><a href="sign-in.html" style="display:inline-block;background:var(--gold);color:#231a02;border-radius:10px;padding:13px 24px;font-weight:800;font-size:14px;text-decoration:none">Go to sign in &rarr;</a></div>`;
+   ok.style.display='block';btn.style.display='none';
+ }
+}
+</script>
+<div id="wa-widget" style="position:fixed;bottom:22px;right:22px;z-index:99999;font-family:system-ui,-apple-system,sans-serif">
+ <div id="wa-panel" style="display:none;position:absolute;bottom:70px;right:0;width:300px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.3)">
+  <div style="background:#25D366;padding:16px 18px;color:#fff;position:relative">
+   <div style="font-size:19px;font-weight:800">Hello!</div>
+   <div style="font-size:12.5px;opacity:.96;margin-top:3px;line-height:1.4">Click a contact below to chat on WhatsApp</div>
+   <button onclick="waToggle()" aria-label="Close" style="position:absolute;top:11px;right:12px;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1">&times;</button>
+  </div>
+  <a href="https://wa.me/2348022268113" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:#111;background:#f6f6f3">
+   <div style="width:42px;height:42px;border-radius:50%;background:#eee"></div>
+   <div style="flex:1"><div style="font-weight:700;font-size:14px">Leivotest STACS Support</div><div style="font-size:12px;color:#25D366">● Online · usually replies fast</div></div>
+  </a>
+ </div>
+ <button id="wa-btn" onclick="waToggle()" style="display:flex;align-items:center;gap:9px;background:#25D366;color:#fff;border:none;border-radius:100px;padding:11px 18px 11px 13px;box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer;font-size:14px;font-weight:600">
+  <svg viewBox="0 0 32 32" width="26" height="26" fill="#fff"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.7.9 3.6 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7.7.7-3.6-.2-.4C6.5 18.5 6 16.8 6 15c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10zm5.5-7.5c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg><span id="wa-btn-txt">How can I help you?</span>
+ </button>
+</div>
+<script>function waToggle(){var p=document.getElementById('wa-panel');var o=p.style.display==='block';p.style.display=o?'none':'block';document.getElementById('wa-btn-txt').textContent=o?'How can I help you?':'Chat with us';}</script>
+<button id="themeBtn" onclick="stacsTheme()" aria-label="Toggle day / night view" title="Day / Night view" style="position:fixed;bottom:22px;left:22px;z-index:9998;width:46px;height:46px;border-radius:50%;background:var(--s1,#12502A);color:var(--gold2,#E2A53A);border:1px solid var(--bdr2,rgba(255,255,255,.22));cursor:pointer;font-size:19px;box-shadow:0 6px 16px rgba(0,0,0,.28)">&#127769;</button>
+<script>function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
+(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}catch(e){}})();</script>
+<script>
+(function(){
+  function attach(){
+    var ins=document.querySelectorAll('input[type=password]');
+    for(var i=0;i<ins.length;i++){
+      (function(inp){
+        if(inp.getAttribute('data-eye'))return;
+        inp.setAttribute('data-eye','1');
+        var w=document.createElement('div'); w.className='pw-wrap';
+        inp.parentNode.insertBefore(w,inp); w.appendChild(inp);
+        var b=document.createElement('button');
+        b.type='button'; b.className='pw-eye'; b.textContent='Show';
+        b.setAttribute('aria-label','Show or hide password');
+        b.onclick=function(){ var sh=inp.type==='password'; inp.type=sh?'text':'password'; b.textContent=sh?'Hide':'Show'; };
+        w.appendChild(b);
+      })(ins[i]);
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach); else attach();
+})();
+</script>
+<script>
+(function(){ function go(){ if(!window.STACSPicker||!document.getElementById('countryPicker')) return;
+  STACSPicker.mount({el:'countryPicker',hidden:'country',source:'countries',max:1,
+    placeholder:'Search country: Nigeria, Ghana, Kenya\u2026'});
+} if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go); else go(); })();
+</script>
+</body></html>

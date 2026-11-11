@@ -1,0 +1,1136 @@
+<!DOCTYPE html><html lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Verifier Dashboard</title>
+<style>
+:root{--bg:#0A2E16;--bg2:#0D3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.12);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.84);--tx3:rgba(240,240,236,.64)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx)}
+.top{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:12px 22px;display:flex;align-items:center;gap:14px}
+.logo{width:40px;height:40px;border-radius:50%;background:#fff;object-fit:cover;border:1.5px solid var(--gold)}
+.bn{font-size:14px;font-weight:800}.bt{font-size:9px;letter-spacing:.2em;color:var(--gold2)}
+.ghost{margin-left:auto;background:transparent;border:1px solid var(--bdr);color:var(--tx);border-radius:100px;padding:7px 14px;font-size:12.5px;cursor:pointer}
+.status{display:inline-block;font-size:11px;font-weight:800;padding:4px 12px;border-radius:100px;margin-top:6px}
+.status.pending{background:rgba(200,146,10,.15);color:var(--gold2)}.status.approved{background:rgba(46,204,113,.15);color:var(--grn)}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:20px;margin-bottom:14px}
+.card h3{font-size:15px;margin-bottom:12px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--bdr)}
+.step:last-child{border-bottom:none}
+.step .n{width:26px;height:26px;border-radius:50%;background:var(--card2);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step.done .n{background:var(--grn);color:#04260f}
+.step .t{font-size:14px;font-weight:600}
+:root[data-theme="light"]{--bg:#F3F1EA;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#39412f;--tx3:#565e4b;--gold:#8A6508;--gold2:#7A5A07;--grn:#1B7A43;--rd:#B3352F}
+.wrap{max-width:1000px;margin:26px auto;padding:0 20px}
+.shell{display:flex;gap:22px;max-width:1000px;margin:26px auto;padding:0 20px;align-items:flex-start}
+.sidenav{flex:0 0 190px;position:sticky;top:20px;background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:10px}
+.sidenav .snhead{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);padding:8px 10px 6px}
+.snlink{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;border:none;color:var(--tx2);font-size:13px;font-family:inherit;padding:9px 10px;border-radius:9px;cursor:pointer}
+.snlink:hover{background:var(--card2);color:var(--tx)}
+.snlink .snico{width:20px;text-align:center;flex-shrink:0;font-size:14px;line-height:1}
+.content{flex:1;min-width:0;max-width:760px}
+.hero{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+.av{width:66px;height:66px;border-radius:50%;background:var(--card2);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--gold2);flex-shrink:0}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
+.sumbox{background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:12px 13px}
+.sumbox .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3)}
+.sumbox .v{font-size:15px;font-weight:700;color:var(--tx);margin-top:3px}
+@media(max-width:820px){
+  .shell{flex-direction:column;gap:12px;padding:0 16px}
+  .sidenav{position:sticky;top:0;z-index:40;flex:none;width:100%;display:flex;gap:6px;overflow-x:auto;padding:8px}
+  .sidenav .snhead{display:none}
+  .snlink{width:auto;white-space:nowrap;padding:8px 12px;border:1px solid var(--bdr);flex:0 0 auto}
+  .content{max-width:100%}
+}
+label{font-size:11px;color:var(--tx);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:14px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+.btn{background:var(--gold);color:#231a02;border:none;border-radius:9px;padding:11px 20px;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.secondary{background:transparent;border:1px solid var(--bdr2,rgba(255,255,255,.22));color:var(--tx)}
+.msg{font-size:12.5px;border-radius:9px;padding:10px;margin-top:10px;display:none}
+.msg.ok{display:block;background:rgba(46,204,113,.12);color:var(--grn)}
+.msg.err{display:block;background:rgba(232,106,106,.12);color:var(--rd)}
+.msg.info{display:block;background:rgba(255,255,255,.06);color:var(--tx2)}
+.jobrow{background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:13px 15px;margin-bottom:10px}
+.chip{font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:100px;white-space:nowrap}
+.chip.open{background:rgba(46,204,113,.15);color:var(--grn)}
+.chip.mine{background:rgba(200,146,10,.15);color:var(--gold2)}
+.up{border:1.5px dashed var(--bdr2,rgba(255,255,255,.24));border-radius:10px;padding:14px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--tx2)}
+.gate-back{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:36px 16px}
+.gate-box{background:var(--card);border:1px solid var(--bdr);border-radius:16px;max-width:560px;width:100%;padding:26px}
+.decl{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--tx2);margin-bottom:11px}
+.decl input{width:auto;margin-top:3px}
+</style><style id="sharpCorners">
+/* Global sharp-corner redesign: square off all rounded rectangles (cards, buttons, inputs, chips, modals) while keeping circular avatars round. */
+*{border-radius:0 !important}
+[style*="border-radius:50%"],[style*="border-radius: 50%"],.av,.logo,.avatar,img.logo,.snico{border-radius:50% !important}
+</style>
+</head><body>
+
+<div id="loadingView" style="min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:13px">Loading…</div>
+
+<div id="dashboardView" style="display:none">
+<div class="top"><div style="display:flex;align-items:center;gap:11px"><img class="logo" src="data:image/jpeg;base64,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" alt="STACS"><div><div class="bn">STACS</div><div class="bt">VERIFIER HUB</div></div></div>
+ <button class="ghost" onclick="verifierSignOut()">Sign out</button></div>
+
+<div class="wrap" style="max-width:1000px">
+
+ <div class="hero">
+  <div class="av" id="av">?</div>
+  <div>
+    <h1 id="vName" style="font-size:22px">Welcome</h1>
+    <div id="vIdLine" style="font-size:12.5px;color:var(--tx3);font-family:ui-monospace,monospace;margin-top:2px"></div>
+    <div id="vRoleLine" style="font-size:11.5px;color:var(--tx3);margin-top:2px"></div>
+    <div id="vStatusBadge" style="margin-top:6px"></div>
+    <button id="editProfileBtn" onclick="openProfileModal()" style="margin-top:10px;background:var(--gold);color:#231a02;border:none;border-radius:9px;padding:9px 18px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit">Edit Profile</button>
+  </div>
+ </div>
+
+ <div class="shell" style="margin:0;padding:0;max-width:none">
+ <div class="sidenav">
+  <div class="snhead">VERIFIER HUB</div>
+  <button class="snlink" onclick="navTo('journeyCard')"><span class="snico">🧭</span> Verifier Journey</button>
+  <button class="snlink" onclick="navTo('scopeCard')"><span class="snico">🔎</span> Verification Scope</button>
+  <button class="snlink" onclick="navTo('jobsCard')"><span class="snico">🛡️</span> Verification Requests</button>
+  <button class="snlink" onclick="navTo('payoutsCard')"><span class="snico">💳</span> My Payouts</button>
+  <button class="snlink" onclick="openProfileModal()"><span class="snico">👤</span> Edit Profile</button>
+ </div>
+
+ <div class="content">
+  <div class="card" id="welcomeCard"><div id="welcomeBody">Loading…</div></div>
+
+  <div class="card" id="journeyCard"><h3 id="journeyTitle">Your Verifier Journey</h3><div id="journeyBody">Loading…</div></div>
+
+  <div class="card" id="scopeCard">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+     <h3 style="margin:0;cursor:pointer" onclick="toggleCard('scopeCard')"><span class="chev" id="chev_scopeCard">▾</span> Verification Scope</h3>
+     <button class="btn" style="padding:8px 14px;font-size:12.5px" onclick="openScopeModal()">Apply for new Scope</button>
+   </div>
+   <div id="body_scopeCard">
+     <div style="font-size:12.5px;color:var(--tx2);margin:8px 0 14px">The document tiers you are accredited to verify. Apply for as many of the 8 tiers as you need — each is approved or denied on its own.</div>
+     <div id="scopeBody">Loading…</div>
+   </div>
+  </div>
+
+  <div class="card" id="submitCard" style="display:none">
+   <h3>Ready to submit</h3>
+   <div style="font-size:12.5px;color:var(--tx2);margin-bottom:14px">Your profile looks complete. Review the declarations, then submit for approval.</div>
+   <button class="btn" onclick="openDeclarationGate()">Review declarations &amp; submit</button>
+  </div>
+
+  <div class="card" id="jobsCard">
+   <h3 style="cursor:pointer" onclick="toggleCard('jobsCard')"><span class="chev" id="chev_jobsCard">▾</span> Verification Requests</h3>
+   <div id="body_jobsCard">
+     <div style="font-size:12.5px;color:var(--tx2);margin:4px 0 10px">Requests sent directly to you — accept to begin, or decline with a reason.</div>
+     <div id="assignedBody" style="margin-bottom:16px">Loading…</div>
+     <div style="font-size:12.5px;color:var(--tx2);margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--bdr)">The open pool of funded requests within your scope. Every finding must be backed by a confirmatory document and your remarks.</div>
+     <div id="jobsBody">Loading…</div>
+   </div>
+  </div>
+
+  <div class="card" id="payoutsCard">
+   <h3 style="cursor:pointer" onclick="toggleCard('payoutsCard')"><span class="chev" id="chev_payoutsCard">▾</span> My Payouts</h3>
+   <div id="body_payoutsCard">
+     <div style="font-size:12.5px;color:var(--tx2);margin:4px 0 14px">Your earnings for accepted requests. Payment can be requested once the turnaround window has passed.</div>
+     <div id="payoutsBody">Loading…</div>
+   </div>
+  </div>
+ </div>
+ </div>
+</div>
+</div>
+
+<div class="gate-back" id="gateBack">
+ <div class="gate-box">
+  <h3 style="margin-bottom:14px">Declarations</h3>
+  <div class="decl"><input type="checkbox" id="d1"><label>I confirm I am duly authorized or accredited to verify the credentials I have listed.</label></div>
+  <div class="decl"><input type="checkbox" id="d2"><label>I will back every verification with a confirmatory document from the issuing body, its reference, and my remarks — as legal-grade proof.</label></div>
+  <div class="decl"><input type="checkbox" id="d3"><label>I understand a false or unsupported verification is fraud — a crime that is not permitted on this platform — and my records may be audited at any time.</label></div>
+  <div class="decl"><input type="checkbox" id="d4"><label><b>Physical clearance:</b> original documents may be requested at any time and must be available for shipping. Failure to provide them may be treated as a perception of illegal practice implicating fraud.</label></div>
+  <div class="decl"><input type="checkbox" id="d5"><label>I am 18+ and the information I provide is true and accurate.</label></div>
+  <button class="btn" style="width:100%;margin-top:10px" onclick="acceptDeclarationsAndSubmit()" id="gateBtn">Accept &amp; submit for approval</button>
+  <button class="btn secondary" style="width:100%;margin-top:8px" onclick="closeDeclarationGate()">Cancel</button>
+  <div class="msg" id="gateMsg"></div>
+ </div>
+</div>
+
+<!-- ===== Edit Profile modal ===== -->
+<div class="gate-back" id="profileModal">
+ <div class="gate-box" style="max-width:640px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <h3 style="margin:0">Edit Profile</h3>
+    <button class="btn secondary" style="padding:6px 12px" onclick="closeProfileModal()">Close</button>
+  </div>
+  <div id="profileModalBody">Loading…</div>
+ </div>
+</div>
+
+<!-- ===== Apply for Scope modal ===== -->
+<div class="gate-back" id="scopeModal">
+ <div class="gate-box" style="max-width:640px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <h3 style="margin:0">Apply for Verification Scope</h3>
+    <button class="btn secondary" style="padding:6px 12px" onclick="closeScopeModal()">Close</button>
+  </div>
+  <div style="font-size:12.5px;color:var(--tx2);margin-bottom:14px">Select the document tiers you want to be approved to verify. A company or an individual can apply for as many of the 8 tiers as they wish — STACS approves or denies each tier independently.</div>
+  <div id="scopeModalBody"></div>
+  <button class="btn" style="width:100%;margin-top:12px;display:none" id="scopeApplyBtn" onclick="submitScopeApplication()">Submit scope application</button>
+  <div class="msg" id="scopeModalMsg"></div>
+ </div>
+</div>
+
+<!-- ===== Verification Report Workspace ===== -->
+<div class="gate-back" id="reportModal" style="align-items:flex-start">
+ <div class="gate-box" style="max-width:860px;width:100%">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px">
+    <div><h3 style="margin:0">Verification Report Workspace</h3>
+      <div id="rwSub" style="font-size:12px;color:var(--tx3);margin-top:3px"></div></div>
+    <button class="btn secondary" style="padding:6px 12px" onclick="closeReport()">Close</button>
+  </div>
+  <div id="rwStatusLine" style="font-size:11.5px;margin:6px 0 12px"></div>
+  <div id="reportBody">Loading…</div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;position:sticky;bottom:0;background:var(--card);padding-top:10px;border-top:1px solid var(--bdr)">
+    <button class="btn secondary" onclick="saveReport(false)">Save</button>
+    <button class="btn secondary" onclick="saveReport(false,true)">Save &amp; Close</button>
+    <button class="btn" id="rwSubmitBtn" onclick="saveReport(true)" disabled>Submit for Review</button>
+  </div>
+  <div class="msg" id="rwMsg"></div>
+ </div>
+</div>
+
+<script>
+const VERIFIER_URL = "https://script.google.com/macros/s/AKfycbzyh4HEurpOl9T_Ap5HXpGZlro0jCz3xBet7yQMFZcVwUFa7bQD5PtzkWJe4iABUkgf/exec";
+/* The Skilled hub holds the Paystack secret, so bank-name lookups are routed
+   there (bank-list / bank-resolve). */
+const SKILLED_URL = "https://script.google.com/macros/s/AKfycbwtUYMty_LLT2MohBVwnMoCNRsm-r2b1A4rJRcU6q9B8x-1eOHJgzctiagmKrybo5alqg/exec";
+/* Session is the SAME shared key sign-in.html sets for every hub — role
+   tells us which one this is. A separate per-hub key was tried earlier and
+   was wrong: it meant a successful sign-in.html login never carried over
+   here, forcing a second, broken sign-in attempt inside this page. */
+let S=null;
+try{ var raw=JSON.parse(localStorage.getItem('stacs_session')); if(raw && raw.role==='verifier') S=raw; }catch(e){}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function fmtDate(s){ if(!s) return ''; var d=new Date(s); if(isNaN(d.getTime())) return String(s); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+function verifierSignOut(){ try{ localStorage.removeItem('stacs_session'); }catch(e){} location.href='sign-in.html'; }
+
+function xhrUploadJSON(payload, onProgress, onDone, onError){
+  fetch(VERIFIER_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ onDone(d); })
+    .catch(function(e){ if(onError) onError(e instanceof Error ? e : new Error('Network error.')); });
+}
+
+function navTo(id){ var el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }
+/* Collapse/expand a card by toggling its body block (Scope, Requests, Payouts). */
+function toggleCard(id){
+  var b=document.getElementById('body_'+id), c=document.getElementById('chev_'+id);
+  if(!b) return; var hidden=(b.style.display==='none');
+  b.style.display=hidden?'block':'none'; if(c) c.textContent=hidden?'▾':'▸';
+}
+
+/* ===== Catalogs ===== */
+var PROFILE=null, JOBS=[];
+
+/* The 8 document tiers, carried over from the STACS Fee Engine (names, bands
+   and document groups). This is a fallback — on load the dashboard fetches the
+   live engine (action=fee-engine) and replaces TIERS so prices stay in sync
+   with the workbook. min/max/mid are NGN base-fee guidance for the verifier. */
+var TIERS=[
+  {code:'T1', name:'Basic Verifier',         min:9300,  max:23250,  mid:16275, docs:['Vocational training certificate','Workshop / short course certificate','Employment reference letter','Certificate of service','Employment contract','Portfolio / references']},
+  {code:'T2', name:'Professional Verifier',  min:18600, max:46500,  mid:32550, docs:['Trade test certificate','Welding certification','Electrical competence certificate','Engineering licence (e.g. COREN)','Accountancy membership','Teaching registration','IT vendor certification']},
+  {code:'T3', name:'Institutional Verifier', min:23250, max:69750,  mid:46500, docs:["Bachelor's degree","Master's degree",'PhD / doctoral certificate','Academic transcript','Secondary school certificate','HND / National Diploma']},
+  {code:'T4', name:'Legal Verifier',         min:38750, max:108500, mid:73625, docs:['Court judgement','Affidavit / sworn declaration','Birth certificate','Marriage certificate','Civil registry record']},
+  {code:'T5', name:'Healthcare Verifier',    min:38750, max:108500, mid:73625, docs:['Medical practising licence','Nursing registration','Pharmacy registration','BLS / ACLS certification','Clinical privileges']},
+  {code:'T6', name:'Government Verifier',    min:46500, max:124000, mid:85250, docs:['Passport (bio-data page)','National ID card','Driving licence','Police clearance certificate','Work permit','Tax / business registration']},
+  {code:'T7', name:'Embassy / Diplomatic',   min:62000, max:186000, mid:124000,docs:['Visa (any class)','Consular legalisation','Travel / immigration record']},
+  {code:'T8', name:'International Body',      min:31000, max:139500, mid:85250, docs:['IELTS','TOEFL','OET (healthcare English)','ICAO / IATA certification','Board certification']}
+];
+var ENGINE=null;   // live assumptions {commissionPct, vatPct, usdToNgn, fixedNGN, stdDays, expressDays}
+function loadFeeEngine(){
+  fetch(VERIFIER_URL+'?action=fee-engine').then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){ ENGINE=d.assumptions;
+      TIERS=d.tiers.map(function(t){ return {code:t.code,name:t.name,docs:t.docs,min:t.minBaseNGN,max:t.maxBaseNGN,mid:t.midBaseNGN}; });
+      if(PROFILE){ renderScopeCard(); }
+    }
+  }).catch(function(){});
+}
+function tierByCode(c){ for(var i=0;i<TIERS.length;i++){ if(TIERS[i].code===c) return TIERS[i]; } return null; }
+function parseTiers(s){ return String(s||'').split(/[,\s]+/).map(function(x){return x.trim().toUpperCase();}).filter(function(x){return /^T[1-8]$/.test(x);}).filter(function(x,i,a){return a.indexOf(x)===i;}); }
+/* The state of one tier for this verifier: approved | denied | pending | none */
+function tierState(code){
+  if(parseTiers(PROFILE&&PROFILE.tiers).indexOf(code)>=0) return 'approved';
+  if(parseTiers(PROFILE&&PROFILE.deniedTiers).indexOf(code)>=0) return 'denied';
+  if(parseTiers(PROFILE&&PROFILE.requestedTiers).indexOf(code)>=0) return 'pending';
+  return 'none';
+}
+var COUNTRIES=["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (Brazzaville)","Congo (Kinshasa)","Costa Rica","Côte d’Ivoire","Croatia","Cuba","Cyprus","Czechia","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+
+/* ===== Journey (two connected tracks) =====
+   Before approval: a compact onboarding checklist.
+   After approval: the registration/approval steps collapse to a one-line
+   history, and the main area shifts to professional performance — an
+   operations snapshot (open requests, reports, earnings, standards) and the
+   next milestone — mirroring the agreed spec. Figures come from recorded
+   activity, never preset sample values. */
+function renderJourney(){
+  var el=document.getElementById('journeyBody'); if(!el||!PROFILE) return;
+  var st=String(PROFILE.stage||'');
+  var approved = (PROFILE.status==='Approved') || st==='Approved — active';
+  if(approved){ el.innerHTML = journeyApproved(); }
+  else { el.innerHTML = journeyOnboarding(st); }
+}
+function journeyOnboarding(st){
+  var steps=[
+    {t:'Registered', done:true, sub:'Account created.'},
+    {t:'Email verified', done:(PROFILE.emailVerified==='Yes'), sub:'Email address confirmed.'},
+    {t:'Profile complete', done:(st.indexOf('Profile complete')===0||st.indexOf('Submitted')===0), sub:'Accreditation, scope and documents provided.'},
+    {t:'Submitted for approval', done:(st.indexOf('Submitted')===0), sub:'Sent to STACS for review.'},
+    {t:'Approved & active', done:false, sub:'Your AV- ID is issued — you can take work.'}
+  ];
+  return steps.map(function(s){
+    return '<div class="step'+(s.done?' done':'')+'"><div class="n">'+(s.done?'✓':'○')+'</div>'
+      +'<div><div class="t">'+esc(s.t)+'</div><div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+esc(s.sub)+'</div></div></div>';
+  }).join('');
+}
+var VSTATS={openReq:0, reports:0, earningsNGN:0};
+function journeyApproved(){
+  var openReq = VSTATS.openReq||0;
+  var reports = VSTATS.reports||0;
+  var earnings = '₦'+Number(VSTATS.earningsNGN||0).toLocaleString('en-NG');
+  // compact approval history
+  var history='<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:var(--tx3)">'
+    +'<span style="color:var(--grn);font-weight:700">✓ Registered &amp; verified</span> · '
+    +'<span style="color:var(--grn);font-weight:700">✓ Accreditation &amp; scope approved</span> · '
+    +'<span style="color:var(--grn);font-weight:700">✓ Standards &amp; orientation</span>'
+    +'</div>';
+  // operations snapshot
+  var ops='<div class="sumgrid" style="margin:0 0 14px">'
+    +'<div class="sumbox"><div class="k">Open requests</div><div class="v">'+openReq+'</div></div>'
+    +'<div class="sumbox"><div class="k">Reports submitted</div><div class="v">'+reports+'</div></div>'
+    +'<div class="sumbox"><div class="k">Earnings</div><div class="v">'+esc(earnings)+'</div></div>'
+    +'<div class="sumbox"><div class="k">Standards</div><div class="v" style="color:var(--grn)">Current</div></div>'
+    +'</div>';
+  // next milestone
+  var next = openReq>0
+    ? 'You have '+openReq+' request'+(openReq===1?'':'s')+' matching your scope waiting in Verification Requests. Review each category, fee, service level and deadline before accepting.'
+    : 'Your verifier account is active. Verification requests that match your approved scope will appear here as they come in — review the category, fee, service level and deadline before accepting an assignment.';
+  var mile='<div style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);margin-bottom:6px">Your next milestone</div>'
+    +'<div style="font-size:13px;color:var(--tx2);line-height:1.55">'+esc(next)+'</div>';
+  return history + ops + mile;
+}
+
+/* Welcome note + at-a-glance summary — mirrors the Skilled Worker "Welcome back"
+   card. Content adapts to whether the verifier is approved & active yet. */
+function renderWelcome(){
+  var el=document.getElementById('welcomeBody'); if(!el||!PROFILE) return;
+  var approved = (PROFILE.status==='Approved') || String(PROFILE.stage||'')==='Approved — active';
+  var first = PROFILE.firstname || 'there';
+  var openJobs = (JOBS && JOBS.length) ? JOBS.length : 0;
+
+  var intro = approved
+    ? '<h3 style="margin:0 0 4px">Welcome back 👋</h3><div style="font-size:13px;color:var(--tx2);line-height:1.55">You are an <b style="color:var(--grn)">approved, active STACS Verifier</b>. Funded verification requests within your scope appear in your queue — each finding you submit must be backed by a confirmatory document and your remarks.</div>'
+    : '<h3 style="margin:0 0 4px">Welcome 👋</h3><div style="font-size:13px;color:var(--tx2);line-height:1.55">Let\u2019s get you ready to verify. Complete your accreditation, scope and licence document, accept the declarations, and submit for approval. Once STACS approves you, your <b>AV- ID</b> is issued and you can begin taking work.</div>';
+
+  // at-a-glance summary boxes — Verifier ID and Status are intentionally NOT
+  // repeated here; they already appear in the top profile corner.
+  var tiers = PROFILE.tiers ? esc(PROFILE.tiers) : (PROFILE.requestedTiers ? ('Requested: '+esc(PROFILE.requestedTiers)) : '—');
+  var scopeCount = PROFILE.credentialTypes ? String(PROFILE.credentialTypes).split(',').filter(function(x){return x.trim();}).length : 0;
+  var summary =
+    '<div class="sumgrid">'
+    +'<div class="sumbox"><div class="k">Approved tiers</div><div class="v" style="font-size:13px">'+tiers+'</div></div>'
+    +'<div class="sumbox"><div class="k">Scope items</div><div class="v">'+scopeCount+'</div></div>'
+    +(approved?('<div class="sumbox"><div class="k">Open requests</div><div class="v">'+openJobs+'</div></div>'):'')
+    +'</div>';
+
+  el.innerHTML = intro + summary;
+}
+
+/* Expand/collapse all the section cards at once (mirrors the candidate dashboard).
+   Here the cards are always visible, so this scrolls to the first section and the
+   button simply acts as a "jump to my profile" affordance that stays consistent
+   with the Skilled Worker hub. */
+/* Shows the verifier's photo in the top-left avatar, or their initial as a
+   fallback — exactly like the Skilled Worker candidate dashboard. */
+function refreshAvatar(){
+  var av=document.getElementById('av'); if(!av||!PROFILE) return;
+  var initial=(PROFILE.firstname||'?').charAt(0).toUpperCase();
+  if(PROFILE.photo){
+    av.innerHTML='<img src="'+PROFILE.photo+'" alt="" onerror="this.parentNode.textContent=&quot;'+initial+'&quot;;this.parentNode.style.padding=&quot;&quot;" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+    av.style.padding='0'; av.style.overflow='hidden';
+  } else {
+    av.textContent=initial; av.style.padding='';
+  }
+}
+
+/* Upload / replace the verifier's profile photo. */
+function uploadVerifierPhoto(input){
+  var f=input.files[0]; if(!f) return;
+  var m=document.getElementById('photoMsg');
+  if(f.size>5*1024*1024){ if(m){m.className='msg err';m.style.display='block';m.textContent='That image is larger than 5 MB.';} input.value=''; return; }
+  var rd=new FileReader();
+  rd.onload=function(){
+    if(m){ m.className='msg info'; m.style.display='block'; m.textContent='Uploading…'; }
+    fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'save-verifier-photo', token:S.token, photoB64:rd.result})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok){ if(m){m.className='msg ok';m.textContent='Photo updated.';} PROFILE.photo=d.photo; refreshAvatar();
+          var pa=document.getElementById('profAv'); if(pa){ pa.innerHTML='<img src="'+PROFILE.photo+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover" alt="">'; pa.style.padding='0'; pa.style.overflow='hidden'; } }
+        else { if(m){m.className='msg err';m.textContent=(d&&d.error)||'Could not upload.';} }
+      }).catch(function(){ if(m){m.className='msg err';m.textContent='Could not reach the server.';} });
+  };
+  rd.readAsDataURL(f);
+}
+
+/* ===== Profile load/render/save ===== */
+function showLoadError(msg){
+  ['journeyBody','scopeBody','jobsBody','nextBody'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.innerHTML='<div class="msg err" style="display:block">'+esc(msg)+'</div>';
+  });
+}
+function loadProfile(){
+  if(!S||!S.token) return;
+  fetch(VERIFIER_URL+'?action=my-profile&token='+encodeURIComponent(S.token))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d.ok){ showLoadError(d.error||'Could not load your profile.'); return; }
+      PROFILE=d.profile;
+      document.getElementById('vName').textContent='Hello, '+(PROFILE.firstname||'there');
+      refreshAvatar();
+      document.getElementById('vIdLine').textContent = PROFILE.id || '(Verifier ID issued on approval)';
+      var roleEl=document.getElementById('vRoleLine');
+      if(roleEl) roleEl.textContent = (PROFILE.body ? PROFILE.body : 'Accredited Verifier') + (PROFILE.country ? (' · '+PROFILE.country) : '');
+      var approved = PROFILE.status==='Approved';
+      document.getElementById('vStatusBadge').innerHTML='<span class="status '+(approved?'approved':'pending')+'">'+esc(approved?'Approved · Active':(PROFILE.status||'Pending'))+'</span>';
+      renderWelcome(); renderJourney(); renderScopeCard(); renderSubmitCard(); loadMyPayouts();
+      if(document.getElementById('profileModal').style.display==='flex') renderProfileModal();
+    }).catch(function(e){ showLoadError('Could not reach the server ('+(e&&e.message?e.message:'network error')+'). Please refresh and try again.'); });
+}
+function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
+function saveVerifierFields(fields, msgId){
+  var m=document.getElementById(msgId); m.className='msg info'; m.textContent='Saving…'; m.style.display='block';
+  fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(Object.assign({action:'complete-verifier-profile', token:S.token}, fields))})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ m.className='msg ok'; m.textContent='Saved.'; Object.assign(PROFILE, fields); PROFILE.stage=d.complete?'Profile complete — ready to submit':PROFILE.stage; renderJourney(); renderSubmitCard(); }
+      else { m.className='msg err'; m.textContent=(d&&d.error)||'Could not save.'; }
+    }).catch(function(){ m.className='msg err'; m.textContent='Could not reach the server.'; });
+}
+/* ===== Verification Scope card (read-only status of the 8 tiers) ===== */
+function renderScopeCard(){
+  var el=document.getElementById('scopeBody'); if(!el||!PROFILE) return;
+  var badge={approved:['Approved','var(--grn)','rgba(46,204,113,.15)'],
+             pending:['Pending review','var(--gold2)','rgba(200,146,10,.15)'],
+             denied:['Denied','var(--rd)','rgba(232,106,106,.15)'],
+             none:['Not applied','var(--tx3)','var(--card2)']};
+  var sd=(PROFILE.scopeDetails||{});
+  var rows=TIERS.map(function(t){
+    var stt=tierState(t.code), b=badge[stt];
+    var fee=(sd[t.code] && Number(sd[t.code].feeNGN)>0) ? ('<div style="font-size:11px;color:var(--gold2);margin-top:2px">Your fee: '+ngn(sd[t.code].feeNGN)+'</div>') : '';
+    return '<div class="jobrow" style="margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+      +'<div><div style="font-size:13.5px;font-weight:700;color:var(--tx)">'+esc(t.code+' · '+t.name)+'</div>'
+      +'<div style="font-size:11px;color:var(--tx3);margin-top:2px">'+esc(t.docs.slice(0,3).join(', '))+(t.docs.length>3?'…':'')+'</div>'+fee+'</div>'
+      +'<span class="chip" style="background:'+b[2]+';color:'+b[1]+'">'+b[0]+'</span>'
+      +'</div></div>';
+  }).join('');
+  var approvedCodes=parseTiers(PROFILE.tiers);
+  var sectors = PROFILE.sectors ? esc(PROFILE.sectors) : '—';
+  var docTypes = autoDocTypes(approvedCodes) || (PROFILE.credentialTypes?esc(PROFILE.credentialTypes):'—');
+  el.innerHTML =
+    rows
+    +'<div style="margin-top:14px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3)">Sectors you can verify</div>'
+    +'<div style="font-size:13px;color:var(--tx2);margin-top:4px">'+sectors+'</div>'
+    +'<div style="margin-top:12px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3)">Document types you can verify</div>'
+    +'<div style="font-size:13px;color:var(--tx2);margin-top:4px;line-height:1.5">'+docTypes+'</div>';
+}
+/* Autofills the document types from the verifier's APPROVED tiers' document
+   groups, so the "document types you can verify" list always matches scope. */
+function autoDocTypes(codes){
+  if(!codes||!codes.length) return '';
+  var out=[]; codes.forEach(function(c){ var t=tierByCode(c); if(t) out=out.concat(t.docs); });
+  return esc(out.join(', '));
+}
+
+/* ===== Edit Profile modal ===== */
+function openProfileModal(){ renderProfileModal(); document.getElementById('profileModal').style.display='flex'; }
+function closeProfileModal(){ document.getElementById('profileModal').style.display='none'; }
+function optList(items, sel){ return items.map(function(x){ return '<option value="'+esc(x)+'"'+(String(sel||'')===x?' selected':'')+'>'+esc(x)+'</option>'; }).join(''); }
+function docRow(label, key, url){
+  var have = !!url;
+  return '<div style="margin-bottom:10px">'
+    +'<label>'+esc(label)+'</label>'
+    +'<div class="up" onclick="document.getElementById(\''+key+'Input\').click()"><span id="'+key+'Txt">'+(have?'On file — click to replace':'Click to upload (PDF, JPG or PNG · max 5 MB)')+'</span></div>'
+    +(have?('<div style="font-size:11px;margin-top:4px"><a href="'+esc(url)+'" target="_blank" style="color:var(--gold2)">View current file ↗</a></div>'):'')
+    +'<input type="file" id="'+key+'Input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="profileDocSelected(\''+key+'\',this)">'
+    +'</div>';
+}
+var PENDING_DOCS={};   // key -> base64 of a newly chosen file, sent on Save
+function profileDocSelected(key, input){
+  var f=input.files[0]; if(!f) return;
+  if(f.size>5*1024*1024){ alert('That file is larger than 5 MB.'); input.value=''; return; }
+  var rd=new FileReader();
+  rd.onload=function(){ PENDING_DOCS[key]=rd.result; var t=document.getElementById(key+'Txt'); if(t) t.innerHTML='✓ '+esc(f.name)+' — will upload on Save'; };
+  rd.readAsDataURL(f);
+}
+function renderProfileModal(){
+  var el=document.getElementById('profileModalBody'); if(!el||!PROFILE) return;
+  PENDING_DOCS={};
+  el.innerHTML =
+    // photo
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">'
+    +'<div class="av" id="profAv" style="width:60px;height:60px;font-size:22px">'+((PROFILE.firstname||'?').charAt(0).toUpperCase())+'</div>'
+    +'<div><button class="btn secondary" type="button" onclick="document.getElementById(\'photoInput\').click()">'+(PROFILE.photo?'Change photo':'Upload photo')+'</button>'
+    +'<div style="font-size:11px;color:var(--tx3);margin-top:5px">Passport photo · JPG or PNG · max 5 MB.</div>'
+    +'<input type="file" id="photoInput" accept="image/jpeg,image/png" style="display:none" onchange="uploadVerifierPhoto(this)"></div></div>'
+    +'<div class="msg" id="photoMsg"></div>'
+
+    // personal details
+    +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);margin:6px 0 10px">Personal details</div>'
+    +'<div class="grid">'
+    +'<div><label>Surname</label><input value="'+esc(PROFILE.surname)+'" disabled></div>'
+    +'<div><label>First name</label><input value="'+esc(PROFILE.firstname)+'" disabled></div>'
+    +'<div class="full"><label>Email</label><input value="'+esc(PROFILE.email)+'" disabled></div>'
+    +'<div><label>Phone</label><input id="pf_phone" value="'+esc(PROFILE.phone)+'"></div>'
+    +'<div><label>Gender</label><select id="pf_gender">'+optList(['','Female','Male','Other','Prefer not to say'], PROFILE.gender)+'</select></div>'
+    +'<div><label>Date of birth</label><input id="pf_dob" type="date" value="'+esc(PROFILE.dob)+'"></div>'
+    +'<div><label>Country</label><select id="pf_country">'+optList([''].concat(COUNTRIES), PROFILE.country)+'</select></div>'
+    +'</div>'
+
+    // documents
+    +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);margin:18px 0 10px">Documents</div>'
+    +docRow('Valid ID (NIN)','vid',PROFILE.idDoc)
+    +docRow('Resume / CV','cv',PROFILE.cv)
+    +docRow('Recommendation 1','rec1',PROFILE.rec1)
+    +docRow('Recommendation 2','rec2',PROFILE.rec2)
+    +docRow('Recommendation 3','rec3',PROFILE.rec3)
+    +docRow('Accreditation / licence document','lic',PROFILE.hasLicence?'#':'')
+
+    // accreditation & affiliation (beneath personal details)
+    +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);margin:18px 0 10px">Accreditation &amp; Affiliation</div>'
+    +'<div class="grid">'
+    +'<div class="full"><label>Professional body / accreditation</label><input id="ac_body" value="'+esc(PROFILE.body)+'"></div>'
+    +'<div><label>Accreditation / licence number</label><input id="ac_accredNo" value="'+esc(PROFILE.accredNo)+'"></div>'
+    +'<div><label>Website</label><input id="ac_website" value="'+esc(PROFILE.website)+'"></div>'
+    +'<div><label>Organization / authority represented</label><input id="ac_orgName" value="'+esc(PROFILE.orgName)+'"></div>'
+    +'<div><label>Organization contact</label><input id="ac_orgContact" value="'+esc(PROFILE.orgContact)+'"></div>'
+    +'</div>'
+
+    // Bank details appear only once at least one tier is approved (for payouts).
+    + (parseTiers(PROFILE.tiers).length ? bankSectionHtml() : '')
+
+    +'<button class="btn" style="width:100%;margin-top:16px" id="profSaveBtn" onclick="saveProfileModal()">Save profile</button>'
+    +'<div class="msg" id="profileMsg"></div>';
+  var pa=document.getElementById('profAv');
+  if(pa && PROFILE.photo){ pa.innerHTML='<img src="'+PROFILE.photo+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover" alt="">'; pa.style.padding='0'; pa.style.overflow='hidden'; }
+  if(parseTiers(PROFILE.tiers).length){ loadSavedBank(); }
+}
+/* ===== Bank details (payouts) — shown after the first tier is approved =====
+   Two modes:
+   • Locked (details on file) → read-only account card + an Edit (✏️) pencil;
+     the pencil opens a change-request box (reason + supporting PDF) for admin
+     approval. The entry fields stay hidden until a change is approved.
+   • Empty / Unlocked → entry fields: pick bank, enter account number, confirm
+     the name with Paystack, then Save. */
+var BANK_CONFIRMED=false, BANKS=[];
+function bankSectionHtml(){
+  return '<div style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);margin:18px 0 10px">Bank details (for payouts)</div>'
+    +'<div id="bankSection"><div style="font-size:12.5px;color:var(--tx3)">Loading your bank details…</div></div>';
+}
+function loadSavedBank(){
+  BANK_CONFIRMED=false;
+  var box=document.getElementById('bankSection'); if(!box) return;
+  fetch(VERIFIER_URL+'?action=payout-get&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
+    var state=(d&&d.ok)?d.state:'empty';
+    if(state==='Locked' || state==='Change requested'){ renderBankLocked(d, state); }
+    else { renderBankEntry(); }
+  }).catch(function(){ renderBankEntry(); });
+}
+/* LOCKED view — read-only, with the pencil to request a change. */
+function renderBankLocked(d, state){
+  var box=document.getElementById('bankSection'); if(!box) return;
+  var pending = (state==='Change requested');
+  box.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+    +'<div style="font-size:12.5px;color:var(--tx2);line-height:1.7">'
+    +'<div><span style="color:var(--tx3)">Account name:</span> <b>'+esc(d.holder||'')+'</b></div>'
+    +'<div><span style="color:var(--tx3)">Bank:</span> '+esc(d.bank||'')+'</div>'
+    +'<div><span style="color:var(--tx3)">Account no:</span> '+esc(d.account||'')+'</div>'
+    +'</div>'
+    +(pending?'':'<button type="button" title="Request a change" onclick="openBankChange()" style="background:transparent;border:1px solid var(--bdr);color:var(--gold2);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px;flex-shrink:0">✏️</button>')
+    +'</div>'
+    +'<div style="font-size:11px;color:'+(pending?'var(--gold2)':'var(--tx3)')+';margin-top:8px">'
+    + (pending ? 'A change request is under review. Your current account stays locked until it’s approved.'
+               : 'Your bank details are locked for your protection. Use the pencil to request a change with a supporting document.')
+    +'</div>'
+    +'<div id="bankChangeBox" style="display:none;margin-top:12px;background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px">'
+    +'<label>Reason for the change</label>'
+    +'<textarea id="bkChReason" rows="2" placeholder="Explain why your payout account needs to change (min 15 characters)"></textarea>'
+    +'<label style="margin-top:10px">Supporting document (PDF)</label>'
+    +'<div class="up" onclick="document.getElementById(\'bkChFile\').click()"><span id="bkChFileTxt">Attach a bank letter or statement (PDF · max 5 MB)</span></div>'
+    +'<input type="file" id="bkChFile" accept=".pdf" style="display:none" onchange="bkChFileSel(this)">'
+    +'<button type="button" class="btn" style="width:100%;margin-top:12px" onclick="submitBankChange()">Send change request for approval</button>'
+    +'<div class="msg" id="bkChMsg"></div>'
+    +'</div>';
+}
+function openBankChange(){ var b=document.getElementById('bankChangeBox'); if(b) b.style.display='block'; }
+var BK_CHANGE_PDF=null;
+function bkChFileSel(input){
+  var f=input.files[0]; if(!f) return;
+  if(f.size>5*1024*1024){ alert('That file is larger than 5 MB.'); input.value=''; return; }
+  var rd=new FileReader(); rd.onload=function(){ BK_CHANGE_PDF=rd.result; var t=document.getElementById('bkChFileTxt'); if(t) t.innerHTML='✓ '+esc(f.name); }; rd.readAsDataURL(f);
+}
+function submitBankChange(){
+  var reason=(document.getElementById('bkChReason')||{}).value||'', m=document.getElementById('bkChMsg');
+  if(String(reason).trim().length<15){ if(m){m.className='msg err';m.style.display='block';m.textContent='Please give a reason (at least 15 characters).';} return; }
+  if(!BK_CHANGE_PDF){ if(m){m.className='msg err';m.style.display='block';m.textContent='Attach a supporting PDF.';} return; }
+  if(m){ m.className='msg info'; m.style.display='block'; m.textContent='Sending…'; }
+  fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'payout-request', token:S.token, reason:String(reason).trim(), evidenceB64:BK_CHANGE_PDF})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ if(m){ m.className='msg ok'; m.textContent='Change request sent for approval.'; } BK_CHANGE_PDF=null; loadSavedBank(); }
+      else { if(m){ m.className='msg err'; m.textContent=(d&&d.error)||'Could not send.'; } }
+    }).catch(function(){ if(m){ m.className='msg err'; m.textContent='Could not reach the server.'; } });
+}
+/* ENTRY view — pick bank, enter account, confirm name, then Save profile. */
+function renderBankEntry(){
+  var box=document.getElementById('bankSection'); if(!box) return;
+  box.innerHTML=
+    '<div style="font-size:11px;color:var(--tx3);margin-bottom:10px">We confirm your account name with your bank before saving.</div>'
+    +'<div class="grid">'
+    +'<div><label>Bank name</label><select id="bk_bank"><option value="">Loading banks…</option></select></div>'
+    +'<div><label>Account number</label><input id="bk_acct" inputmode="numeric" maxlength="10" placeholder="10-digit NUBAN"></div>'
+    +'</div>'
+    +'<button type="button" class="btn secondary" style="margin-top:10px" id="bk_confirmBtn" onclick="confirmBank()">Confirm account name</button>'
+    +'<div id="bk_nameWrap" style="display:none;margin-top:10px"><label>Account name (confirmed)</label><input id="bk_name" value="" readonly style="font-weight:700"></div>'
+    +'<div class="msg" id="bk_msg"></div>';
+  loadBankList();
+}
+function loadBankList(){
+  var sel=document.getElementById('bk_bank'); if(!sel) return;
+  fetch(SKILLED_URL+'?action=bank-list').then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok||!d.banks){ sel.innerHTML='<option value="">Bank lookup unavailable</option>'; return; }
+    BANKS=d.banks;
+    sel.innerHTML='<option value="">Select your bank</option>'+d.banks.map(function(b){ return '<option value="'+esc(b.code)+'">'+esc(b.name)+'</option>'; }).join('');
+  }).catch(function(){ sel.innerHTML='<option value="">Bank lookup unavailable</option>'; });
+}
+function confirmBank(){
+  var sel=document.getElementById('bk_bank'), acct=(document.getElementById('bk_acct')||{}).value||'';
+  var msg=document.getElementById('bk_msg'); var code=sel?sel.value:'';
+  acct=String(acct).replace(/\D/g,'');
+  if(!code){ if(msg){msg.className='msg err';msg.style.display='block';msg.textContent='Select your bank.';} return; }
+  if(acct.length<10){ if(msg){msg.className='msg err';msg.style.display='block';msg.textContent='Enter your 10-digit account number.';} return; }
+  if(msg){ msg.className='msg info'; msg.style.display='block'; msg.textContent='Confirming with your bank…'; }
+  var btn=document.getElementById('bk_confirmBtn'); if(btn) btn.disabled=true;
+  fetch(SKILLED_URL+'?action=bank-resolve&account='+encodeURIComponent(acct)+'&bank_code='+encodeURIComponent(code))
+    .then(function(r){return r.json();}).then(function(d){
+      if(btn) btn.disabled=false;
+      if(d&&d.ok&&d.accountName){
+        var nw=document.getElementById('bk_nameWrap'), nm=document.getElementById('bk_name');
+        if(nw) nw.style.display='block'; if(nm) nm.value=d.accountName;
+        BANK_CONFIRMED=true;
+        if(msg){ msg.className='msg ok'; msg.textContent='Account confirmed. Save your profile to store it.'; }
+      } else {
+        BANK_CONFIRMED=false;
+        if(msg){ msg.className='msg err'; msg.textContent=(d&&d.error)||'Could not confirm that account. Check your details.'; }
+      }
+    }).catch(function(){ if(btn) btn.disabled=false; if(msg){ msg.className='msg err'; msg.textContent='Could not reach the bank service.'; } });
+}
+function saveProfileModal(){
+  var m=document.getElementById('profileMsg'); m.className='msg info'; m.style.display='block'; m.textContent='Saving…';
+  var fields={action:'complete-verifier-profile', token:S.token,
+    phone:val('pf_phone'), gender:val('pf_gender'), dob:val('pf_dob'), country:val('pf_country'),
+    body:val('ac_body'), accredNo:val('ac_accredNo'), website:val('ac_website'),
+    orgName:val('ac_orgName'), orgContact:val('ac_orgContact')};
+  if(PENDING_DOCS.vid)  fields.idB64=PENDING_DOCS.vid;
+  if(PENDING_DOCS.cv)   fields.cvB64=PENDING_DOCS.cv;
+  if(PENDING_DOCS.rec1) fields.rec1B64=PENDING_DOCS.rec1;
+  if(PENDING_DOCS.rec2) fields.rec2B64=PENDING_DOCS.rec2;
+  if(PENDING_DOCS.rec3) fields.rec3B64=PENDING_DOCS.rec3;
+  if(PENDING_DOCS.lic)  fields.licenceB64=PENDING_DOCS.lic;
+  var btn=document.getElementById('profSaveBtn'); if(btn) btn.disabled=true;
+  xhrUploadJSON(fields, null,
+    function(d){
+      if(btn) btn.disabled=false;
+      if(d&&d.ok){
+        m.className='msg ok'; m.textContent='Profile saved.';
+        if(fields.licenceB64) PROFILE.hasLicence=true;
+        maybeSaveBank(function(){ loadProfile(); });   // save confirmed bank details, then re-pull
+      } else { m.className='msg err'; m.textContent=(d&&d.error)||'Could not save.'; }
+    },
+    function(){ if(btn) btn.disabled=false; m.className='msg err'; m.textContent='Could not reach the server.'; });
+}
+/* Persists the confirmed bank account (if the verifier confirmed one this
+   session) to the payout store, then continues. Account name is the one
+   Paystack returned — never free-typed. */
+function maybeSaveBank(next){
+  if(!BANK_CONFIRMED){ if(next) next(); return; }
+  var sel=document.getElementById('bk_bank'), nm=document.getElementById('bk_name'), ac=document.getElementById('bk_acct');
+  var bankName = sel ? (sel.options[sel.selectedIndex]||{}).text||'' : '';
+  var holder = nm ? nm.value : '';
+  var account = ac ? String(ac.value).replace(/\D/g,'') : '';
+  if(!holder || !account){ if(next) next(); return; }
+  var m=document.getElementById('profileMsg'); if(m){ m.className='msg info'; m.textContent='Saving bank details…'; }
+  fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'payout-save', token:S.token, data:{holder:holder, bank:bankName, account:account, country:(PROFILE.country||'Nigeria'), currency:'NGN'}})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(m){ if(d&&d.ok){ m.className='msg ok'; m.textContent='Profile and bank details saved.'; } else { m.className='msg err'; m.textContent='Profile saved, but bank details: '+((d&&d.error)||'could not save.'); } }
+      BANK_CONFIRMED=false; if(next) next();
+    }).catch(function(){ if(m){ m.className='msg err'; m.textContent='Profile saved, but bank details could not reach the server.'; } if(next) next(); });
+}
+
+/* ===== Apply for Scope modal ===== */
+var SCOPE_TIER=null;   // the tier currently being applied for in the modal
+function openScopeModal(){ SCOPE_TIER=null; renderScopeModal(); document.getElementById('scopeModal').style.display='flex'; }
+function closeScopeModal(){ document.getElementById('scopeModal').style.display='none'; var m=document.getElementById('scopeModalMsg'); if(m) m.style.display='none'; }
+function ngn(n){ return '₦'+Number(n||0).toLocaleString('en-NG'); }
+
+/* Step 1 — pick ONE tier of interest (not all listed at once). */
+function renderScopeModal(){
+  var el=document.getElementById('scopeModalBody'); if(!el) return;
+  document.getElementById('scopeApplyBtn').style.display='none';
+  var opts='<option value="">— Select a tier —</option>'+TIERS.map(function(t){
+    var stt=tierState(t.code);
+    var tag = stt==='approved'?' (approved)':stt==='pending'?' (pending)':stt==='denied'?' (denied — can re-apply)':'';
+    var dis = (stt==='approved'||stt==='pending')?' disabled':'';
+    return '<option value="'+t.code+'"'+dis+'>'+esc(t.code+' · '+t.name+tag)+'</option>';
+  }).join('');
+  el.innerHTML =
+    '<label>Tier of interest</label>'
+    +'<select id="scopeTierSel" onchange="scopeSelectTier(this.value)">'+opts+'</select>'
+    +'<div style="font-size:11px;color:var(--tx3);margin-top:6px">Approved and pending tiers can’t be re-selected. A denied tier can be applied for again.</div>'
+    +'<div id="scopeStep2" style="margin-top:16px"></div>';
+}
+/* Step 2 — on tier select, show its document types to confirm, a field for any
+   additional documents the verifier needs from the candidate, and the base fee
+   the verifier wishes to charge (with the engine's guidance band). */
+function scopeSelectTier(code){
+  SCOPE_TIER=code;
+  var step=document.getElementById('scopeStep2'); if(!step) return;
+  document.getElementById('scopeApplyBtn').style.display = code?'block':'none';
+  if(!code){ step.innerHTML=''; return; }
+  var t=tierByCode(code); if(!t){ step.innerHTML=''; return; }
+  var docChecks=t.docs.map(function(dn,i){
+    return '<label class="decl" style="margin-bottom:6px"><input type="checkbox" class="scopeDoc" value="'+esc(dn)+'" checked> <span style="font-size:12.5px">'+esc(dn)+'</span></label>';
+  }).join('');
+  step.innerHTML =
+    '<div style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);margin-bottom:8px">Documents in '+esc(t.name)+'</div>'
+    +'<div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Confirm the document types you can verify in this tier.</div>'
+    +docChecks
+    +'<label style="margin-top:14px">Additional documents you require from the candidate</label>'
+    +'<textarea id="scopeExtra" rows="2" placeholder="e.g. a signed consent form, the original issued reference number"></textarea>'
+    +'<div style="font-size:11px;color:var(--tx3);margin:4px 0 14px">What you need the candidate to submit before you can approve verification for this tier.</div>'
+    +'<label>Your fee for this tier (₦)</label>'
+    +'<input id="scopeFee" type="number" min="0" step="500" value="'+(t.mid||'')+'">'
+    +'<div style="font-size:11px;color:var(--tx3);margin-top:4px">Guidance for this tier: '+ngn(t.min)+' – '+ngn(t.max)+'. This is what <b>you</b> earn; STACS adds its service charge on top, and the requester sees the all-in total.</div>'
+    +'<label style="margin-top:14px">Estimated turnaround (days)</label>'
+    +'<input id="scopeTurn" type="number" min="1" step="1" placeholder="e.g. 30">'
+    +'<div style="font-size:11px;color:var(--tx3);margin-top:4px">How long you need to complete a verification in this tier.</div>'
+    +'<label style="margin-top:14px">Qualification document (PDF)</label>'
+    +'<div class="up" onclick="document.getElementById(\'scopeQualInput\').click()"><span id="scopeQualTxt">Click to upload the credential that qualifies you for this tier (PDF · max 5 MB)</span></div>'
+    +'<input type="file" id="scopeQualInput" accept=".pdf" style="display:none" onchange="scopeQualSelected(this)">'
+    +'<div class="msg info" style="display:block;margin-top:12px;font-size:12px">This fee is <b>not final</b>. A requester may offer less — you can <b>accept</b> or <b>decline</b> each offer before any work begins.</div>';
+}
+var SCOPE_QUAL=null;
+function scopeQualSelected(input){
+  var f=input.files[0]; if(!f) return;
+  if(f.size>5*1024*1024){ alert('That file is larger than 5 MB.'); input.value=''; return; }
+  var rd=new FileReader();
+  rd.onload=function(){ SCOPE_QUAL=rd.result; var t=document.getElementById('scopeQualTxt'); if(t) t.innerHTML='✓ '+esc(f.name); };
+  rd.readAsDataURL(f);
+}
+function submitScopeApplication(){
+  var m=document.getElementById('scopeModalMsg');
+  if(!SCOPE_TIER){ m.className='msg err'; m.style.display='block'; m.textContent='Select a tier to apply for.'; return; }
+  var docs=[].slice.call(document.querySelectorAll('.scopeDoc:checked')).map(function(c){return c.value;});
+  if(!docs.length){ m.className='msg err'; m.style.display='block'; m.textContent='Confirm at least one document type for this tier.'; return; }
+  var fee=Math.round(Number((document.getElementById('scopeFee')||{}).value)||0);
+  if(fee<=0){ m.className='msg err'; m.style.display='block'; m.textContent='Enter the fee you want to charge for this tier.'; return; }
+  var turn=Math.round(Number((document.getElementById('scopeTurn')||{}).value)||0);
+  if(turn<=0){ m.className='msg err'; m.style.display='block'; m.textContent='Enter your estimated turnaround (in days).'; return; }
+  var existing=(PROFILE.scopeDetails&&PROFILE.scopeDetails[SCOPE_TIER]&&PROFILE.scopeDetails[SCOPE_TIER].qualUrl);
+  if(!SCOPE_QUAL && !existing){ m.className='msg err'; m.style.display='block'; m.textContent='Upload a qualification document (PDF) for this tier.'; return; }
+  var extra=(document.getElementById('scopeExtra')||{}).value||'';
+  m.className='msg info'; m.style.display='block'; m.textContent='Submitting…';
+  var btn=document.getElementById('scopeApplyBtn'); if(btn) btn.disabled=true;
+  fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'apply-scope', token:S.token, tier:SCOPE_TIER, docs:docs, extraDocs:extra, feeNGN:fee, turnaroundDays:turn, qualificationB64:SCOPE_QUAL||'', hasQualification:!!existing})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(btn) btn.disabled=false;
+      if(d&&d.ok){
+        m.className='msg ok'; m.textContent='Applied — '+SCOPE_TIER+' is now pending STACS review.';
+        PROFILE.requestedTiers=d.requested; PROFILE.deniedTiers=d.denied; PROFILE.scopeDetails=d.details;
+        renderScopeCard(); SCOPE_TIER=null; SCOPE_QUAL=null; setTimeout(renderScopeModal, 700);
+      } else { m.className='msg err'; m.textContent=(d&&d.error)||'Could not submit.'; }
+    }).catch(function(){ if(btn) btn.disabled=false; m.className='msg err'; m.textContent='Could not reach the server.'; });
+}
+function renderSubmitCard(){
+  var card=document.getElementById('submitCard'); if(!card||!PROFILE) return;
+  card.style.display = PROFILE.stage==='Profile complete — ready to submit' ? 'block' : 'none';
+}
+function openDeclarationGate(){ document.getElementById('gateBack').style.display='flex'; }
+function closeDeclarationGate(){ document.getElementById('gateBack').style.display='none'; }
+function acceptDeclarationsAndSubmit(){
+  var m=document.getElementById('gateMsg');
+  var all=['d1','d2','d3','d4','d5'].every(function(id){ return document.getElementById(id).checked; });
+  if(!all){ m.className='msg err'; m.style.display='block'; m.textContent='Please accept every declaration to continue.'; return; }
+  m.className='msg info'; m.style.display='block'; m.textContent='Submitting…';
+  fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save-verifier-ack', token:S.token})})
+    .then(function(r){return r.json();}).then(function(){
+      return fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'submit-for-approval', token:S.token})});
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ m.className='msg ok'; m.textContent='Submitted for approval.'; PROFILE.stage=d.stage; setTimeout(function(){ closeDeclarationGate(); renderJourney(); renderSubmitCard(); renderNext(); }, 900); }
+      else { m.className='msg err'; m.textContent=(d&&d.error)||'Could not submit.'; }
+    }).catch(function(){ m.className='msg err'; m.textContent='Could not reach the server.'; });
+}
+
+/* ===== Assigned requests (direct "Request to Verify" items) ===== */
+function ngnV(n){ return '₦'+Number(n||0).toLocaleString('en-NG'); }
+function loadAssignedRequests(){
+  if(!S||!S.token) return;
+  var el=document.getElementById('assignedBody'); if(el) el.innerHTML='<div style="font-size:12.5px;color:var(--tx3)">Loading your requests…</div>';
+  fetch(VERIFIER_URL+'?action=verify-requests&token='+encodeURIComponent(S.token))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!el) return;
+      if(!d||!d.ok){ el.innerHTML='<div class="msg err" style="display:block">Could not load your requests.</div>'; return; }
+      var reqs=(d.requests||[]).filter(function(r){ return r.status!=='Declined'; });
+      // live journey stats: open = accepted/paid not yet submitted; reports = submitted
+      VSTATS.openReq = reqs.filter(function(r){ return (r.status==='Accepted'||r.status==='Paid') && String(r.reportStatus||'').indexOf('Submitted')!==0; }).length;
+      VSTATS.reports = reqs.filter(function(r){ return String(r.reportStatus||'').indexOf('Submitted')===0; }).length;
+      try{ renderJourney(); }catch(e){}
+      if(!reqs.length){ el.innerHTML='<div style="font-size:12.5px;color:var(--tx3)">No direct requests right now.</div>'; return; }
+      el.innerHTML=reqs.map(function(r){
+        var submitted = String(r.reportStatus||'').indexOf('Submitted')===0;
+        var badge = submitted
+          ? '<span class="chip" style="background:rgba(46,204,113,.15);color:var(--grn)">Submitted for review</span>'
+          : r.status==='Paid'
+          ? '<span class="chip" style="background:rgba(46,204,113,.15);color:var(--grn)">Paid</span>'
+          : r.status==='Accepted'
+          ? '<span class="chip" style="background:rgba(200,146,10,.15);color:var(--gold2)">Accepted</span>'
+          : '<span class="chip" style="background:rgba(200,146,10,.15);color:var(--gold2)">Pending</span>';
+        var acts;
+        if(r.status==='Pending'){
+          acts='<div style="display:flex;gap:8px;margin-top:10px">'
+            +'<button class="btn" style="padding:8px 14px;font-size:12.5px" onclick="assignAct('+r.row+',\'accept\')">Accept</button>'
+            +'<button class="btn secondary" style="padding:8px 14px;font-size:12.5px" onclick="assignDecline('+r.row+')">Decline</button></div>';
+        } else if(r.status==='Accepted'){
+          acts='<div style="font-size:11.5px;color:var(--gold2);margin-top:8px">Awaiting the candidate’s payment — you’ll be emailed to commence once paid.</div>';
+        } else if(r.status==='Paid' || submitted){
+          acts=reportActionHtml(r);
+        } else {
+          acts='<div style="font-size:11.5px;color:var(--tx3);margin-top:8px">'+esc(r.status)+'</div>';
+        }
+        return '<div class="jobrow" style="margin-bottom:10px">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+          +'<div><div style="font-size:14px;font-weight:700;color:var(--tx)">'+esc(r.document||'Document')+'</div>'
+          +'<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+esc(r.candidateName||'Candidate')+' · '+esc(r.tier)+' · '+esc(r.service||'Standard')+'</div></div>'
+          +badge+'</div>'
+          +'<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--tx3);margin-top:8px">'
+          +'<span>You earn <b style="color:var(--gold2)">'+ngnV(verifierNetOf(r.amount))+'</b></span>'
+          +'<span>Turnaround <b style="color:var(--tx2)">'+(r.turnaround||'—')+' days</b></span>'
+          +(r.deadline?('<span>Deadline <b style="color:var(--tx2)">'+esc(fmtDate(r.deadline))+'</b></span>'):'')
+          +'</div>'
+          +acts
+          +'<div class="msg" id="areq'+r.row+'"></div>'
+          +'</div>';
+      }).join('');
+    }).catch(function(){ if(el) el.innerHTML='<div class="msg err" style="display:block">Could not reach the server.</div>'; });
+}
+/* Button/status for a Paid request's report: Start → Edit (Ongoing) → red
+   Ongoing Overdue → Submitted for Review & Approval. */
+function reportActionHtml(r){
+  if(String(r.reportStatus||'').indexOf('Submitted')===0)
+    return '<div style="margin-top:8px;font-size:12px;color:var(--grn);font-weight:700">Submitted for Review &amp; Approval</div>';
+  var ongoing = (r.reportStatus==='Ongoing');
+  var overdue = ongoing && r.deadline && (new Date(r.deadline) < new Date());
+  var label = ongoing ? (overdue?'Edit · Ongoing Overdue':'Edit · Ongoing Report') : 'Start';
+  return '<div style="margin-top:10px">'
+    +'<button class="btn" style="padding:8px 14px;font-size:12.5px'+(overdue?';background:var(--rd);color:#fff':'')+'" onclick="openReportWorkspace('+r.row+')">'+label+'</button>'
+    +(ongoing?('<div style="font-size:10.5px;color:'+(overdue?'var(--rd)':'var(--tx3)')+';margin-top:4px">'+(overdue?'Ongoing Overdue Report':'Ongoing Report')+(r.reportUpdated?(' · last updated '+esc(r.reportUpdated)):'')+'</div>'):'')
+    +'</div>';
+}
+
+/* The amount recorded is the payer's all-in total; show the verifier only their
+   own net (total minus STACS's share). Uses the live engine ratio if present. */
+function verifierNetOf(totalNGN){
+  if(!ENGINE || !ENGINE.usdToNgn) return totalNGN;  // fallback: show total if engine not loaded
+  // total = base + base*comm + fixed, then *(1+vat). Solve base from total.
+  var vat=ENGINE.vatPct||0, comm=ENGINE.commissionPct||0, fixed=ENGINE.fixedNGN||0;
+  var preVat = totalNGN/(1+vat);
+  var base = (preVat - fixed)/(1+comm);
+  return Math.max(0, Math.round(base));
+}
+function assignAct(row, action, reason){
+  var m=document.getElementById('areq'+row); if(m){ m.className='msg info'; m.style.display='block'; m.textContent='Working…'; }
+  fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'act-verify-request', token:S.token, row:row, act:action, reason:reason||''})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ if(m){ m.className='msg ok'; m.textContent=(d.status==='Accepted'?'Accepted — it’s yours to process.':'Declined. The candidate has been emailed to choose another verifier.'); } loadAssignedRequests(); }
+      else { if(m){ m.className='msg err'; m.textContent=(d&&d.error)||'Could not update.'; } }
+    }).catch(function(){ if(m){ m.className='msg err'; m.textContent='Could not reach the server.'; } });
+}
+function assignDecline(row){
+  var reason=window.prompt('Reason for declining (shared with STACS admin; the candidate is told you are unavailable):','');
+  if(reason===null) return;
+  if(String(reason).trim().length<5){ var m=document.getElementById('areq'+row); if(m){ m.className='msg err'; m.style.display='block'; m.textContent='Please give a brief reason (at least 5 characters).'; } return; }
+  assignAct(row, 'decline', String(reason).trim());
+}
+
+/* ===== Verification Report Workspace ===== */
+var RW=null;   // {row, submitted}
+function openReportWorkspace(row){
+  RW={row:row};
+  document.getElementById('reportModal').style.display='flex';
+  document.getElementById('reportBody').innerHTML='<div style="font-size:12.5px;color:var(--tx3)">Loading report…</div>';
+  var sm=document.getElementById('rwMsg'); if(sm){ sm.style.display='none'; }
+  fetch(VERIFIER_URL+'?action=get-report&token='+encodeURIComponent(S.token)+'&row='+row)
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ document.getElementById('reportBody').innerHTML='<div class="msg err" style="display:block">'+esc((d&&d.error)||'Could not load.')+'</div>'; return; }
+      RW.data=d; renderReportBody(d);
+    }).catch(function(){ document.getElementById('reportBody').innerHTML='<div class="msg err" style="display:block">Could not reach the server.</div>'; });
+}
+function closeReport(){ document.getElementById('reportModal').style.display='none'; RW=null; loadAssignedRequests(); }
+function rwField(label, id, val, ph){ return '<label style="margin-top:10px">'+esc(label)+'</label><input id="'+id+'" value="'+esc(val||'')+'" placeholder="'+esc(ph||'')+'">'; }
+function renderReportBody(d){
+  var rep=d.report||{}; var submitted=String(d.reportStatus||'').indexOf('Submitted')===0;
+  RW.submitted=submitted;
+  document.getElementById('rwSub').textContent = (d.document||'Document')+' · '+(d.tier||'')+' · '+(d.service||'Standard')+(d.deadline?(' · due '+fmtDate(d.deadline)):'');
+  var sl=document.getElementById('rwStatusLine');
+  var overdue = (d.reportStatus==='Ongoing') && d.deadline && (new Date(d.deadline)<new Date());
+  sl.innerHTML = submitted
+    ? '<span style="color:var(--grn);font-weight:700">Submitted for Review &amp; Approval</span>'
+    : '<span style="color:'+(overdue?'var(--rd)':'var(--gold2)')+';font-weight:700">'+(overdue?'Ongoing Overdue Report':'Ongoing Report')+'</span>'+(d.reportUpdated?(' <span style="color:var(--tx3)">· last updated '+esc(d.reportUpdated)+'</span>'):'');
+  var dis = submitted ? ' disabled' : '';
+  var contacts=(rep.contacts&&rep.contacts.length)?rep.contacts:[{}];
+  document.getElementById('reportBody').innerHTML=
+    '<div class="card" style="padding:14px;margin-bottom:12px"><h3 style="margin:0 0 8px;font-size:14px">Organization / Establishment</h3>'
+    +rwField('Organization / establishment name','rw_org',rep.org)
+    +'<label style="margin-top:10px">Address(es)</label><textarea id="rw_addr" rows="2" placeholder="Main / branch address, city, state, country">'+esc(rep.addr||'')+'</textarea>'
+    +rwField('Primary contact','rw_primary',rep.primary)
+    +rwField('Main contact','rw_main',rep.main)
+    +'</div>'
+    +'<div class="card" style="padding:14px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0;font-size:14px">Contacts</h3>'
+    +(submitted?'':'<button class="btn secondary" style="padding:6px 12px;font-size:12px" onclick="rwAddContact()">+ Add contact</button>')+'</div>'
+    +'<div id="rwContacts" style="margin-top:10px"></div></div>'
+    +'<div class="card" style="padding:14px;margin-bottom:12px"><h3 style="margin:0 0 8px;font-size:14px">Evidence &amp; attachments</h3>'
+    +'<div id="rwFiles" style="font-size:12px;color:var(--tx2);margin-bottom:8px"></div>'
+    +(submitted?'':'<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" style="padding:7px 12px;font-size:12px" onclick="rwPick(\'document\')">Upload document/image</button>'
+      +'<button class="btn secondary" style="padding:7px 12px;font-size:12px" onclick="rwPick(\'video\')">Upload video</button></div>'
+      +'<input type="file" id="rwFileInput" style="display:none" onchange="rwUpload(this)">'
+      +'<label style="margin-top:10px">External video link</label><div style="display:flex;gap:8px"><input id="rw_link" placeholder="https://..."><button class="btn secondary" style="padding:7px 12px;font-size:12px;white-space:nowrap" onclick="rwAddLink()">Add link</button></div>')
+    +'</div>'
+    +'<div class="card" style="padding:14px;margin-bottom:12px"><h3 style="margin:0 0 8px;font-size:14px">Verification report</h3>'
+    +(submitted?'':'<div style="display:flex;gap:6px;margin-bottom:8px">'
+      +'<button class="btn secondary" style="padding:6px 10px" onclick="rwFmt(\'bold\')"><b>B</b></button>'
+      +'<button class="btn secondary" style="padding:6px 10px" onclick="rwFmt(\'italic\')"><i>I</i></button>'
+      +'<button class="btn secondary" style="padding:6px 10px" onclick="rwFmt(\'underline\')"><u>U</u></button>'
+      +'<button class="btn secondary" style="padding:6px 10px" onclick="rwFmt(\'insertUnorderedList\')">• List</button>'
+      +'<button class="btn secondary" style="padding:6px 10px" onclick="rwFmt(\'insertOrderedList\')">1. List</button></div>')
+    +'<div id="rw_report" contenteditable="'+(submitted?'false':'true')+'" style="border:1px solid var(--bdr);background:var(--card2);min-height:200px;padding:12px;color:var(--tx);line-height:1.6;outline:none">'+(rep.body||'<p>Explain the full verification journey: how the request was received, which contacts were reached, what evidence was examined, what was confirmed, any limitations, and the final conclusion.</p>')+'</div>'
+    +'</div>'
+    +'<div class="card" style="padding:14px"><h3 style="margin:0 0 8px;font-size:14px">Declaration, liability &amp; indemnity</h3>'
+    +rwDecl('rw_d1','I confirm the information in this report is accurate to the best of my knowledge and based on the evidence available to me.',rep.d1,dis)
+    +rwDecl('rw_d2','I understand that false or reckless claims may make me liable under STACS policy and applicable law.',rep.d2,dis)
+    +rwDecl('rw_d3','I accept responsibility for the integrity of this report and agree to STACS compliance review.',rep.d3,dis)
+    +rwDecl('rw_d4','I confirm all supporting evidence uploaded or referenced is genuine and relevant to this request.',rep.d4,dis)
+    +'<div style="font-size:11px;color:var(--rd);margin-top:6px">Submit stays disabled until all four boxes are checked.</div></div>';
+  RW.files = (rep.files||[]).slice();
+  rwRenderFiles();
+  var cc=document.getElementById('rwContacts');
+  cc.innerHTML=''; contacts.forEach(function(c){ rwAddContact(c, submitted); });
+  rwSyncSubmit();
+}
+function rwDecl(id,label,checked,dis){ return '<label class="decl" style="margin-bottom:8px"><input type="checkbox" id="'+id+'" '+(checked?'checked':'')+dis+' onchange="rwSyncSubmit()"> <span style="font-size:12px">'+esc(label)+'</span></label>'; }
+function rwAddContact(c, dis){
+  c=c||{}; var cc=document.getElementById('rwContacts'); if(!cc) return;
+  var div=document.createElement('div'); div.className='jobrow'; div.style.marginBottom='8px';
+  var d=dis?' disabled':'';
+  div.innerHTML='<div class="grid">'
+    +'<div><label>Full name</label><input class="rwc_name" value="'+esc(c.name||'')+'"'+d+'></div>'
+    +'<div><label>Designation</label><input class="rwc_role" value="'+esc(c.role||'')+'"'+d+'></div>'
+    +'<div><label>Email</label><input class="rwc_email" value="'+esc(c.email||'')+'"'+d+'></div>'
+    +'<div><label>Phone</label><input class="rwc_phone" value="'+esc(c.phone||'')+'"'+d+'></div>'
+    +'</div>'+(dis?'':'<div style="text-align:right;margin-top:6px"><button class="btn secondary" style="padding:5px 10px;font-size:11.5px" onclick="this.closest(\'.jobrow\').remove()">Delete</button></div>');
+  cc.appendChild(div);
+}
+var RW_PICK='document';
+function rwPick(kind){ RW_PICK=kind; var inp=document.getElementById('rwFileInput'); inp.accept = kind==='video'?'video/*':'.pdf,.jpg,.jpeg,.png'; inp.click(); }
+function rwUpload(input){
+  var f=input.files[0]; if(!f) return;
+  if(f.size>15*1024*1024){ alert('That file is larger than 15 MB.'); input.value=''; return; }
+  var m=document.getElementById('rwMsg'); if(m){ m.className='msg info'; m.style.display='block'; m.textContent='Uploading '+f.name+'…'; }
+  var rd=new FileReader();
+  rd.onload=function(){
+    fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'report-upload', token:S.token, name:f.name, fileB64:rd.result})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.ok&&d.url){ RW.files.push({name:f.name, url:d.url, kind:RW_PICK}); rwRenderFiles(); if(m){ m.className='msg ok'; m.textContent='Uploaded.'; } }
+        else { if(m){ m.className='msg err'; m.textContent=(d&&d.error)||'Upload failed.'; } }
+      }).catch(function(){ if(m){ m.className='msg err'; m.textContent='Could not reach the server.'; } });
+  };
+  rd.readAsDataURL(f); input.value='';
+}
+function rwAddLink(){ var i=document.getElementById('rw_link'); var u=i?i.value.trim():''; if(!u) return; RW.files.push({name:u, url:u, kind:'link'}); if(i) i.value=''; rwRenderFiles(); }
+function rwRenderFiles(){
+  var el=document.getElementById('rwFiles'); if(!el) return;
+  if(!RW.files.length){ el.innerHTML='<span style="color:var(--tx3)">No evidence added yet.</span>'; return; }
+  el.innerHTML=RW.files.map(function(f,i){
+    return '<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0"><a href="'+esc(f.url)+'" target="_blank" style="color:var(--gold2)">'+esc(f.kind==='link'?'🔗 ':(f.kind==='video'?'🎞 ':'📄 '))+esc(f.name)+'</a>'+(RW.submitted?'':'<button onclick="RW.files.splice('+i+',1);rwRenderFiles()" style="background:transparent;border:none;color:var(--rd);cursor:pointer">✕</button>')+'</div>';
+  }).join('');
+}
+function rwFmt(cmd){ document.execCommand(cmd,false,null); var e=document.getElementById('rw_report'); if(e) e.focus(); }
+function rwSyncSubmit(){
+  var btn=document.getElementById('rwSubmitBtn'); if(!btn) return;
+  if(RW&&RW.submitted){ btn.disabled=true; return; }
+  var all=['rw_d1','rw_d2','rw_d3','rw_d4'].every(function(id){ var e=document.getElementById(id); return e&&e.checked; });
+  btn.disabled=!all;
+}
+function rwCollect(){
+  var contacts=[].slice.call(document.querySelectorAll('#rwContacts .jobrow')).map(function(row){
+    return { name:(row.querySelector('.rwc_name')||{}).value||'', role:(row.querySelector('.rwc_role')||{}).value||'',
+      email:(row.querySelector('.rwc_email')||{}).value||'', phone:(row.querySelector('.rwc_phone')||{}).value||'' };
+  }).filter(function(c){ return c.name||c.email||c.phone; });
+  return {
+    org:(document.getElementById('rw_org')||{}).value||'', addr:(document.getElementById('rw_addr')||{}).value||'',
+    primary:(document.getElementById('rw_primary')||{}).value||'', main:(document.getElementById('rw_main')||{}).value||'',
+    contacts:contacts, files:RW.files||[], body:(document.getElementById('rw_report')||{}).innerHTML||'',
+    d1:!!(document.getElementById('rw_d1')||{}).checked, d2:!!(document.getElementById('rw_d2')||{}).checked,
+    d3:!!(document.getElementById('rw_d3')||{}).checked, d4:!!(document.getElementById('rw_d4')||{}).checked
+  };
+}
+function saveReport(submit, andClose){
+  if(!RW) return;
+  var report=rwCollect();
+  var m=document.getElementById('rwMsg'); if(m){ m.className='msg info'; m.style.display='block'; m.textContent=submit?'Submitting…':'Saving…'; }
+  fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'save-report', token:S.token, row:RW.row, report:report, submit:!!submit,
+      declarations:{d1:report.d1,d2:report.d2,d3:report.d3,d4:report.d4}})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){
+        if(m){ m.className='msg ok'; m.textContent=submit?'Submitted for Review & Approval.':'Saved — '+(d.reportUpdated||'just now'); }
+        if(submit||andClose){ setTimeout(closeReport, 900); }
+      } else { if(m){ m.className='msg err'; m.textContent=(d&&d.error)||'Could not save.'; } }
+    }).catch(function(){ if(m){ m.className='msg err'; m.textContent='Could not reach the server.'; } });
+}
+
+/* ===== My Payouts ===== */
+function loadMyPayouts(){
+  var el=document.getElementById('payoutsBody'); if(!el||!S||!S.token) return;
+  el.innerHTML='<div style="font-size:12.5px;color:var(--tx3)">Loading your payouts…</div>';
+  fetch(VERIFIER_URL+'?action=my-payouts&token='+encodeURIComponent(S.token))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='<div class="msg err" style="display:block">Could not load payouts.</div>'; return; }
+      var ps=d.payouts||[];
+      VSTATS.earningsNGN = ps.reduce(function(s,p){ return s+(Number(p.net)||0); }, 0);
+      try{ renderJourney(); }catch(e){}
+      if(!ps.length){ el.innerHTML='<div style="font-size:12.5px;color:var(--tx3)">No earnings yet. Accepted requests appear here, and become payable after their turnaround window.</div>'; return; }
+      el.innerHTML=ps.map(function(p){
+        var action;
+        if(p.payoutStatus){ action='<span class="chip" style="background:rgba(46,204,113,.15);color:var(--grn)">Sent · '+esc(p.payoutStatus.replace(/^Requested — /,''))+'</span>'; }
+        else if(p.eligible){ action='<button class="btn" style="padding:7px 13px;font-size:12.5px" onclick="requestPayout('+p.row+')">Request payment</button>'; }
+        else { action='<span style="font-size:11.5px;color:var(--tx3)">Available from '+esc(p.availableFrom||'—')+'</span>'; }
+        return '<div class="jobrow" style="margin-bottom:8px">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+          +'<div><div style="font-size:13.5px;font-weight:700;color:var(--tx)">'+esc(p.document||'Document')+'</div>'
+          +'<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+esc(p.candidateName||'')+' · '+esc(p.service||'Standard')+' · '+(p.turnaround||'—')+' days</div></div>'
+          +'<div style="text-align:right"><div style="font-size:15px;font-weight:800;color:var(--gold2)">'+ngnV(p.net)+'</div></div>'
+          +'</div>'
+          +'<div style="margin-top:10px;text-align:right">'+action+'</div>'
+          +'<div class="msg" id="pay'+p.row+'"></div>'
+          +'</div>';
+      }).join('');
+    }).catch(function(){ el.innerHTML='<div class="msg err" style="display:block">Could not reach the server.</div>'; });
+}
+function requestPayout(row){
+  var m=document.getElementById('pay'+row); if(m){ m.className='msg info'; m.style.display='block'; m.textContent='Requesting…'; }
+  fetch(VERIFIER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'claim-payout', token:S.token, row:row})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ if(m){ m.className='msg ok'; m.textContent='Payment requested — marked Sent.'; } loadMyPayouts(); }
+      else { if(m){ m.className='msg err'; m.textContent=(d&&d.error)||'Could not request.'; } }
+    }).catch(function(){ if(m){ m.className='msg err'; m.textContent='Could not reach the server.'; } });
+}
+
+/* ===== Verification Requests (job queue) ===== */
+function loadJobs(){
+  if(!S||!S.token) return;
+  fetch(VERIFIER_URL+'?action=unverified&token='+encodeURIComponent(S.token))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d.ok){ var el=document.getElementById('jobsBody'); if(el) el.innerHTML='<div class="msg err" style="display:block">'+esc(d.error||'Could not load requests.')+'</div>'; return; }
+      JOBS=d.items||[]; renderJobs();
+    }).catch(function(e){ var el=document.getElementById('jobsBody'); if(el) el.innerHTML='<div class="msg err" style="display:block">Could not reach the server.</div>'; });
+}
+function renderJobs(){
+  var el=document.getElementById('jobsBody'); if(!el) return;
+  if(!JOBS.length){ el.innerHTML='<div style="font-size:12.5px;color:var(--tx3);padding:8px 0">No cases available right now.</div>'; return; }
+  el.innerHTML = JOBS.map(function(j, idx){
+    return '<div class="jobrow">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+      +'<div><div style="font-size:14px;font-weight:700;color:var(--tx)">'+esc(j.item||'Credential')+'</div>'
+      +'<div style="font-size:11.5px;color:var(--tx3)">'+esc(j.name||j.stacsId)+' · '+esc(j.country||'')+' · requested '+esc(fmtDate(j.requestedAt))+'</div></div>'
+      +'<span class="chip '+(j.assignedToMe?'mine':'open')+'">'+(j.assignedToMe?'Assigned to you':'Open')+'</span>'
+      +'</div>'
+      +renderSubmitForm(j, idx)
+      +'</div>';
+  }).join('');
+}
+var JOB_EVIDENCE={};
+function renderSubmitForm(j, idx){
+  var fid='job'+idx;
+  return '<div style="margin-top:12px;border-top:1px solid var(--bdr);padding-top:12px">'
+    +'<label>How did you confirm this?</label><input id="'+fid+'_method" placeholder="e.g. Called the issuing body and confirmed registration">'
+    +'<label style="margin-top:10px">Evidence — confirmatory document</label>'
+    +'<div class="up" onclick="document.getElementById(\''+fid+'_evInput\').click()"><span id="'+fid+'_evTxt">Click to upload (PDF, JPG or PNG · max 5 MB)</span></div>'
+    +'<input type="file" id="'+fid+'_evInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="jobEvidenceSelected(\''+fid+'\',this)">'
+    +'<label style="margin-top:10px">Your remarks</label><textarea id="'+fid+'_remarks" rows="3" placeholder="What you checked and what you found (at least 10 characters)"></textarea>'
+    +'<div style="display:flex;gap:8px;margin-top:12px">'
+    +'<button class="btn" onclick="submitJob(\''+fid+'\',\''+esc(j.stacsId)+'\',\''+esc(j.slot)+'\',\''+esc(j.item)+'\',\'Verified\')">Mark Verified</button>'
+    +'<button class="btn secondary" onclick="submitJob(\''+fid+'\',\''+esc(j.stacsId)+'\',\''+esc(j.slot)+'\',\''+esc(j.item)+'\',\'Rejected\')">Mark Rejected</button>'
+    +'</div><div class="msg" id="'+fid+'_msg"></div></div>';
+}
+function jobEvidenceSelected(fid, input){
+  var f=input.files[0]; if(!f) return;
+  if(f.size>5*1024*1024){ alert('That file is larger than 5 MB.'); input.value=''; return; }
+  var rd=new FileReader();
+  rd.onload=function(){ JOB_EVIDENCE[fid]=rd.result; var t=document.getElementById(fid+'_evTxt'); if(t) t.innerHTML='\u2713 '+f.name; };
+  rd.readAsDataURL(f);
+}
+function submitJob(fid, stacsId, slot, item, decision){
+  var method=val(fid+'_method'), remarks=val(fid+'_remarks'), evidenceB64=JOB_EVIDENCE[fid];
+  var m=document.getElementById(fid+'_msg');
+  if(!method){ m.className='msg err'; m.style.display='block'; m.textContent='Please state how you confirmed this.'; return; }
+  if(!evidenceB64){ m.className='msg err'; m.style.display='block'; m.textContent='Evidence is mandatory — please upload a confirmatory document.'; return; }
+  if(!remarks || remarks.length<10){ m.className='msg err'; m.style.display='block'; m.textContent='Please add your remarks (at least 10 characters).'; return; }
+  m.className='msg info'; m.style.display='block'; m.textContent='Submitting…';
+  xhrUploadJSON({action:'submit-verification', token:S.token, stacsId:stacsId, slot:slot, item:item, decision:decision, method:method, evidenceB64:evidenceB64, remarks:remarks}, null,
+    function(d){
+      if(d&&d.ok){ m.className='msg ok'; m.textContent='Submitted — '+decision+'.'; setTimeout(loadJobs, 1200); }
+      else { m.className='msg err'; m.textContent=(d&&d.error)||'Could not submit.'; }
+    },
+    function(){ m.className='msg err'; m.textContent='Could not reach the server.'; });
+}
+
+function renderNext(){
+  var el=document.getElementById('nextBody'); if(!el||!PROFILE) return;
+  var msg;
+  if(PROFILE.emailVerified!=='Yes') msg='Check your email and click the verification link to activate your account.';
+  else if(PROFILE.stage==='Profile complete — ready to submit') msg='Your profile is complete — review the declarations and submit for approval above.';
+  else if(String(PROFILE.stage||'').indexOf('Submitted')===0) msg='Your profile is under review. We\u2019ll email you once you\u2019re approved.';
+  else if(PROFILE.status!=='Approved') msg='Complete your accreditation, scope and licence document to continue.';
+  else if(!JOBS.length) msg='You\u2019re approved and active — verification requests matching your scope will appear here as they come in.';
+  else msg='You have open cases waiting in Verification Requests.';
+  el.innerHTML='<div style="font-size:13.5px;color:var(--tx2)">'+esc(msg)+'</div>';
+}
+
+(function(){
+  if(S && S.token){
+    document.getElementById('loadingView').style.display='none';
+    document.getElementById('dashboardView').style.display='block';
+    loadFeeEngine(); loadProfile(); loadJobs(); loadAssignedRequests();
+  } else {
+    location.href='sign-in.html';
+  }
+})();
+</script>
+</body></html>

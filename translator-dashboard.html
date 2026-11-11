@@ -1,0 +1,246 @@
+<!DOCTYPE html><html lang="en"><head><script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Translator Dashboard</title>
+<style>
+:root{--bg:#0A2E16;--bg2:#0D3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.12);--bdr2:rgba(255,255,255,.22);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.68);--tx3:rgba(240,240,236,.42)}
+:root[data-theme="light"]{--bg:#F3F1EA;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#4f574a;--tx3:#6c7466}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);line-height:1.55}
+.logo{width:40px;height:40px;border-radius:50%;background:#fff;object-fit:cover;border:1.5px solid var(--gold)}
+.top{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:12px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20}
+.bn{font-size:14px;font-weight:800}.bt{font-size:9px;letter-spacing:.2em;color:var(--gold2)}
+.who{margin-left:auto;font-size:13px;color:var(--tx2);display:flex;align-items:center;gap:12px}
+.ghost{background:transparent;border:1px solid var(--bdr2);color:var(--tx);border-radius:100px;padding:7px 14px;font-size:12.5px;cursor:pointer}
+.wrap{max-width:1060px;margin:0 auto;padding:22px 20px 70px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:20px;margin-bottom:18px}
+.card h3{font-size:16px;margin:0}
+.sub{font-size:12.5px;color:var(--tx2);margin-bottom:12px}
+.banner{background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.3);border-radius:11px;padding:11px 14px;font-size:12.5px;color:var(--gold2);margin-bottom:16px}
+.bdg{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px}
+.job{background:var(--card2);border:1px solid var(--bdr);border-radius:11px;padding:14px;margin-bottom:10px}
+.job .t{font-size:14px;font-weight:700}
+.job .m{font-size:11.7px;color:var(--tx3);margin-top:3px}
+.btn{border:none;border-radius:8px;padding:9px 15px;font-size:12.5px;font-weight:700;cursor:pointer}
+.b1{background:var(--gold);color:#231a02}
+.b2{background:transparent;color:var(--tx2);border:1px solid var(--bdr2)}
+.empty{text-align:center;color:var(--tx3);padding:40px 20px;font-size:13.5px}
+.stat{display:flex;gap:20px;margin-bottom:14px;font-size:12.5px}
+.stat b{font-size:17px;display:block}
+label{font-size:11px;color:var(--tx);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px}
+input,textarea,select{width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px;font-family:inherit;margin-bottom:10px}
+.up{border:1.5px dashed var(--bdr2);border-radius:10px;padding:13px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--tx2);margin-bottom:10px}
+.up:hover{border-color:var(--gold2)}
+.msg{font-size:12.5px;border-radius:9px;padding:10px;margin-top:10px;display:none}
+</style></head><body>
+<div class="top"><a href="index.html" class="brandlink" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit" title="Back to STACS home"><img class="logo" src="logo.jpg" alt="STACS"><div><div class="bn">STACS</div></a><div class="bt">TRANSLATOR HUB</div></div>
+ <div class="who"><span id="whoName">Translator</span><a href="faq.html" style="color:var(--tx2);font-size:12.5px;text-decoration:none">Help</a><button class="ghost" onclick="logout()">Sign out</button></div></div>
+<div class="wrap">
+ <div class="banner"><b>Every translation needs a signed certificate of accuracy.</b> You cannot submit without one. Your ID is stamped on every record and your work is auditable.</div>
+
+ <div class="card" id="payoutCard">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><h3>Payout details</h3>
+   <span id="poState" class="bdg" style="background:rgba(255,255,255,.08);color:var(--tx2)">…</span></div>
+  <div class="sub">Where STACS pays you after a completed job. Saved once, then locked for your protection.</div>
+  <div id="poBody">Loading…</div>
+  <div class="msg" id="poMsg"></div>
+ </div>
+
+ <div class="card">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><h3>Your translation work</h3>
+   <span id="jobBadge" class="bdg" style="background:rgba(255,255,255,.08);color:var(--tx2)">…</span></div>
+  <div class="sub">Jobs offered to your tier, plus everything assigned to you. Payment is released when the requester confirms receipt.</div>
+  <div id="jobsBody">Loading…</div>
+ </div>
+</div>
+<script src="data/picker.js"></script>
+<script>
+const TRANSLATOR_URL="https://script.google.com/macros/s/AKfycbYBRY75JwvvyHGjtlgkzKGn47HTSA3fyqfWrF5DbQ3swjFIMDzAMfQ8jMWsu0lf3g4/exec";
+let SESSION=null, JOBS=[];
+try{SESSION=JSON.parse(localStorage.getItem('stacs_session'));}catch(e){}
+if(!SESSION||SESSION.role!=='translator'){ location.href='sign-in.html'; }
+else init();
+
+function init(){
+  document.getElementById('whoName').textContent=(SESSION.name||'Translator')+' · '+(SESSION.id||'')+(SESSION.tier?' · '+SESSION.tier:'');
+  if(SESSION.token){ fetch(TRANSLATOR_URL+'?action=session&token='+encodeURIComponent(SESSION.token))
+    .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok===false) logout(); }).catch(function(){}); }
+  loadJobs(); poLoad();
+}
+function esc(s){ return String(s||'').replace(/[<>]/g,''); }
+
+/* ---------------- jobs ---------------- */
+function loadJobs(){
+  fetch(TRANSLATOR_URL+'?action=my-jobs&token='+encodeURIComponent(SESSION.token))
+   .then(function(r){return r.json();}).then(paintJobs)
+   .catch(function(){ paintJobs({ok:true,open:2,completed:1,tier:SESSION.tier||'TR-2',jobs:[
+     {row:5,ref:'TJ-2201',candidate:'WK-4820193756-NG',document:"Bachelor's degree",pair:'English <-> French',requiredTier:'TR-2',pages:3,assigned:'',status:'Offered',requested:'2026-08-12',due:'2026-08-19',fee:36,mine:false},
+     {row:6,ref:'TJ-2202',candidate:'WK-5561120987-GH',document:'Affidavit',pair:'English <-> Arabic',requiredTier:'TR-3',pages:2,assigned:'',status:'Offered',requested:'2026-08-13',due:'2026-08-20',fee:28,mine:false},
+     {row:7,ref:'TJ-2198',candidate:'WK-3391220456-RW',document:'Trade test certificate',pair:'English <-> French',requiredTier:'TR-2',pages:1,assigned:SESSION.id,status:'Accepted',requested:'2026-08-05',due:'2026-08-15',fee:12,mine:true},
+     {row:8,ref:'TJ-2150',candidate:'WK-9902113345-TZ',document:'Employment reference',pair:'English <-> French',requiredTier:'TR-1',pages:1,assigned:SESSION.id,status:'Completed',requested:'2026-07-02',due:'2026-07-12',fee:12,payout:'Released',mine:true}
+   ]}); });
+}
+var TIER_ORDER={'TR-1':1,'TR-2':2,'TR-3':3,'TR-4':4};
+function canDo(required){ return (TIER_ORDER[SESSION.tier]||0) >= (TIER_ORDER[required]||1); }
+function paintJobs(d){
+  if(!d||d.ok===false){ document.getElementById('jobsBody').textContent='Could not load your jobs.'; return; }
+  JOBS=d.jobs||[];
+  var b=document.getElementById('jobBadge');
+  b.textContent=(d.tier||SESSION.tier||'')+' · '+(d.open||0)+' open';
+  b.style.background='rgba(200,146,10,.18)'; b.style.color='var(--gold2)';
+  var body=document.getElementById('jobsBody');
+  if(!JOBS.length){ body.innerHTML='<div class="empty">No translation jobs yet. You will be offered work that matches your tier and language pairs.</div>'; return; }
+  var stat='<div class="stat"><div><b>'+(d.open||0)+'</b><span style="color:var(--tx3)">open</span></div>'
+    +'<div><b style="color:#2ECC71">'+(d.completed||0)+'</b><span style="color:var(--tx3)">completed</span></div>'
+    +'<div><b>'+JOBS.length+'</b><span style="color:var(--tx3)">total</span></div></div>';
+  body.innerHTML=stat+JOBS.map(function(j,i){
+    var eligible=canDo(j.requiredTier);
+    var sc = j.status==='Completed'?'background:rgba(46,204,113,.15);color:#2ECC71'
+           : j.status==='Accepted'?'background:rgba(200,146,10,.18);color:#E2A53A'
+           : 'background:rgba(255,255,255,.08);color:var(--tx2)';
+    var actions='';
+    if(j.status==='Offered'){
+      actions = eligible
+        ? '<button class="btn b1" onclick="accept('+i+')">Accept job</button> <button class="btn b2" onclick="decline('+i+')">Decline</button>'
+        : '<span style="font-size:12px;color:var(--rd)">Requires '+j.requiredTier+' — outside your accreditation.</span>';
+    } else if(j.status==='Accepted' && j.mine){
+      actions = '<button class="btn b1" onclick="openSubmit('+i+')">Submit translation</button>';
+    } else if(j.status==='Completed'){
+      actions = '<span style="font-size:12px;color:var(--tx3)">Payout: '+(j.payout||'Held')+'</span>';
+    }
+    return '<div class="job" id="job'+i+'"><div style="display:flex;align-items:center;gap:9px">'
+      +'<span class="t">'+esc(j.document)+'</span><span class="bdg" style="'+sc+'">'+j.status+'</span>'
+      +'<span class="bdg" style="background:rgba(255,255,255,.06);color:var(--tx3)">'+j.requiredTier+'</span></div>'
+      +'<div class="m">'+esc(j.pair)+' · '+(j.pages||1)+' page(s) · '+esc(j.candidate)+' · due '+String(j.due).slice(0,10)+' · fee $'+(j.fee||0)+'</div>'
+      +'<div style="margin-top:10px">'+actions+'</div>'
+      +'<div id="sub'+i+'"></div></div>';
+  }).join('');
+}
+function accept(i){
+  var j=JOBS[i];
+  fetch(TRANSLATOR_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'accept-job',token:SESSION.token,row:j.row})}).catch(function(){});
+  j.status='Accepted'; j.assigned=SESSION.id; j.mine=true; paintJobs({ok:true,jobs:JOBS,tier:SESSION.tier,open:JOBS.filter(function(x){return x.status!=='Completed';}).length,completed:JOBS.filter(function(x){return x.status==='Completed';}).length});
+}
+function decline(i){
+  var j=JOBS[i];
+  fetch(TRANSLATOR_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'decline-job',token:SESSION.token,row:j.row})}).catch(function(){});
+  JOBS.splice(i,1); paintJobs({ok:true,jobs:JOBS,tier:SESSION.tier,open:JOBS.filter(function(x){return x.status!=='Completed';}).length,completed:JOBS.filter(function(x){return x.status==='Completed';}).length});
+}
+var TFILE={}, CFILE={};
+function openSubmit(i){
+  document.getElementById('sub'+i).innerHTML=
+    '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-top:12px">'
+    +'<label>Translated document *</label>'
+    +'<div class="up" onclick="document.getElementById(\'tf'+i+'\').click()"><span id="tftxt'+i+'">Click to upload (PDF, JPG or PNG · max 5 MB)</span></div>'
+    +'<input type="file" id="tf'+i+'" accept=".pdf,.jpg,.jpeg,.png" style="display:none">'
+    +'<label>Certificate of accuracy * <span style="text-transform:none;color:var(--tx3)">(signed — mandatory)</span></label>'
+    +'<div class="up" onclick="document.getElementById(\'cf'+i+'\').click()"><span id="cftxt'+i+'">Click to upload (PDF, JPG or PNG · max 5 MB)</span></div>'
+    +'<input type="file" id="cf'+i+'" accept=".pdf,.jpg,.jpeg,.png" style="display:none">'
+    +'<label>Notes (optional)</label><textarea id="nt'+i+'" rows="2" placeholder="Terminology choices, source quality, anything the reader should know."></textarea>'
+    +'<div style="font-size:11.5px;color:var(--gold2);background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.3);border-radius:8px;padding:9px 11px;margin-bottom:10px">'
+    +'By submitting you confirm this is a complete and faithful rendering of the source. Nothing summarised, omitted or corrected.</div>'
+    +'<button class="btn b1" onclick="submitTranslation('+i+')">Submit translation</button> '
+    +'<button class="btn b2" onclick="document.getElementById(\'sub'+i+'\').innerHTML=\'\'">Cancel</button>'
+    +'<div class="msg" id="sm'+i+'"></div></div>';
+  bindFile('tf'+i,'tftxt'+i,function(b64){TFILE[i]=b64;});
+  bindFile('cf'+i,'cftxt'+i,function(b64){CFILE[i]=b64;});
+}
+function bindFile(inputId,labelId,cb){
+  var el=document.getElementById(inputId); if(!el) return;
+  el.addEventListener('change',function(e){
+    var f=e.target.files[0]; if(!f)return;
+    if(f.type!=='application/pdf' && !/^image\//.test(f.type)){ alert('Please upload a PDF, JPG or PNG file.'); el.value=''; return; }
+    var cap=(f.type==='application/pdf')?5*1024*1024:2*1024*1024;
+    if(f.size>cap){ alert('That file is too large. Maximum '+(f.type==='application/pdf'?'5 MB for PDFs':'2 MB for images')+'.'); el.value=''; return; }
+    var r=new FileReader(); r.onload=function(){ cb(r.result); document.getElementById(labelId).innerHTML='&#10003; '+f.name; }; r.readAsDataURL(f);
+  });
+}
+function submitTranslation(i){
+  var j=JOBS[i], m=document.getElementById('sm'+i);
+  m.style.display='block';
+  if(!TFILE[i]){ m.style.background='rgba(232,106,106,.12)';m.style.color='#E86A6A';m.textContent='Please attach the translated document.'; return; }
+  if(!CFILE[i]){ m.style.background='rgba(232,106,106,.12)';m.style.color='#E86A6A';m.textContent='A signed certificate of accuracy is required. A translation cannot be submitted without one.'; return; }
+  fetch(TRANSLATOR_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'submit-translation',token:SESSION.token,
+    row:j.row, translationB64:TFILE[i], certificateB64:CFILE[i], notes:(document.getElementById('nt'+i)||{}).value||''})}).catch(function(){});
+  m.style.background='rgba(46,204,113,.12)';m.style.color='#2ECC71';
+  m.textContent='Submitted with your certificate of accuracy. Payment is released when the requester confirms receipt.';
+  j.status='Completed'; j.payout='Held';
+  setTimeout(function(){ paintJobs({ok:true,jobs:JOBS,tier:SESSION.tier,open:JOBS.filter(function(x){return x.status!=='Completed';}).length,completed:JOBS.filter(function(x){return x.status==='Completed';}).length}); },1500);
+}
+
+/* ---------------- payout card (shared pattern) ---------------- */
+var poField='display:block;width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px;font-family:inherit;margin-bottom:10px';
+var poLabel='font-size:11px;color:var(--tx);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px';
+function poMsg(kind,txt){var m=document.getElementById('poMsg');m.style.display=txt?'block':'none';m.textContent=txt||'';
+  m.style.background=kind==='ok'?'rgba(46,204,113,.12)':'rgba(232,106,106,.12)';m.style.color=kind==='ok'?'#2ECC71':'#E86A6A';}
+function poBadge(t,c){var b=document.getElementById('poState');b.textContent=t;
+  b.style.background=c==='green'?'rgba(46,204,113,.15)':c==='gold'?'rgba(200,146,10,.18)':'rgba(255,255,255,.08)';
+  b.style.color=c==='green'?'#2ECC71':c==='gold'?'#E2A53A':'var(--tx2)';}
+function poLoad(){
+  fetch(TRANSLATOR_URL+'?action=payout-get&token='+encodeURIComponent(SESSION.token))
+   .then(function(r){return r.json();}).then(poRender)
+   .catch(function(){ poRender({ok:true,state:'empty'}); });
+}
+function poForm(){
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+   +'<div><label style="'+poLabel+'">Account holder *</label><input id="po_holder" style="'+poField+'"></div>'
+   +'<div><label style="'+poLabel+'">Bank name *</label><input id="po_bank" style="'+poField+'"></div>'
+   +'<div><label style="'+poLabel+'">Account number / IBAN *</label><input id="po_account" style="'+poField+'"></div>'
+   +'<div><label style="'+poLabel+'">SWIFT / BIC</label><input id="po_swift" style="'+poField+'"></div>'
+   +'<div><label style="'+poLabel+'">Bank country *</label><input id="po_country" style="'+poField+'"></div>'
+   +'<div><label style="'+poLabel+'">Currency *</label><input id="po_currency" placeholder="e.g. NGN, USD" style="'+poField+'"></div>'
+   +'</div><div style="font-size:11.5px;color:#E2A53A;background:rgba(200,146,10,.1);border:1px solid rgba(200,146,10,.3);border-radius:8px;padding:9px 11px;margin-bottom:12px">'
+   +'Check carefully. Once saved these details are <b>locked</b>. Changing them later needs a written reason and a supporting PDF, approved by our team.</div>'
+   +'<button class="btn b1" onclick="poSave()">Save &amp; lock payout details</button>';
+}
+function poRender(d){
+  var body=document.getElementById('poBody');
+  if(!d||d.ok===false){ poBadge('—',''); body.textContent=(d&&d.error)||'Unavailable.'; return; }
+  if(d.state==='empty'){ poBadge('Not set',''); body.innerHTML=poForm(); return; }
+  var sum='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:12px">'
+   +'<div><div style="font-size:10.5px;color:var(--tx3);text-transform:uppercase">Account holder</div><div>'+(d.holder||'')+'</div></div>'
+   +'<div><div style="font-size:10.5px;color:var(--tx3);text-transform:uppercase">Bank</div><div>'+(d.bank||'')+'</div></div>'
+   +'<div><div style="font-size:10.5px;color:var(--tx3);text-transform:uppercase">Account</div><div style="font-family:ui-monospace,monospace">'+(d.account||'')+'</div></div>'
+   +'<div><div style="font-size:10.5px;color:var(--tx3);text-transform:uppercase">Country / currency</div><div>'+(d.country||'')+' · '+(d.currency||'')+'</div></div></div>';
+  if(d.state==='Locked'){ poBadge('Locked','green');
+    body.innerHTML=sum+'<div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Locked. Previous accounts are archived and never overwritten.</div>'
+      +'<button class="btn b2" onclick="poReq()">Request change</button><div id="poReqBox"></div>'; }
+  else if(d.state==='Change requested'){ poBadge('Change under review','gold');
+    body.innerHTML=sum+'<div style="font-size:12.5px;color:#E2A53A">Your change request is under review. Your current account stays locked until a decision is made.</div>'; }
+  else if(d.state==='Unlocked'){ poBadge('Edit window open','gold');
+    body.innerHTML='<div style="font-size:12.5px;color:#E2A53A;margin-bottom:12px">Approved — enter the new details. The window closes '+(d.unlockedUntil?new Date(d.unlockedUntil).toLocaleString():'shortly')+'.</div>'+poForm(); }
+}
+function poVal(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function poSave(){
+  var data={holder:poVal('po_holder'),bank:poVal('po_bank'),account:poVal('po_account'),swift:poVal('po_swift'),
+            country:poVal('po_country'),currency:poVal('po_currency')};
+  if(!data.holder||!data.bank||!data.account||!data.country||!data.currency){ poMsg('err','Please complete all required fields (*).'); return; }
+  fetch(TRANSLATOR_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'payout-save',token:SESSION.token,data:data})}).catch(function(){});
+  poMsg('ok','Payout details saved and locked. A confirmation email is on its way.');
+  setTimeout(poLoad,1300);
+}
+function poReq(){
+  document.getElementById('poReqBox').innerHTML='<div style="margin-top:12px">'
+   +'<label style="'+poLabel+'">Why do you need to change your payout account? *</label>'
+   +'<textarea id="po_reason" rows="3" style="'+poField+'" placeholder="Explain clearly — e.g. the account was closed by the bank."></textarea>'
+   +'<label style="'+poLabel+'">Supporting document (PDF) *</label>'
+   +'<input type="file" id="po_evidence" accept=".pdf,.jpg,.jpeg,.png" style="'+poField+'">'
+   +'<button class="btn b1" onclick="poSubmitReq()">Submit change request</button></div>';
+}
+function poSubmitReq(){
+  var reason=poVal('po_reason'), f=document.getElementById('po_evidence').files[0];
+  if(reason.length<15){ poMsg('err','Please explain the reason (at least 15 characters).'); return; }
+  if(!f){ poMsg('err','Please attach a supporting PDF.'); return; }
+  var r=new FileReader();
+  r.onload=function(){
+    fetch(TRANSLATOR_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'payout-request',token:SESSION.token,reason:reason,evidenceB64:r.result})}).catch(function(){});
+    poMsg('ok','Change request submitted. We will review it and email you the decision.');
+    setTimeout(poLoad,1300);
+  };
+  r.readAsDataURL(f);
+}
+function logout(){localStorage.removeItem('stacs_session');location.href='sign-in.html';}
+</script>
+<button id="themeBtn" onclick="stacsTheme()" aria-label="Toggle day / night view" style="position:fixed;bottom:22px;left:22px;z-index:9998;width:46px;height:46px;border-radius:50%;background:var(--card2);color:var(--gold2);border:1px solid var(--bdr2);cursor:pointer;font-size:19px;box-shadow:0 6px 16px rgba(0,0,0,.28)">&#127769;</button>
+<script>function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
+(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}catch(e){}})();</script>
+</body></html>

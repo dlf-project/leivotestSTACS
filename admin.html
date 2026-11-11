@@ -1,0 +1,1506 @@
+<!DOCTYPE html><html lang="en"><head><script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS · Admin Console</title>
+<style>
+:root{--bg:#062514;--bg2:#0D3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.12);--gold:#C8920A;--gold2:#E2A53A;--grn:#2ECC71;--rd:#E86A6A;--tx:#F0F0EC;--tx2:rgba(240,240,236,.66);--tx3:rgba(240,240,236,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+.top{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:12px 22px;display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:50%;background:#fff;object-fit:cover;border:1.5px solid var(--gold)}
+.bn{font-size:14px;font-weight:800}.bt{font-size:9px;letter-spacing:.2em;color:var(--gold2)}
+.top .r{margin-left:auto;display:flex;gap:10px;align-items:center}
+.ghost{background:transparent;border:1px solid var(--bdr);color:var(--tx);border-radius:100px;padding:7px 14px;font-size:12.5px;cursor:pointer}
+.wrap{max-width:1100px;margin:24px auto;padding:0 20px}
+/* gate */
+.gate{max-width:400px;margin:60px auto;background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:28px}
+.gate h1{font-size:20px;margin-bottom:6px}.gate p{font-size:13px;color:var(--tx2);margin-bottom:18px}
+.gate input{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;color:var(--tx);font-size:14px;margin-bottom:12px}
+.btn{width:100%;background:var(--gold);color:#231a02;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:14px;cursor:pointer}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.col h2{font-size:16px;margin-bottom:4px}.col .sub{font-size:12px;color:var(--tx3);margin-bottom:14px}
+.row{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.row .info{flex:1;min-width:0}
+.row .nm{font-size:14px;font-weight:700}.row .dt{font-size:11.5px;color:var(--tx3);word-break:break-all}
+.row .meta{font-size:11.5px;color:var(--tx2);margin-top:2px}
+.vbadge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;background:rgba(46,204,113,.15);color:var(--grn)}
+.vbadge.no{background:rgba(232,106,106,.15);color:var(--rd)}
+.ap{background:var(--gold);color:#231a02;border:none;border-radius:8px;padding:9px 14px;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
+/* side nav */
+.ashell{display:flex;gap:20px;max-width:1200px;margin:24px auto;padding:0 20px;align-items:flex-start}
+.anav{flex:0 0 210px;position:sticky;top:20px;background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:10px}
+.anav .h{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--tx3);padding:8px 10px 6px}
+.anav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;color:var(--tx2);font-size:13.5px;font-family:inherit;padding:10px 11px;border-radius:9px;cursor:pointer}
+.anav button:hover{background:var(--card2);color:var(--tx)}
+.anav button.active{background:var(--card2);color:var(--tx);font-weight:700}
+.anav button .i{width:20px;text-align:center;font-size:15px}
+.acontent{flex:1;min-width:0}
+.apanel{display:none}.apanel.show{display:block}
+/* modal */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:200;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 16px}
+.modal-back.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:16px;max-width:680px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+body.modal-open{overflow:hidden}
+@media(max-width:820px){.ashell{flex-direction:column}.anav{position:static;width:100%;display:flex;gap:6px;overflow-x:auto}.anav .h{display:none}.anav button{white-space:nowrap;flex:0 0 auto}}
+.ap:disabled{opacity:.5;cursor:default}
+.empty{color:var(--tx3);font-size:13px;padding:24px;text-align:center;background:var(--card);border-radius:12px;border:1px dashed var(--bdr)}
+.resL{font-size:11.5px;color:var(--tx2);font-weight:700;display:block;margin-bottom:4px}
+.resI{width:100%;box-sizing:border-box;background:var(--card);border:1px solid var(--bdr);color:var(--tx);border-radius:9px;padding:9px 11px;font:inherit;font-size:13px;outline:none}
+.resI:focus{border-color:var(--gold2)}
+.msg{font-size:12.5px;border-radius:9px;padding:10px 12px;margin-bottom:14px;display:none}
+.msg.ok{background:rgba(46,204,113,.12);color:var(--grn);display:block}.msg.err{background:rgba(232,106,106,.12);color:var(--rd);display:block}
+@media(max-width:760px){.cols{grid-template-columns:1fr}}
+:root[data-theme="light"]{--bg:#F3F1EA;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F5F4EE;--s1:#FFFFFF;--s2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#4f574a;--tx3:#6c7466;--gp:rgba(200,146,10,.13);--grnp:rgba(46,204,113,.14);--gold:#8A6508;--gold2:#7A5A07;--grn:#1B7A43;--rd:#B3352F}.pw-wrap{position:relative}
+.pw-wrap input{padding-right:64px!important}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gold2);font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 6px;text-transform:uppercase;letter-spacing:.4px}
+@media print{
+  body{background:#fff !important;color:#000 !important}
+  .anav,.top,.noprint,#adminNav,.apanel:not(.show){display:none !important}
+  .ashell{display:block;margin:0;padding:0}
+  .apanel.show{display:block !important}
+  #rpResult table{width:100%;border-collapse:collapse;color:#000}
+  #rpResult th,#rpResult td{border:1px solid #999;padding:6px 8px;font-size:11px;color:#000}
+  #rpResult h2,#rpResult h3,#rpResult div{color:#000 !important}
+}
+</style><style id="sharpCorners">
+/* Global sharp-corner redesign: square off all rounded rectangles (cards, buttons, inputs, chips, modals) while keeping circular avatars round. */
+*{border-radius:0 !important}
+[style*="border-radius:50%"],[style*="border-radius: 50%"],.av,.logo,.avatar,img.logo,.snico{border-radius:50% !important}
+</style>
+</head><body>
+<div id="gate" class="gate">
+ <h1>STACS Admin</h1><p>Enter your admin key to review and approve pending registrations.</p>
+ <input id="key" type="password" placeholder="Admin key" onkeydown="if(event.key==='Enter')enter()">
+ <button class="btn" onclick="enter()">Open console</button>
+ <div class="msg" id="gateMsg"></div>
+</div>
+<div id="app" style="display:none">
+ <div class="top"><a href="index.html" class="brandlink" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit" title="Back to STACS home"><img class="logo" src="data:image/jpeg;base64,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" alt="STACS"><div><div class="bn">STACS</div></a><div class="bt">ADMIN CONSOLE</div></div>
+  <div class="r"><button class="ghost" onclick="loadAll()">Refresh</button><button class="ghost" onclick="lock()">Lock</button></div></div>
+ <div class="ashell">
+  <nav class="anav" id="adminNav">
+    <div class="h">Console</div>
+    <button class="active" data-panel="stats" onclick="showPanel('stats',this)"><span class="i">📊</span>Statistics</button>
+    <button data-panel="skilled" onclick="showPanel('skilled',this)"><span class="i">🔨</span>Skilled Workers</button>
+    <button data-panel="verifiers" onclick="showPanel('verifiers',this)"><span class="i">🔍</span>Verifiers</button>
+    <button data-panel="translators" onclick="showPanel('translators',this)"><span class="i">🌐</span>Translators</button>
+    <button data-panel="employers" onclick="showPanel('employers',this)"><span class="i">🏢</span>Employers</button>
+    <button data-panel="qa" onclick="showPanel('qa',this)"><span class="i">🛡️</span>QA &amp; Appeals</button>
+    <button data-panel="payouts" onclick="showPanel('payouts',this)"><span class="i">💳</span>Payouts</button>
+    <button data-panel="reports" onclick="showPanel('reports',this)"><span class="i">📋</span>Reports &amp; search</button>
+    <button data-panel="email" onclick="showPanel('email',this)"><span class="i">✉️</span>Send email</button>
+    <button data-panel="fees" onclick="showPanel('fees',this)"><span class="i">💰</span>Promotion fees</button>
+    <button data-panel="resumes" onclick="showPanel('resumes',this)"><span class="i">📝</span>Resume Requests</button>
+  </nav>
+  <div class="acontent">
+   <div class="msg" id="msg"></div>
+
+   <div class="apanel show" id="panel-stats">
+     <h2 style="margin-bottom:4px">Platform at a glance</h2>
+     <div class="sub">Skilled workers and employers are active as soon as they verify their email. Verifiers and translators are reviewed by you.</div>
+     <div id="statsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:12px">Loading…</div>
+   </div>
+
+   <div class="apanel" id="panel-skilled">
+     <h2 style="margin-bottom:4px">Skilled Worker hub</h2>
+     <div class="sub">Search by full name, STACS ID, email or phone number. Click a member to open their full record.</div>
+     <input id="memSearch" oninput="memSearchDebounced()" placeholder="Search by name, ID, email or phone…" style="width:100%;max-width:440px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13.5px;margin:10px 0 12px">
+     <div id="memList">Loading members…</div>
+     <h3 style="margin:22px 0 4px;font-size:14px">Accounts stuck on unverified email</h3>
+     <div class="sub" style="margin-bottom:10px">Registered but never confirmed their email — often a delivery failure or a typo. Correct the address below and resend.</div>
+     <div id="unverified-skilled"></div>
+   </div>
+
+   <div class="apanel" id="panel-verifiers">
+     <h2>Verifiers</h2><div class="sub">All verifiers. Search by name, ID, email, phone or accrediting body. Pending verifiers await your approval before they can operate.</div>
+     <input id="memSearch-verifier" oninput="memSearchDebounced('verifier')" placeholder="Search verifiers…" style="width:100%;max-width:440px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13.5px;margin:10px 0 12px">
+     <select id="memSort-verifier" onchange="loadMembers('verifier')" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13px;margin:0 0 12px 8px">
+       <option value="recent">Sort: Newest first</option>
+       <option value="oldest">Oldest first</option>
+       <option value="name">Name (A–Z)</option>
+       <option value="status">Status (pending first)</option>
+       <option value="country">Country (A–Z)</option>
+     </select>
+     <div id="memList-verifier">Loading…</div>
+     <h3 style="margin:22px 0 4px;font-size:14px">Accounts stuck on unverified email</h3>
+     <div class="sub" style="margin-bottom:10px">Registered but never confirmed their email — often a delivery failure or a typo. Correct the address below and resend.</div>
+     <div id="unverified-verifier"></div>
+     <h3 style="margin:22px 0 4px;font-size:14px">Pending approval</h3>
+     <div id="verifiers"></div>
+
+   </div>
+
+   <div class="apanel" id="panel-translators">
+     <h2>Translators</h2><div class="sub">All translators with their granted tier. Search by name, ID, email, phone or tier. Pending translators await approval and tier assignment.</div>
+     <input id="memSearch-translator" oninput="memSearchDebounced('translator')" placeholder="Search translators…" style="width:100%;max-width:440px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13.5px;margin:10px 0 12px">
+     <div id="memList-translator">Loading…</div>
+     <h3 style="margin:22px 0 4px;font-size:14px">Pending approval</h3>
+     <div id="translators"></div>
+   </div>
+
+   <div class="apanel" id="panel-employers">
+     <h2>Employers</h2><div class="sub">All employers. They join automatically on email verification, but must be <b>business-verified</b> here before they can be granted hiring access. Verification confirms the organization is real and authorized.</div>
+     <input id="empVerSearch" oninput="loadEmpVerification()" placeholder="Search employers by company, name, ID, country…" style="width:100%;max-width:440px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13.5px;margin:10px 0 12px">
+     <div id="empVerList">Loading…</div>
+   </div>
+
+   <div class="apanel" id="panel-qa">
+     <h2>Quality Assurance &amp; Appeals</h2><div class="sub">Flagged verifications. A verifier is not paid until you decide, and every decision is stamped into the audit trail.</div>
+     <div id="qa" style="margin-top:10px"></div>
+   </div>
+
+   <div class="apanel" id="panel-payouts">
+     <h2>Payout change requests</h2><div class="sub">A member can only change locked bank details with your approval. The old account is archived automatically.</div>
+     <div id="payouts" style="margin-top:10px"></div>
+   </div>
+
+   <div class="apanel" id="panel-reports">
+     <h2>Reports &amp; cross-hub search</h2>
+     <div class="sub">Search across selected hubs, optionally within a date range, then print or export the summary for internal use.</div>
+     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:14px 0" class="noprint">
+       <div style="flex:1;min-width:220px">
+         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Search term (name, ID, email, phone)</label>
+         <input id="rpQuery" placeholder="Leave blank to list everyone…" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px">
+       </div>
+       <div>
+         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Registered from</label>
+         <input id="rpFrom" type="date" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px;color-scheme:dark">
+       </div>
+       <div>
+         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">to</label>
+         <input id="rpTo" type="date" style="background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px;color-scheme:dark">
+       </div>
+     </div>
+     <div class="noprint" style="margin-bottom:6px">
+       <div style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);margin-bottom:6px">Include hubs</div>
+       <label style="font-size:13px;margin-right:14px;cursor:pointer"><input type="checkbox" class="rpHub" value="skilled" checked> Skilled workers</label>
+       <label style="font-size:13px;margin-right:14px;cursor:pointer"><input type="checkbox" class="rpHub" value="verifier" checked> Verifiers</label>
+       <label style="font-size:13px;margin-right:14px;cursor:pointer"><input type="checkbox" class="rpHub" value="translator" checked> Translators</label>
+       <label style="font-size:13px;margin-right:14px;cursor:pointer"><input type="checkbox" class="rpHub" value="employer" checked> Employers</label>
+     </div>
+     <div class="noprint" style="margin:12px 0">
+       <button class="ap" onclick="runReport()">Run report</button>
+       <button class="ghost" onclick="printReport()" style="margin-left:8px">Print / save PDF</button>
+     </div>
+     <div id="rpResult"></div>
+   </div>
+
+   <div class="apanel" id="panel-email">
+     <h2>Send email</h2>
+     <div class="sub">Pick a template, choose recipients, review, then send. Every message is branded, personalised, logged, and includes the standard trust footer. Limit: 200 recipients per send.</div>
+
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0">
+       <div>
+         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Template</label>
+         <select id="emTemplate" onchange="emLoadTemplate()" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px"></select>
+       </div>
+       <div>
+         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Recipients</label>
+         <select id="emAudience" onchange="emAudienceChange()" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px">
+           <option value="">Select…</option>
+           <optgroup label="Everyone matching a search">
+             <option value="search-skilled">Skilled workers — all matching</option>
+             <option value="search-verifier">Verifiers — all matching</option>
+             <option value="search-translator">Translators — all matching</option>
+             <option value="search-employer">Employers — all matching</option>
+           </optgroup>
+           <optgroup label="Pick specific people">
+             <option value="pick-skilled">Skilled workers — pick from list</option>
+             <option value="pick-verifier">Verifiers — pick from list</option>
+             <option value="pick-translator">Translators — pick from list</option>
+             <option value="pick-employer">Employers — pick from list</option>
+           </optgroup>
+           <option value="paste">Paste a list of emails / IDs</option>
+         </select>
+       </div>
+     </div>
+
+     <div id="emAudienceBox" style="display:none;margin-bottom:12px">
+       <div style="position:relative">
+         <input id="emSearch" oninput="emSearchLive()" onblur="setTimeout(function(){var r=document.getElementById('emResults');if(r)r.style.display='none';},180)" placeholder="Search to narrow recipients (blank = everyone in that hub)…" style="width:100%;max-width:440px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px">
+         <button class="ghost" onclick="emLoadRecipients()" style="margin-left:8px">Load recipients</button>
+         <div id="emResults" style="display:none;position:absolute;z-index:60;left:0;right:0;max-width:440px;max-height:240px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:9px;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,.35)"></div>
+       </div>
+       <div id="emChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+       <div id="emRecipInfo" style="font-size:12px;color:var(--tx2);margin-top:8px"></div>
+     </div>
+
+     <div id="emPasteBox" style="display:none;margin-bottom:12px">
+       <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Paste emails or STACS IDs (one per line, or comma/space separated)</label>
+       <textarea id="emPaste" placeholder="jane@example.com&#10;WK-1234567890-NG&#10;john@example.com" style="width:100%;min-height:120px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-size:13px;font-family:inherit;resize:vertical"></textarea>
+       <div style="margin-top:8px"><span style="font-size:11px;color:var(--tx3)">Which hub to resolve IDs/emails against:</span>
+         <select id="emPasteHub" style="background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:7px 10px;color:var(--tx);font-size:12.5px;margin-left:6px">
+           <option value="skilled">Skilled workers</option><option value="verifier">Verifiers</option><option value="translator">Translators</option><option value="employer">Employers</option>
+         </select>
+         <button class="ghost" onclick="emResolvePaste()" style="margin-left:8px">Resolve list</button>
+       </div>
+       <div id="emPasteInfo" style="font-size:12px;color:var(--tx2);margin-top:8px"></div>
+     </div>
+
+     <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Subject</label>
+     <input id="emSubject" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px;margin-bottom:12px">
+
+     <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Message (use {{FirstName}} to personalise; fill any other {{fields}} yourself)</label>
+     <div id="emFills"></div>
+     <textarea id="emBody" style="width:100%;min-height:220px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:12px;color:var(--tx);font-size:13.5px;font-family:inherit;resize:vertical;line-height:1.6"></textarea>
+
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+       <div>
+         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Campaign image URL (optional)</label>
+         <input id="emImageUrl" placeholder="https://www.leivotest.com/stacs/images/banner.jpg" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13px">
+         <div style="font-size:11px;color:var(--tx3);margin-top:4px">Host the image (Hostinger/Drive) and paste its link. Works for any campaign size.</div>
+       </div>
+       <div>
+         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Attach files (optional)</label>
+         <input type="file" id="emFiles" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="emFilesChange()" style="width:100%;font-size:12.5px;color:var(--tx2)">
+         <div style="font-size:11px;color:var(--tx3);margin-top:4px">Attachments limited to sends of 20 recipients or fewer. <span id="emFilesInfo"></span></div>
+       </div>
+     </div>
+
+     <div style="margin-top:12px">
+       <button class="ap" onclick="emReview()">Review &amp; send</button>
+     </div>
+     <div id="emStatus" style="font-size:13px;margin-top:12px"></div>
+   </div>
+
+   <div class="apanel" id="panel-fees">
+     <h2>Promotion fees</h2>
+     <div class="sub">Edit candidate promotion prices here. Changes save to the platform immediately — no code or redeploy needed. Prices are in the charge currency (NGN). Total = base price (by coverage × duration) × package multiplier.</div>
+     <div id="feesBody" style="margin-top:14px">Loading…</div>
+   </div>
+
+   <div class="apanel" id="panel-resumes">
+     <h2 style="margin-bottom:4px">Resume Requests</h2>
+     <div class="sub">Custom Resume Drafting Service. Review, prepare, lock and approve each candidate's professionally written resume. On approval two PDFs are produced: a private copy with contact details for the candidate, and a shareable copy without contact details for employers and recruiters. Every request is recorded in the <b>Resume Requests</b> tab of the Candidate spreadsheet.</div>
+     <input id="resSearch" oninput="loadResumeAdmin()" placeholder="Search by request ID, candidate, package or status…" style="width:100%;max-width:440px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13.5px;margin:12px 0">
+     <div id="resList">Loading requests…</div>
+     <div id="resDetail" style="margin-top:16px"></div>
+   </div>
+  </div>
+ </div>
+
+ <div class="modal-back" id="emModalBack" onclick="if(event.target===this)emCloseModal()">
+   <div class="modal" id="emModal"></div>
+ </div>
+
+ <!-- locked modal for member detail -->
+ <div class="modal-back" id="memModalBack" onclick="if(event.target===this)closeMember()">
+   <div class="modal" id="memModal"></div>
+ </div>
+
+ <!-- email candidate for additional information -->
+ <div class="modal-back" id="resEmailBack" onclick="if(event.target===this)resEmailClose()">
+   <div class="modal" id="resEmailModal"></div>
+ </div>
+</div>
+<script>
+const SKILLED_URL="https://script.google.com/macros/s/AKfycbwtUYMty_LLT2MohBVwnMoCNRsm-r2b1A4rJRcU6q9B8x-1eOHJgzctiagmKrybo5alqg/exec";
+const EMPLOYER_URL="https://script.google.com/macros/s/AKfycbwPlLG5bdp5MsTFUU6RYLdz6g5zWJLRkmjmkkenqqWBz4Xy9PoSIZVRDA4iZSRBHRBq/exec";
+let TOK={w:'',e:'',v:'',t:''};
+async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function enter(){
+ const key=document.getElementById('key').value.trim();const gm=document.getElementById('gateMsg');gm.className='msg';gm.textContent='';
+ if(!key)return;
+ const kh=await sha256(key);
+ try{
+   const [rw,re,rv,rt]=await Promise.all([
+     fetch(SKILLED_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
+     fetch(EMPLOYER_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
+     fetch(VERIFIER_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
+     fetch(TRANSLATOR_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false}))
+   ]);
+   if(!rw.ok && !re.ok){gm.className='msg err';gm.textContent='Admin key rejected, or receivers not reachable.';return;}
+   TOK.w=rw.token||'';TOK.e=re.token||'';TOK.v=(rv&&rv.token)||'';TOK.t=(rt&&rt.token)||'';
+   document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';loadAll();
+ }catch(e){gm.className='msg err';gm.textContent='Could not reach the receivers.';}
+}
+function lock(){TOK={w:'',e:'',v:'',t:''};location.reload();}
+
+const VERIFIER_URL_ADMIN="https://script.google.com/macros/s/AKfycbzyh4HEurpOl9T_Ap5HXpGZlro0jCz3xBet7yQMFZcVwUFa7bQD5PtzkWJe4iABUkgf/exec";
+
+
+const TRANSLATOR_URL_ADMIN="https://script.google.com/macros/s/AKfycbxSSjGFWHU-sfV2hKwSctKQVsB5Yn6VbLRLkJbb29H1mZsnaU5MwWNVmEY1L5zh2aC8/exec";
+function statCard(label,value,sub,colour){
+  return '<div style="background:var(--card2,#0F4423);border:1px solid var(--bdr);border-radius:13px;padding:16px">'
+    +'<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3)">'+label+'</div>'
+    +'<div style="font-size:27px;font-weight:800;color:'+(colour||'var(--tx)')+';line-height:1.2;margin:4px 0 2px">'+value+'</div>'
+    +'<div style="font-size:11.5px;color:var(--tx2)">'+(sub||'')+'</div></div>';
+}
+function loadStats(){
+  const el=document.getElementById('statsGrid'); if(!el) return;
+  const tok=TOK.w||TOK.e||TOK.v;
+  const hubs=[[SKILLED_URL,TOK.w,'Skilled workers'],[EMPLOYER_URL,TOK.e,'Employers'],
+              [VERIFIER_URL_ADMIN,TOK.v,'Verifiers'],[TRANSLATOR_URL_ADMIN,TOK.t,'Translators']];
+  Promise.all(hubs.map(([u,t,label])=>
+    fetch(u+'?action=stats&token='+encodeURIComponent(t||tok||'')).then(r=>r.json()).catch(()=>({ok:false,hub:label}))
+  )).then(res=>{
+    let html='', totalMembers=0;
+    res.forEach((d,i)=>{
+      const label=hubs[i][2];
+      if(!d||d.ok===false){
+        var why=(d&&d.error==='unauthorized')
+          ? 'ADMIN_KEY does not match this hub\'s receiver'
+          : 'receiver not reachable — check it is deployed';
+        html+=statCard(label,'—',why,'var(--rd,#E86A6A)'); return; }
+      totalMembers += (d.total||0);
+      let sub=(d.emailVerified||0)+' email-verified';
+      if(d.pending) sub+=' · '+d.pending+' awaiting your approval';
+      if(d.unverifiedEmail) sub+=' · '+d.unverifiedEmail+' unverified email';
+      if(d.migrated!==undefined) sub+=' · '+d.migrated+' migrated';
+      html+=statCard(label, d.total||0, sub, (d.pending? 'var(--gold2)':'var(--tx)'));
+    });
+    const sk=res[0]||{};
+    if(sk.verifications!==undefined){
+      html+=statCard('Verifications', sk.verifications||0,
+        (sk.verified||0)+' completed · '+(sk.held||0)+' payment held', 'var(--grn,#2ECC71)');
+    }
+    html+=statCard('Total members', totalMembers, 'across all active hubs');
+    el.innerHTML=html;
+  }).catch(()=>{ el.innerHTML='<div class="empty">Could not load statistics.</div>'; });
+}
+function loadApprovalQueues(){
+  loadList(VERIFIER_URL_ADMIN, TOK.v, 'verifiers', 'verifier');
+  loadList(TRANSLATOR_URL_ADMIN, TOK.t, 'translators', 'translator');
+}
+
+function loadQA(){
+ const el=document.getElementById('qa'); if(!el) return;
+ el.innerHTML='<div class="empty">Loading…</div>';
+ const tok=TOK.w||TOK.e||TOK.v;
+ if(!tok){ el.innerHTML='<div class="empty">This hub\'s ADMIN_KEY does not match. Set the same secret in every receiver, then redeploy that hub.</div>'; return; }
+ fetch(SKILLED_URL+'?action=qa-queue&token='+encodeURIComponent(tok)).then(r=>r.json()).then(d=>{
+   if(!d.ok){ el.innerHTML='<div class="empty">'+(d.error==='unauthorized'?'Session expired — lock and sign in again.':'Could not load.')+'</div>'; return; }
+   const list=d.items||[];
+   if(!list.length){ el.innerHTML='<div class="empty">No flagged verifications. 🎉</div>'; return; }
+   el.innerHTML=list.map(function(x,i){
+     return '<div class="row" style="flex-direction:column;align-items:stretch" data-c="'+x.candidate+'" data-s="'+x.slot+'">'
+       +'<div style="display:flex;align-items:center;gap:9px"><b style="font-size:14.5px">'+(x.item||'Credential')+'</b>'
+       +'<span class="vbadge no">'+(x.payout||'Held')+'</span></div>'
+       +'<div class="meta">'+x.candidate+' · slot '+x.slot+' · verifier '+(x.verifier||'')+' · outcome '+(x.outcome||'')+' · '+String(x.date).slice(0,10)+'</div>'
+       +'<div style="margin-top:8px;font-size:12.5px"><b style="color:var(--rd)">Flag from '+(x.payer||'requester')+':</b> '+(x.flagReason||'')+'</div>'
+       +'<div style="margin-top:6px;font-size:12.5px;color:var(--tx2)"><b>Verifier said:</b> '+(x.verifierRemarks||'—')+' · <b>Method:</b> '+(x.method||'—')+'</div>'
+       +(x.evidence?'<a href="'+x.evidence+'" target="_blank" style="font-size:12px;color:var(--gold2)">Open the verifier\'s evidence →</a>':'<span style="font-size:12px;color:var(--rd)">No evidence attached</span>')
+       +(x.qaNote?'<div style="margin-top:6px;font-size:11.5px;color:var(--tx3)">Previous QA note: '+x.qaNote+'</div>':'')
+       +'<textarea id="qaNote'+i+'" rows="2" placeholder="Record your reasoning (required, min 10 characters)" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-size:13px;font-family:inherit;margin-top:10px"></textarea>'
+       +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'
+       +'<button class="ap" onclick="qaDecide('+i+',\''+x.candidate+'\','+x.slot+',\'release\',this)">Release payment</button>'
+       +'<button class="ap" style="background:var(--gold2)" onclick="qaDecide('+i+',\''+x.candidate+'\','+x.slot+',\'reverify\',this)">Order re-verification</button>'
+       +'<button class="ap" style="background:transparent;border:1px solid var(--rd);color:var(--rd)" onclick="qaDecide('+i+',\''+x.candidate+'\','+x.slot+',\'withhold\',this)">Uphold flag &amp; withhold</button>'
+       +'<button class="ap" style="background:var(--rd);color:#fff" onclick="qaDecide('+i+',\''+x.candidate+'\','+x.slot+',\'suspend\',this)">Withhold &amp; suspend verifier</button>'
+       +'</div><div class="msg" id="qaMsg'+i+'"></div></div>';
+   }).join('');
+ }).catch(()=>{ el.innerHTML='<div class="empty">Could not reach the server.</div>'; });
+}
+function qaDecide(i,candidate,slot,decision,btn){
+ const note=(document.getElementById('qaNote'+i)||{}).value||'';
+ const m=document.getElementById('qaMsg'+i);
+ if(note.trim().length<10){ m.className='msg err'; m.textContent='Please record your reasoning (at least 10 characters) before deciding.'; return; }
+ const tok=TOK.w||TOK.e||TOK.v;
+ btn.disabled=true;
+ fetch(SKILLED_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'qa-decide',token:tok,candidate:candidate,slot:slot,decision:decision,note:note})}).catch(()=>{});
+ const words={release:'Payment released — the flag was not upheld.',
+              reverify:'Re-verification ordered at platform cost; payment stays held.',
+              withhold:'Flag upheld; payment withheld.',
+              suspend:'Flag upheld, payment withheld, and the verifier is referred for suspension.'};
+ m.className='msg ok'; m.textContent=words[decision]+' Decision recorded in the audit trail.';
+ const row=btn.closest('.row'); setTimeout(function(){ if(row) row.remove(); },1600);
+}
+
+function loadPayouts(){
+ const el=document.getElementById('payouts'); if(!el) return;
+ el.innerHTML='<div class="empty">Loading…</div>';
+ if(!TOK.w && !TOK.e){ el.innerHTML='<div class="empty">This hub\'s ADMIN_KEY does not match. Set the same secret in every receiver, then redeploy that hub.</div>'; return; }
+ fetch(VERIFIER_URL_ADMIN+'?action=payout-requests&token='+encodeURIComponent(TOK.v||TOK.w||TOK.e)).then(r=>r.json()).then(d=>{
+  if(!d.ok){ el.innerHTML='<div class="empty">'+(d.error==='unauthorized'?'Session expired — lock and sign in again.':'Could not load.')+'</div>'; return; }
+  const list=d.requests||[];
+  if(!list.length){ el.innerHTML='<div class="empty">No payout change requests. 🎉</div>'; return; }
+  el.innerHTML=list.map(function(p){
+    return '<div class="row" data-m="'+p.memberId+'"><div class="info">'+
+      '<div class="nm">'+(p.name||p.memberId)+' <span style="font-size:11px;color:var(--tx3)">'+p.memberId+'</span></div>'+
+      '<div class="meta">Current: '+(p.bank||'')+' '+(p.currentAccount||'')+' · requested '+(p.requestedAt?new Date(p.requestedAt).toLocaleDateString():'')+'</div>'+
+      '<div class="dt" style="margin-top:4px;color:var(--tx2)">"'+(p.reason||'')+'"</div>'+
+      (p.evidence?'<a href="'+p.evidence+'" target="_blank" style="font-size:11.5px;color:var(--gold2)">Open supporting document →</a>':'<span style="font-size:11.5px;color:var(--rd)">No document attached</span>')+
+      '</div>'+
+      '<button class="ap" onclick="payoutDecide(\''+p.memberId+'\',true,this)">Approve</button>'+
+      '<button class="ap" style="background:transparent;border:1px solid var(--rd);color:var(--rd)" onclick="payoutDecide(\''+p.memberId+'\',false,this)">Decline</button></div>';
+  }).join('');
+ }).catch(()=>{ el.innerHTML='<div class="empty">Could not reach the server.</div>'; });
+}
+function payoutDecide(memberId,approve,btn){
+ btn.disabled=true;btn.textContent=approve?'Approving…':'Declining…';
+ const msg=document.getElementById('msg');msg.className='msg';
+ const body={action:approve?'payout-approve':'payout-reject',token:(TOK.v||TOK.w||TOK.e),memberId:memberId};
+ fetch(VERIFIER_URL_ADMIN,{method:'POST',mode:'no-cors',body:JSON.stringify(body)}).catch(()=>{});
+ msg.className='msg ok';
+ msg.textContent=approve?('Approved — '+memberId+' has a 72-hour window to update their bank details. The old account will be archived.')
+                        :('Declined — '+memberId+' keeps their existing locked account.');
+ const row=btn.closest('.row'); if(row) row.remove();
+}
+
+function loadAll(){loadStats();loadApprovalQueues();loadPayouts();loadQA();}
+
+/* ===== Member directory (generic across hubs) ===== */
+// hub registry: id -> {url, tokenKey, panel}
+/* ===== Reports & cross-hub search ===== */
+function runReport(){
+  var out=document.getElementById('rpResult'); if(!out) return;
+  var q=(document.getElementById('rpQuery')||{}).value||'';
+  var from=(document.getElementById('rpFrom')||{}).value||'';
+  var to=(document.getElementById('rpTo')||{}).value||'';
+  var hubs=Array.prototype.slice.call(document.querySelectorAll('.rpHub:checked')).map(function(c){return c.value;});
+  if(!hubs.length){ out.innerHTML='<div class="empty">Select at least one hub.</div>'; return; }
+  out.innerHTML='<div class="empty">Running report across '+hubs.length+' hub'+(hubs.length===1?'':'s')+'…</div>';
+  var fromMs=from?new Date(from+'T00:00:00').getTime():null;
+  var toMs=to?new Date(to+'T23:59:59').getTime():null;
+  var jobs=hubs.map(function(h){
+    var cfg=hubCfg(h); var tok=cfg?cfg.tok():'';
+    if(!cfg||!tok) return Promise.resolve({hub:h, ok:false, members:[]});
+    return fetch(cfg.url+'?action=admin-members&token='+encodeURIComponent(tok)+'&q='+encodeURIComponent(q))
+      .then(function(r){return r.json();})
+      .then(function(d){ return {hub:h, ok:!!(d&&d.ok), members:(d&&d.members)||[]}; })
+      .catch(function(){ return {hub:h, ok:false, members:[]}; });
+  });
+  Promise.all(jobs).then(function(results){
+    var rows=[], perHub={}, unreachable=[];
+    var hubName={skilled:'Skilled worker',verifier:'Verifier',translator:'Translator',employer:'Employer'};
+    results.forEach(function(res){
+      if(!res.ok){ unreachable.push(hubName[res.hub]||res.hub); return; }
+      perHub[res.hub]=0;
+      res.members.forEach(function(m){
+        if(fromMs||toMs){
+          var t=m.created?new Date(m.created).getTime():null;
+          if(t===null || isNaN(t)) return;
+          if(fromMs&&t<fromMs) return;
+          if(toMs&&t>toMs) return;
+        }
+        perHub[res.hub]++;
+        rows.push({ hub:hubName[res.hub]||res.hub, id:m.id, name:m.name, email:m.email,
+          phone:m.phone||'', category:m.category||'', status:m.status||'', created:m.created });
+      });
+    });
+    rows.sort(function(a,b){ return new Date(b.created||0)-new Date(a.created||0); });
+    renderReport(rows, perHub, hubName, {q:q, from:from, to:to}, unreachable);
+  });
+}
+function renderReport(rows, perHub, hubName, filt, unreachable){
+  var out=document.getElementById('rpResult'); if(!out) return;
+  var when=new Date().toLocaleString();
+  var summary='<div style="border:0.5px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-bottom:14px">'
+    +'<div style="font-weight:700;margin-bottom:6px">Summary</div>'
+    +'<div style="font-size:12.5px;color:var(--tx2)">Generated '+esc(when)
+    +(filt.q?(' · term: "'+esc(filt.q)+'"'):'')
+    +((filt.from||filt.to)?(' · registered '+(filt.from?esc(filt.from):'…')+' to '+(filt.to?esc(filt.to):'…')):'')+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px">';
+  Object.keys(perHub).forEach(function(h){
+    summary+='<div style="background:var(--card2);border:0.5px solid var(--bdr);border-radius:8px;padding:8px 12px"><div style="font-size:11px;color:var(--tx3)">'+esc(hubName[h]||h)+'</div><div style="font-size:18px;font-weight:800">'+perHub[h]+'</div></div>';
+  });
+  summary+='<div style="background:rgba(200,146,10,.14);border:0.5px solid rgba(200,146,10,.3);border-radius:8px;padding:8px 12px"><div style="font-size:11px;color:var(--gold2)">Total</div><div style="font-size:18px;font-weight:800;color:var(--gold2)">'+rows.length+'</div></div>';
+  summary+='</div>';
+  if(unreachable.length) summary+='<div style="font-size:11.5px;color:#E86A6A;margin-top:8px">Could not reach: '+unreachable.map(esc).join(', ')+' (check that hub\'s deployment / ADMIN_KEY).</div>';
+  summary+='</div>';
+  if(!rows.length){ out.innerHTML=summary+'<div class="empty">No members match these filters.</div>'; return; }
+  var head='<tr><th>Hub</th><th>Name</th><th>ID</th><th>Email</th><th>Phone</th><th>Category</th><th>Status</th><th>Registered</th></tr>';
+  var body=rows.map(function(r){
+    return '<tr><td>'+esc(r.hub)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.id)+'</td><td>'+esc(r.email||'')+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.category)+'</td><td>'+esc(r.status)+'</td><td>'+esc(fmtD(r.created)||'')+'</td></tr>';
+  }).join('');
+  out.innerHTML=summary
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">'
+    +'<thead style="text-align:left;color:var(--tx3)">'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+}
+function printReport(){
+  var out=document.getElementById('rpResult');
+  if(!out || !out.querySelector('table')){ alert('Run a report first, then print.'); return; }
+  window.print();
+}
+
+
+/* ===== Send email (26-template library, guardrailed) ===== */
+/* STACS Admin Email Template Library — 26 templates, grouped by category.
+   Each: {id, name, subject, body}. {{FirstName}} auto-fills; other {{fields}}
+   the admin fills before sending. The standard trust footer is appended server-side. */
+var EMAIL_TEMPLATES = {
+  'Onboarding': [
+    {id:'welcome', name:'Welcome / Encouragement', subject:'Welcome to LEIVOTEST — STACS! Your global journey starts here',
+     body:'Hello {{FirstName}},\n\nThank you for choosing LEIVOTEST — STACS.\n\nBy creating your profile, you\u2019ve taken an important step towards making your skills visible to legitimate employers and recruitment partners around the world.\n\nEvery improvement you make helps employers understand your experience, qualifications and readiness for international opportunities.\n\nRemember:\n\u2713 Your progress is automatically saved.\n\u2713 You can continue your application at any time.\n\u2713 Our Support Team is available whenever you need assistance.\n\nThere\u2019s no need to rush \u2014 focus on building a complete and accurate profile.\n\nWe look forward to supporting your journey.\n\nBest wishes,\nThe LEIVOTEST — STACS Team'},
+    {id:'app-received', name:'Application Received', subject:'We\u2019ve received your STACS application',
+     body:'Hello {{FirstName}},\n\nThank you \u2014 we\u2019ve successfully received your submission on LEIVOTEST — STACS.\n\nYour information is now safely recorded. You can sign in at any time to continue building your profile.\n\nIf you have any questions, our Support Team is glad to help.\n\nKind regards,\nThe LEIVOTEST — STACS Team'},
+    {id:'inactive', name:'Inactive Profile Reminder', subject:'Your STACS profile is waiting for you',
+     body:'Hello {{FirstName}},\n\nWe noticed that you have not signed in to your STACS account recently.\n\nYour profile remains safely stored and waiting for you. Every improvement you make increases your chances of being discovered by employers and recruitment partners.\n\nWhen you return, you can continue exactly where you stopped \u2014 there is no need to start over.\n\nIf you need assistance, our Support Team will be happy to help. We look forward to welcoming you back.'}
+  ],
+  'Community & Access': [
+    {id:'telegram-invite', name:'Telegram Invitation / How to use STACS', subject:'You\u2019re invited to the STACS Community \u2014 and discover how to use STACS',
+     body:'Hello {{FirstName}},\n\nAre you making the most of STACS? It\u2019s new, and there is more to it than many members realise \u2014 and the best place to learn, stay updated, and connect is our private STACS Community on Telegram.\n\nInside the community you can:\n\u2713 Learn how to use the STACS platform properly, step by step\n\u2713 Receive timely updates, guidance and announcements\n\u2713 Hear about approved opportunities as they arise\n\u2713 Get support and connect with other verified professionals\n\nFor your safety, and to keep out impersonators and scammers, the group link is never shared openly. Instead, tap the button below and confirm your details against your verified STACS profile \u2014 your one-time community pass is issued only to verified members.\n\nJoin the STACS Community on Telegram: https://leivotest.com/stacs/telegram.html\n\nDon\u2019t miss out on how to get the most from STACS \u2014 we\u2019d love to see you there.\n\nWarm regards,\nThe LEIVOTEST — STACS Team'},
+    {id:'verify-email', name:'Get your Email Verified (ID issuance)', subject:'Important: verify your email so your STACS ID can be issued',
+     body:'Hello {{FirstName}},\n\nThere is one important step still waiting on your STACS account: verifying your email address.\n\nWhy this matters:\n\u2713 Your unique STACS ID is issued once your email is verified\n\u2713 Without a verified email and an ID, your profile cannot be seen by employers\n\u2713 You also cannot access member benefits \u2014 including joining the STACS Community on Telegram \u2014 until this is done\n\nPlease check your inbox (and your spam/junk folder) for your STACS verification email, and click the verification link inside it. If you cannot find it, sign in at leivotest.com/stacs and request a new verification link, or contact our Support Team and we will help you right away.\n\nYou cannot be seen without your unique ID \u2014 and it will be issued as soon as your email is verified. Let\u2019s get this done so employers can start discovering you.\n\nKind regards,\nThe LEIVOTEST — STACS Team'}
+  ],
+  'Profile': [
+    {id:'action-needed', name:'Action Required / Reminder', subject:'Action needed to keep your STACS profile moving forward',
+     body:'Hello {{FirstName}},\n\nYour STACS profile is progressing well, but there is one important step waiting for your attention.\n\nAction required:\n{{ActionRequired}}\n\nCompleting this step will help you:\n\u2713 Improve your profile quality\n\u2713 Increase employer confidence\n\u2713 Become eligible for additional platform services\n\u2713 Continue your international career journey without unnecessary delays\n\nIf you are unsure how to complete this step, our Support Team will gladly guide you. Your progress has already been saved.\n\nThank you for choosing LEIVOTEST — STACS.'},
+    {id:'approved', name:'Profile Approved', subject:'Your STACS profile has been approved',
+     body:'Hello {{FirstName}},\n\nCongratulations! Your LEIVOTEST — STACS profile has been reviewed and approved.\n\nWhat this means:\n\u2713 Your profile has successfully passed the current review stage.\n\u2713 You may now access additional services available to your account.\n\u2713 You are eligible to continue building your Global Readiness Profile.\n\nYour next recommended steps:\n{{NextSteps}}\n\nPlease remember that profile approval does not guarantee employment, visa approval or placement \u2014 it confirms that your profile satisfies the requirements for the current stage.\n\nIf you have any questions, our Support Team is always ready to assist.\n\nWarm regards,\nLEIVOTEST — STACS'},
+    {id:'corrections', name:'Returned for Corrections', subject:'A few updates are needed before we can continue',
+     body:'Hello {{FirstName}},\n\nThank you for taking the time to build your STACS profile. During our review, we noticed a few items that require clarification or correction before we can continue.\n\nItems requiring attention:\n{{MissingItems}}\n\nOnce these have been updated, simply save your changes and submit them for review. Our team will continue processing your application as soon as the requested information has been received.\n\nYour progress has been safely saved. Need help? Our Support Team will gladly guide you.\n\nThank you for your cooperation.'},
+    {id:'migrated', name:'Migrated to Job Pool', subject:'Congratulations! You\u2019re now visible in the STACS Job Pool',
+     body:'Hello {{FirstName}},\n\nCongratulations! Your profile has successfully been migrated into the LEIVOTEST — STACS Global Job Pool.\n\nYour contact-protected profile can now be discovered by eligible employers and licensed recruitment partners searching for candidates whose skills and experience match their needs.\n\nEmployers can now view:\n\u2713 Professional Summary  \u2713 Skills  \u2713 Education  \u2713 Experience  \u2713 Verification Status  \u2713 Languages  \u2713 Availability\n\nYour personal contact information remains protected until the appropriate stage of the recruitment process.\n\nPlease remember that visibility in the Job Pool does not guarantee employment \u2014 selection decisions remain entirely with employers. Continue updating your profile regularly to improve your opportunities.'},
+    {id:'annual-review', name:'Annual Profile Review', subject:'Time for your annual STACS profile review',
+     body:'Hello {{FirstName}},\n\nIt\u2019s a good time to review your STACS profile and make sure everything is current.\n\nPlease take a moment to check that your qualifications, documents, skills and availability are up to date. A current profile helps employers see you at your best.\n\nSign in whenever you\u2019re ready. Our Support Team is here if you need help.'}
+  ],
+  'Verification': [
+    {id:'verif-update', name:'Verification Update', subject:'Update on your STACS verification request',
+     body:'Hello {{FirstName}},\n\nWe\u2019re writing regarding the verification stage of your STACS profile.\n\nVerification status:\n{{CurrentStatus}}\n\nAdditional information:\n{{AdminNotes}}\n\nAll verifications on STACS are performed by independent accredited verification partners operating within their approved professional scope. Where additional documents or clarification are required, you will be notified promptly.\n\nIf you have any questions, please contact our Support Team.'},
+    {id:'verif-complete', name:'Verification Completed', subject:'Your document verification has been completed',
+     body:'Hello {{FirstName}},\n\nYour requested document verification has now been completed.\n\nVerification summary:\nDocument: {{DocumentName}}\nStatus: {{VerificationStatus}}\nCompleted on: {{CompletionDate}}\nVerifier reference: {{ReferenceNumber}}\n\nWhere applicable, your STACS profile has been updated automatically. If the verification was requested by an employer, only that employer will have access to the detailed verification report in accordance with our privacy and verification policies.\n\nThank you for helping us maintain a trusted platform.'},
+    {id:'verif-failed', name:'Verification Could Not Be Completed', subject:'We could not complete your verification',
+     body:'Hello {{FirstName}},\n\nThank you for submitting your document for verification. Unfortunately, the verification process could not be completed at this time.\n\nStatus: Unable to verify\n\nReported reason(s):\n{{ReportedReasons}}\n\nThis notification does not necessarily indicate that a document is fraudulent \u2014 it means the verification could not be successfully concluded based on the available information. You may upload updated documents or submit a new verification request where appropriate.\n\nPlease note that verification services are considered rendered once the verification process has been undertaken. As outlined in our Terms of Use, verification fees are generally non-refundable where verification could not be completed due to document-related limitations.\n\nIf you believe this outcome requires further review, please contact our Support Team.'}
+  ],
+  'Travel': [
+    {id:'travel-expiry', name:'Travel Document Reminder', subject:'Your travel document will expire soon',
+     body:'Hello {{FirstName}},\n\nOur records indicate that your travel document is approaching its expiry date.\n\nKeeping your passport or travel document valid helps ensure you remain ready for international employment opportunities and visa processing.\n\nCurrent travel document:\nType: {{DocumentType}}\nCountry of issue: {{Country}}\nExpiry date: {{ExpiryDate}}\nStatus: Renewal recommended\n\nWe encourage you to begin the renewal process through the appropriate government authority as early as possible. If you have already renewed, simply update the information within your STACS profile.'}
+  ],
+  'Employer': [
+    {id:'employer-interest', name:'Employer Interest Notification', subject:'An employer has shown interest in your profile',
+     body:'Hello {{FirstName}},\n\nGood news! An employer or licensed recruitment partner has expressed interest in your STACS profile.\n\nYou have been invited to review the request through your dashboard. Depending on the employer\u2019s recruitment stage, you may be invited to submit additional information, complete an interview, provide further documentation, or begin employer-specific assessments.\n\nPlease sign in to your STACS account to review the details. For your privacy and security, employer contact details remain protected until the appropriate stage of the recruitment process.\n\nWe wish you every success.'},
+    {id:'interview-invite', name:'Interview Invitation', subject:'You\u2019ve been invited to an interview',
+     body:'Hello {{FirstName}},\n\nAn employer has invited you to an interview through LEIVOTEST — STACS.\n\nDetails:\n{{InterviewDetails}}\n\nPlease sign in to your dashboard to review and confirm. If you need help, our Support Team is available.\n\nWe wish you the very best.'},
+    {id:'interview-reminder', name:'Interview Reminder', subject:'Reminder: your upcoming interview',
+     body:'Hello {{FirstName}},\n\nThis is a friendly reminder of your upcoming interview.\n\n{{InterviewDetails}}\n\nPlease ensure you are prepared and available at the scheduled time. Sign in to your dashboard for full details.'},
+    {id:'job-offer', name:'Job Offer Notification', subject:'You have a job offer to review',
+     body:'Hello {{FirstName}},\n\nAn employer has extended an offer for you to review through LEIVOTEST — STACS.\n\nPlease sign in to your dashboard to view the details. Take your time to review carefully before responding.\n\nPlease remember that all employment decisions and terms rest with the employer. Our Support Team is here if you have questions.'},
+    {id:'position-closed', name:'Position Closed / Withdrawn', subject:'An opportunity is no longer available',
+     body:'Hello {{FirstName}},\n\nWe\u2019re writing to let you know that an opportunity you were being considered for is no longer available.\n\nThis is a normal part of recruitment and is not a reflection of your profile or potential. Your profile remains active and visible to other employers.\n\nWe encourage you to keep your profile current to maximise your opportunities. Thank you for your understanding.'}
+  ],
+  'Promotion': [
+    {id:'promo-active', name:'Promotion Confirmation', subject:'Your profile promotion is now active',
+     body:'Hello {{FirstName}},\n\nThank you for choosing a STACS Profile Promotion service. Your promotion has now been successfully activated.\n\nPromotion details:\nPromotion: {{PromotionType}}\nAudience: {{Audience}}\nStart date: {{StartDate}}\nExpiry date: {{ExpiryDate}}\nDuration: {{Duration}}\n\nDuring this period, your profile will receive enhanced visibility within the selected employer audience. Please remember that profile promotion increases exposure but does not guarantee employment, interviews or visa sponsorship.\n\nYou may monitor your promotion through your dashboard. Thank you for investing in your global career journey.'},
+    {id:'promo-expiring', name:'Promotion Expiring Soon', subject:'Your profile promotion will end soon',
+     body:'Hello {{FirstName}},\n\nYour current STACS Profile Promotion will expire soon.\n\nCurrent promotion: {{PromotionName}}\nAudience: {{Audience}}\nExpiry date: {{ExpiryDate}}\n\nTo continue benefiting from enhanced employer visibility, you may renew before it expires. If you choose not to renew, your profile simply returns to the standard visibility level available to all eligible candidates \u2014 renewing is entirely optional and does not affect your existing profile or your eligibility to remain in the Job Pool.\n\nThank you for continuing your journey with LEIVOTEST — STACS.'}
+  ],
+  'Account': [
+    {id:'payment-confirm', name:'Payment Confirmation', subject:'We\u2019ve received your payment',
+     body:'Hello {{FirstName}},\n\nThank you \u2014 we\u2019ve received your payment on LEIVOTEST — STACS.\n\nPayment details:\n{{PaymentDetails}}\n\nYour account has been updated accordingly. If you have any questions about this payment, please contact our Support Team.\n\nKind regards,\nThe LEIVOTEST — STACS Team'},
+    {id:'refund', name:'Refund / Adjustment Notification', subject:'An update regarding your payment',
+     body:'Hello {{FirstName}},\n\nWe\u2019re writing regarding an adjustment to your STACS account.\n\n{{AdjustmentDetails}}\n\nIf you have any questions about this, please contact our Support Team and we\u2019ll be glad to clarify.\n\nKind regards,\nThe LEIVOTEST — STACS Team'},
+    {id:'suspension', name:'Account Suspension / Restriction', subject:'Important: a restriction has been placed on your account',
+     body:'Hello {{FirstName}},\n\nWe\u2019re writing to inform you that a restriction has been placed on your STACS account.\n\nReason: {{Reason}}\nDuration / next steps: {{DurationAndSteps}}\n\nIf you believe this decision requires review, you may appeal by contacting our Support Team, who will explain the process. We take these matters seriously and aim to resolve them fairly.\n\nThe LEIVOTEST — STACS Team'},
+    {id:'privacy-update', name:'Data Privacy / Policy Update', subject:'An update to our policies',
+     body:'Hello {{FirstName}},\n\nWe\u2019re letting you know about an important update to our policies at LEIVOTEST — STACS.\n\n{{PolicyUpdate}}\n\nWe encourage you to review the updated policy. Your continued use of the platform indicates your acknowledgement of these changes. If you have any questions, our Support Team is here to help.'}
+  ],
+  'Security': [
+    {id:'password-reset', name:'Password Reset / Security Alert', subject:'A security notice about your STACS account',
+     body:'Hello {{FirstName}},\n\nThis is a security notice regarding your STACS account.\n\n{{SecurityMessage}}\n\nIf you did not initiate this, please contact our Support Team immediately so we can help protect your account.\n\nThe LEIVOTEST — STACS Team'}
+  ],
+  'Document Guidance': [
+    {id:'docs-general', name:'General Additional Documents Notification', subject:'Your STACS Journey Continues \u2013 Additional Documents May Be Required',
+     body:'Dear {{FirstName}},\n\nThank you for continuing your journey toward international employment through LEIVOTEST STACS.\n\nAs your profile progresses, you may be asked to provide additional documents depending on:\n\n\u2022 Your profession or trade\n\u2022 Your destination country\n\u2022 Employer requirements\n\u2022 Immigration regulations\n\u2022 Verification requirements\n\u2022 Visa application procedures\n\nPlease don\u2019t be concerned if additional document requests appear later. This is a normal part of preparing candidates for global employment opportunities.\n\nMany important documents have limited validity periods. For this reason, we intentionally request some documents only when they are likely to be needed, to help you avoid unnecessary costs and repeated applications.\n\nYou can always view your current document requirements by logging into your STACS Dashboard under:\n\nCareer Profile \u2192 Documents & Verification\n\nIf you have questions or need assistance preparing any document, our support team will be happy to guide you.\n\nThank you for choosing STACS as your trusted global employment mobility platform.\n\nWarm regards,\nLEIVOTEST STACS\nGlobal Employment Mobility Platform'},
+    {id:'docs-soon', name:'Document Will Soon Be Required', subject:'Start Preparing This Important Document',
+     body:'Dear {{FirstName}},\n\nBased on your current progress, you may soon need the following document:\n\n{{DocumentName}}\n\nAt this stage, no immediate action is required.\n\nWe simply encourage you to begin making enquiries so you understand:\n\n\u2022 where to obtain it,\n\u2022 how long processing usually takes,\n\u2022 the expected cost,\n\u2022 any supporting documents you may need.\n\nWhen the appropriate stage of your journey arrives, STACS will notify you if this document should be uploaded or submitted.\n\nPreparing early can help prevent delays later in your employment or visa process.\n\nYour progress remains saved, and we will continue guiding you every step of the way.\n\nKind regards,\nLEIVOTEST STACS'},
+    {id:'docs-time-sensitive', name:'Time-Sensitive Document Advisory', subject:'Please Wait Before Obtaining This Document',
+     body:'Dear {{FirstName}},\n\nSome official documents remain valid for only a limited period after they are issued.\n\nExamples include:\n\n\u2022 Police Clearance Certificates\n\u2022 Medical Examination Reports\n\u2022 Drug Screening Reports\n\u2022 Tuberculosis Screening\n\u2022 Yellow Fever Vaccination Certificates (where applicable)\n\u2022 Employment Medical Fitness Certificates\n\u2022 Country-specific Immigration Health Certificates\n\nTo help you avoid unnecessary expenses, we recommend waiting until STACS or your employer requests these documents unless you have already been advised otherwise.\n\nObtaining these documents too early may result in them expiring before they are used, requiring you to obtain them again.\n\nWhen the appropriate time arrives, we will notify you and provide guidance.\n\nThank you for planning wisely.\n\nWarm regards,\nLEIVOTEST STACS'},
+    {id:'docs-country-specific', name:'Country-Specific Documents', subject:'Additional Documents May Be Required for Your Destination Country',
+     body:'Dear {{FirstName}},\n\nDifferent countries have different immigration and employment requirements.\n\nDepending on where you intend to work, you may later be asked to provide additional documentation such as:\n\n\u2022 Police Clearance\n\u2022 Medical Fitness\n\u2022 Professional Registration\n\u2022 Vaccination Records\n\u2022 Language Certificates\n\u2022 Skills Assessment\n\u2022 Trade Licensing\n\u2022 Work Experience Verification\n\u2022 Financial Evidence\n\u2022 Other country-specific requirements\n\nThese requirements vary by destination and employer.\n\nSTACS will only ask you for relevant documents when they become necessary. There is no need to upload everything at once.\n\nWarm regards,\nLEIVOTEST STACS'},
+    {id:'docs-employer-requested', name:'Employer Requested Additional Documents', subject:'An Employer Has Requested Additional Documents',
+     body:'Dear {{FirstName}},\n\nAn employer reviewing your profile has requested additional supporting documentation before proceeding with your application.\n\nRequested documents:\n\n\u2022 {{Document1}}\n\u2022 {{Document2}}\n\u2022 {{Document3}}\n\nPlease review your STACS Dashboard for full details.\n\nIf you already possess these documents, simply upload them. If you need assistance obtaining any of them, please contact STACS Support.\n\nProviding these documents promptly may improve your chances of progressing with this opportunity.\n\nWarm regards,\nLEIVOTEST STACS'},
+    {id:'docs-verify-recommended', name:'Verification Recommended', subject:'Increase Employer Confidence by Verifying Your Documents',
+     body:'Dear {{FirstName}},\n\nYour profile is already visible to employers.\n\nHowever, verified documents help employers make faster and more confident hiring decisions.\n\nAt this time, the following documents remain unverified:\n\n\u2022 {{Document1}}\n\u2022 {{Document2}}\n\u2022 {{Document3}}\n\nVerification is optional unless specifically requested by an employer or recruitment partner.\n\nCandidates with verified credentials often stand out because employers can immediately distinguish between verified and unverified information.\n\nYou can request document verification directly from your Verification Block in your STACS Dashboard.\n\nWarm regards,\nLEIVOTEST STACS'},
+    {id:'docs-why-explainer', name:'Helpful Information About Additional Documents', subject:'Understanding Why More Documents May Be Requested',
+     body:'Dear {{FirstName}},\n\nMany candidates ask why additional documents are requested after they have already completed their profile.\n\nThe answer is simple: international recruitment is a staged process. Different documents become important at different points in your journey.\n\nFor example:\n\n\u2022 Before migration into the Job Pool, employers primarily need to understand your skills and experience.\n\u2022 During employer selection, they may request verification of qualifications or employment history.\n\u2022 During visa preparation, immigration authorities may require police clearance, medical examinations, passport validity, or destination-specific documents.\n\u2022 Before travel, airlines or destination authorities may request additional documentation depending on your route and destination.\n\nTo help you avoid unnecessary expense and document expiry, STACS requests many of these documents only when they are genuinely needed.\n\nWhenever additional documentation is required, you will receive a notification in your dashboard and an email explaining what is needed and why.\n\nWarm regards,\nLEIVOTEST STACS'}
+  ],
+  'General': [
+    {id:'announcement', name:'General Announcement / Update', subject:'Important update from LEIVOTEST — STACS',
+     body:'Hello {{FirstName}},\n\nWe hope you are doing well. We\u2019re reaching out to share an important update about the LEIVOTEST — STACS Global Employment Mobility Platform.\n\n{{AnnouncementTitle}}\n\n{{AdminMessage}}\n\nIf this update requires any action from you, please follow the instructions provided above. Our goal is to continue providing a trusted, transparent and secure platform that connects skilled professionals with legitimate international opportunities.\n\nIf you have any questions, simply reply to this email or contact our Support Team.\n\nThank you for being part of the STACS community.\n\nWarm regards,\nThe LEIVOTEST — STACS Team'},
+    {id:'freeform', name:'Blank / Free-form', subject:'{{Subject}}',
+     body:'Hello {{FirstName}},\n\n{{YourMessage}}\n\nIf you need any clarification regarding this message, please reply directly to this email or contact our Support Team.\n\nThank you for being part of the LEIVOTEST — STACS community.\n\nKind regards,\nThe LEIVOTEST — STACS Team'}
+  ]
+};
+
+function emInitTemplates(){
+  var sel=document.getElementById('emTemplate'); if(!sel) return;
+  var html='<option value="">Select a template…</option>';
+  for(var cat in EMAIL_TEMPLATES){
+    html+='<optgroup label="'+cat+'">';
+    EMAIL_TEMPLATES[cat].forEach(function(t){ html+='<option value="'+cat+'|'+t.id+'">'+t.name+'</option>'; });
+    html+='</optgroup>';
+  }
+  sel.innerHTML=html;
+}
+function emFindTemplate(val){
+  var parts=String(val||'').split('|'); if(parts.length!==2) return null;
+  var cat=parts[0], id=parts[1];
+  if(!EMAIL_TEMPLATES[cat]) return null;
+  for(var i=0;i<EMAIL_TEMPLATES[cat].length;i++){ if(EMAIL_TEMPLATES[cat][i].id===id) return EMAIL_TEMPLATES[cat][i]; }
+  return null;
+}
+/* Preset expansions for common placeholders. Each key is a placeholder name (as
+   it appears inside {{ }}); value is a list of {label, text} options. 'Other'
+   opens an unlimited free-text box. Selecting an option substitutes the full
+   flowing text into the message so it reads naturally. Extend freely. */
+var FILL_OPTIONS = {
+  'ActionRequired': [
+    {label:'Complete your profile', text:'Finish the remaining details on your profile. A complete profile helps employers understand your experience and readiness, and it is required before you can migrate into the Job Pool.'},
+    {label:'Migrate into the Job Pool', text:'Migrate into the Global Job Pool — the step that makes your profile visible to verified employers worldwide. Until you complete it, employers cannot discover you, and it includes your mandatory orientation so you are fully ready when an employer reaches out.'},
+    {label:'Upload your documents', text:'Upload your Photo ID, Resume/CV and credentials. These allow employers and verifiers to confirm your qualifications with confidence and move your profile forward.'},
+    {label:'Add a skill', text:'Add at least your main trade to your profile. Your skills are what employers search for, and each one can be independently verified to build trust.'},
+    {label:'Renew your travel document', text:'Begin renewing your passport or travel document with the appropriate authority. Keeping it valid keeps you ready for international opportunities and visa processing.'},
+    {label:'Verify a skill or credential', text:'Request verification of a key skill or credential. Verified profiles stand out to employers and carry far more weight during selection.'}
+  ],
+  'CurrentStatus': [
+    {label:'Submitted', text:'Your verification request has been submitted and is in our queue.'},
+    {label:'Assigned to a verifier', text:'Your request has been assigned to an accredited verifier working within their approved scope.'},
+    {label:'Under review', text:'Your request is currently under review by the assigned verifier.'},
+    {label:'Awaiting additional information', text:'We need a little more information to proceed. Please check your profile for the specific item requested.'},
+    {label:'Completed', text:'Your verification has been completed and your profile has been updated where applicable.'},
+    {label:'Unable to verify', text:'Unfortunately the verification could not be completed based on the available information.'}
+  ],
+  'NextSteps': [
+    {label:'Add / verify skills', text:'\u2022 Add or verify your key skills so employers can find and trust you.'},
+    {label:'Complete documents', text:'\u2022 Upload any remaining documents (Photo ID, Resume/CV, credentials).'},
+    {label:'Migrate into the Job Pool', text:'\u2022 Migrate into the Job Pool to become visible to employers.'},
+    {label:'Keep travel document current', text:'\u2022 Make sure your passport or travel document stays valid.'}
+  ]
+};
+/* Shared document-name options, reused across DocumentName / Document1-3 so an
+   admin doesn't retype common documents for every send. */
+var _DOC_NAMES = [
+  {label:'Police Clearance Certificate', text:'Police Clearance Certificate'},
+  {label:'Medical Fitness Certificate', text:'Medical Fitness Certificate'},
+  {label:'Yellow Fever Vaccination Certificate', text:'Yellow Fever Vaccination Certificate'},
+  {label:'Tuberculosis (TB) Screening Report', text:'Tuberculosis (TB) Screening Report'},
+  {label:'Drug Screening Report', text:'Drug Screening Report'},
+  {label:'Birth Certificate', text:'Birth Certificate'},
+  {label:'Marriage Certificate', text:'Marriage Certificate'},
+  {label:"Driver's License", text:"Driver's License"},
+  {label:'International Passport', text:'International Passport'},
+  {label:'Academic Transcript', text:'Academic Transcript'},
+  {label:'Trade Test Certificate', text:'Trade Test Certificate'},
+  {label:'Professional Registration / Licence', text:'Professional Registration / Licence'},
+  {label:'Language Proficiency Certificate', text:'Language Proficiency Certificate'},
+  {label:'Employment Reference Letter', text:'Employment Reference Letter'},
+  {label:'Skills Assessment Report', text:'Skills Assessment Report'}
+];
+FILL_OPTIONS['DocumentName']=_DOC_NAMES;
+FILL_OPTIONS['Document1']=_DOC_NAMES;
+FILL_OPTIONS['Document2']=_DOC_NAMES;
+FILL_OPTIONS['Document3']=_DOC_NAMES;
+var EM_BASE_BODY = '';  // template body with placeholders intact
+function emLoadTemplate(){
+  var t=emFindTemplate(document.getElementById('emTemplate').value); if(!t) return;
+  document.getElementById('emSubject').value=t.subject;
+  EM_BASE_BODY=t.body;
+  document.getElementById('emBody').value=t.body;
+  emRenderFills(t.body);
+}
+/* Build a control per {{placeholder}} in the body. Known placeholders (in
+   FILL_OPTIONS) get a dropdown + Other; unknown ones get a labelled free-text. */
+function emRenderFills(body){
+  var box=document.getElementById('emFills'); if(!box) return;
+  var found=(body.match(/\{\{([^}]+)\}\}/g)||[])
+    .map(function(p){return p.replace(/[{}]/g,'').trim();})
+    .filter(function(name){return !/^FirstName$/i.test(name);});
+  // unique, preserve order
+  var seen={}, names=[];
+  found.forEach(function(n){ if(!seen[n]){ seen[n]=1; names.push(n); } });
+  if(!names.length){ box.innerHTML=''; return; }
+  box.innerHTML=names.map(function(name){
+    var opts=FILL_OPTIONS[name];
+    var safe=name.replace(/[^a-zA-Z0-9]/g,'_');
+    var head='<div style="margin-bottom:10px"><label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--gold2);display:block;margin-bottom:5px">'+esc(name)+'</label>';
+    if(opts){
+      var o='<option value="">Select…</option>'+opts.map(function(op,i){return '<option value="'+i+'">'+esc(op.label)+'</option>';}).join('')+'<option value="other">Other (type your own)…</option>';
+      return head+'<select data-fill="'+esc(name)+'" onchange="emFillChange(this,\''+safe+'\')" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:9px 12px;color:var(--tx);font-size:13px">'+o+'</select>'
+        +'<textarea id="emOther_'+safe+'" data-fillother="'+esc(name)+'" oninput="emApplyFills()" placeholder="Type your custom message (no length limit)…" style="display:none;width:100%;min-height:80px;margin-top:8px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-size:13px;font-family:inherit;resize:vertical"></textarea></div>';
+    }
+    // open placeholder — free text
+    return head+'<textarea data-fillfree="'+esc(name)+'" oninput="emApplyFills()" placeholder="Fill in: '+esc(name)+'" style="width:100%;min-height:70px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px;color:var(--tx);font-size:13px;font-family:inherit;resize:vertical"></textarea></div>';
+  }).join('');
+}
+function emFillChange(sel, safe){
+  var other=document.getElementById('emOther_'+safe);
+  if(other) other.style.display = (sel.value==='other') ? 'block' : 'none';
+  emApplyFills();
+}
+/* Rebuild the body from the base template, substituting each placeholder with
+   its chosen expansion / free text. */
+function emApplyFills(){
+  var body=EM_BASE_BODY;
+  // dropdown selections
+  document.querySelectorAll('[data-fill]').forEach(function(sel){
+    var name=sel.getAttribute('data-fill'), val=sel.value;
+    var opts=FILL_OPTIONS[name]||[]; var rep=null;
+    if(val==='other'){ var t=document.getElementById('emOther_'+name.replace(/[^a-zA-Z0-9]/g,'_')); rep=t?t.value:''; }
+    else if(val!==''){ rep=(opts[Number(val)]||{}).text||''; }
+    if(rep!==null) body=body.split('{{'+name+'}}').join(rep);
+  });
+  // free-text placeholders
+  document.querySelectorAll('[data-fillfree]').forEach(function(t){
+    var name=t.getAttribute('data-fillfree');
+    if(t.value) body=body.split('{{'+name+'}}').join(t.value);
+  });
+  document.getElementById('emBody').value=body;
+}
+var EM_RECIPIENTS=[], EM_LOADED=[];
+function emMode(){ var v=document.getElementById('emAudience').value; if(v==='paste')return'paste'; if(v.indexOf('pick-')===0)return'pick'; if(v.indexOf('search-')===0)return'search'; return''; }
+function emHub(){ var v=document.getElementById('emAudience').value; return v.replace('search-','').replace('pick-',''); }
+function emAudienceChange(){
+  var mode=emMode();
+  document.getElementById('emAudienceBox').style.display=(mode==='search'||mode==='pick')?'block':'none';
+  document.getElementById('emPasteBox').style.display=(mode==='paste')?'block':'none';
+  EM_RECIPIENTS=[]; EM_LOADED=[];
+  var sf=document.getElementById('emSearch'); if(sf) sf.value='';
+  var info=document.getElementById('emRecipInfo'); if(info) info.textContent='';
+  var srch=document.getElementById('emSearch');
+  if(srch) srch.placeholder = (mode==='pick') ? 'Type a name, ID or email, then click to add…' : 'Search to narrow recipients (blank = everyone in that hub)…';
+  var chips=document.getElementById('emChips'); if(chips){ chips.style.display=(mode==='pick')?'flex':'none'; emRenderChips(); }
+  var results=document.getElementById('emResults'); if(results) results.style.display='none';
+}
+/* SEARCH — ALL MATCHING mode: bulk-load everyone that matches. */
+function emLoadRecipients(){
+  var mode=emMode(); var hub=emHub();
+  var cfg=hubCfg(hub); var tok=cfg?cfg.tok():'';
+  var info=document.getElementById('emRecipInfo');
+  if(!cfg||!tok){ info.innerHTML='<span style="color:#E86A6A">That hub is not reachable (check its deployment / ADMIN_KEY).</span>'; return; }
+  var q=(document.getElementById('emSearch')||{}).value||'';
+  if(mode==='pick'){ emSearchLive(); return; }  // pick mode uses live search, not bulk load
+  info.textContent='Loading…';
+  fetch(cfg.url+'?action=admin-members&token='+encodeURIComponent(tok)+'&q='+encodeURIComponent(q))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ info.innerHTML='<span style="color:#E86A6A">Could not load recipients.</span>'; return; }
+      EM_RECIPIENTS=(d.members||[]).filter(function(m){return m.email && m.email.indexOf('@')>0;})
+        .map(function(m){return {email:m.email,name:m.name};});
+      info.innerHTML='<b>'+EM_RECIPIENTS.length+'</b> recipient'+(EM_RECIPIENTS.length===1?'':'s')+' loaded'+(EM_RECIPIENTS.length>200?' <span style="color:#E86A6A">(over the 200 limit — narrow your search)</span>':'')+'.';
+    }).catch(function(){ info.innerHTML='<span style="color:#E86A6A">Could not reach the hub.</span>'; });
+}
+/* PICK mode: live search → results dropdown → click to add as a chip. */
+var _emSearchTimer=null;
+function emSearchLive(){
+  if(emMode()!=='pick') return;
+  if(_emSearchTimer) clearTimeout(_emSearchTimer);
+  _emSearchTimer=setTimeout(emDoSearch, 250);
+}
+function emDoSearch(){
+  var hub=emHub(); var cfg=hubCfg(hub); var tok=cfg?cfg.tok():'';
+  var results=document.getElementById('emResults');
+  if(!cfg||!tok){ if(results){results.style.display='block';results.innerHTML='<div class="empty" style="padding:10px">Hub not reachable.</div>';} return; }
+  var q=(document.getElementById('emSearch')||{}).value||'';
+  if(!q.trim()){ if(results) results.style.display='none'; return; }
+  fetch(cfg.url+'?action=admin-members&token='+encodeURIComponent(tok)+'&q='+encodeURIComponent(q))
+    .then(function(r){return r.json();}).then(function(d){
+      var members=((d&&d.members)||[]).filter(function(m){return m.email && m.email.indexOf('@')>0;});
+      if(!results) return;
+      if(!members.length){ results.style.display='block'; results.innerHTML='<div class="empty" style="padding:10px">No matches.</div>'; return; }
+      results.style.display='block';
+      results.innerHTML=members.slice(0,40).map(function(m){
+        var picked=EM_RECIPIENTS.some(function(r){return r.email.toLowerCase()===String(m.email).toLowerCase();});
+        return '<div onmousedown="emAddChip(\''+esc(m.email).replace(/\x27/g,"")+'\',\''+esc(m.name||"").replace(/\x27/g,"")+'\')" style="padding:9px 12px;cursor:pointer;font-size:12.5px;border-bottom:1px solid var(--bdr);'+(picked?'opacity:.5':'')+'" onmouseover="this.style.background=\'var(--card2)\'" onmouseout="this.style.background=\'transparent\'">'
+          +'<b>'+esc(m.name||'(no name)')+'</b> <span style="color:var(--tx3)">· '+esc(m.id||'')+' · '+esc(m.email)+'</span>'+(picked?' <span style="color:var(--grn)">✓ added</span>':'')+'</div>';
+      }).join('');
+    }).catch(function(){});
+}
+function emAddChip(email, name){
+  if(!email) return;
+  if(EM_RECIPIENTS.some(function(r){return r.email.toLowerCase()===email.toLowerCase();})) return; // dedupe
+  EM_RECIPIENTS.push({email:email, name:name||''});
+  emRenderChips();
+  var info=document.getElementById('emRecipInfo');
+  if(info) info.innerHTML='<b>'+EM_RECIPIENTS.length+'</b> recipient'+(EM_RECIPIENTS.length===1?'':'s')+' added'+(EM_RECIPIENTS.length>200?' <span style="color:#E86A6A">(over the 200 limit)</span>':'')+'.';
+  // refresh the results list so the added one shows ✓
+  emDoSearch();
+}
+function emRemoveChip(i){
+  EM_RECIPIENTS.splice(i,1); emRenderChips();
+  var info=document.getElementById('emRecipInfo');
+  if(info) info.innerHTML='<b>'+EM_RECIPIENTS.length+'</b> recipient'+(EM_RECIPIENTS.length===1?'':'s')+' added.';
+}
+function emRenderChips(){
+  var box=document.getElementById('emChips'); if(!box) return;
+  if(emMode()!=='pick'){ box.innerHTML=''; return; }
+  box.innerHTML=EM_RECIPIENTS.map(function(r,i){
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--bdr);border-radius:100px;padding:5px 8px 5px 12px;font-size:12px">'
+      +esc(r.name||r.email)+'<button onclick="emRemoveChip('+i+')" title="Remove" style="background:transparent;border:none;color:#E86A6A;cursor:pointer;font-size:14px;line-height:1;padding:0 2px">×</button></span>';
+  }).join('');
+}
+function emResolvePaste(){
+  var raw=(document.getElementById('emPaste')||{}).value||'';
+  var hub=(document.getElementById('emPasteHub')||{}).value||'skilled';
+  var info=document.getElementById('emPasteInfo');
+  var tokens=raw.split(/[\s,;]+/).map(function(x){return x.trim();}).filter(Boolean);
+  if(!tokens.length){ info.innerHTML='<span style="color:#E86A6A">Paste some emails or IDs first.</span>'; return; }
+  var cfg=hubCfg(hub); var tok=cfg?cfg.tok():'';
+  if(!cfg||!tok){ info.innerHTML='<span style="color:#E86A6A">That hub is not reachable.</span>'; return; }
+  info.textContent='Resolving '+tokens.length+' entries…';
+  // load the whole hub member list once, then match tokens against email or id
+  fetch(cfg.url+'?action=admin-members&token='+encodeURIComponent(tok)+'&q=')
+    .then(function(r){return r.json();}).then(function(d){
+      var members=(d&&d.members)||[];
+      var byEmail={}, byId={};
+      members.forEach(function(m){ if(m.email) byEmail[String(m.email).toLowerCase()]=m; if(m.id) byId[String(m.id).toLowerCase()]=m; });
+      var matched=[], unmatched=[];
+      tokens.forEach(function(t){
+        var key=t.toLowerCase(), m=byEmail[key]||byId[key];
+        if(m && m.email){ matched.push({email:m.email,name:m.name}); }
+        else if(t.indexOf('@')>0){ matched.push({email:t, name:''}); } // raw email not in hub — still allow
+        else unmatched.push(t);
+      });
+      // dedupe by email
+      var seen={}; EM_RECIPIENTS=matched.filter(function(m){ var k=m.email.toLowerCase(); if(seen[k])return false; seen[k]=1; return true; });
+      info.innerHTML='<b>'+EM_RECIPIENTS.length+'</b> recipient'+(EM_RECIPIENTS.length===1?'':'s')+' resolved'
+        +(unmatched.length?(' · <span style="color:#E88A2A">'+unmatched.length+' not found: '+unmatched.slice(0,5).map(esc).join(', ')+(unmatched.length>5?'…':'')+'</span>'):'')
+        +(EM_RECIPIENTS.length>200?' <span style="color:#E86A6A">(over the 200 limit)</span>':'');
+    }).catch(function(){ info.innerHTML='<span style="color:#E86A6A">Could not reach the hub.</span>'; });
+}
+function emReview(){
+  var subject=(document.getElementById('emSubject').value||'').trim();
+  var body=(document.getElementById('emBody').value||'').trim();
+  var st=document.getElementById('emStatus');
+  if(!subject){ st.innerHTML='<span style="color:#E86A6A">Add a subject first.</span>'; return; }
+  if(!body){ st.innerHTML='<span style="color:#E86A6A">Add a message first.</span>'; return; }
+  if(!EM_RECIPIENTS.length){ st.innerHTML='<span style="color:#E86A6A">Load recipients first.</span>'; return; }
+  if(EM_RECIPIENTS.length>200){ st.innerHTML='<span style="color:#E86A6A">Too many recipients ('+EM_RECIPIENTS.length+'). Limit is 200.</span>'; return; }
+  if(EM_ATTACHMENTS.length && EM_RECIPIENTS.length>20){ st.innerHTML='<span style="color:#E86A6A">Attachments are limited to 20 recipients or fewer (you have '+EM_RECIPIENTS.length+'). Use a hosted image link for larger campaigns, or narrow recipients.</span>'; return; }
+  st.textContent='';
+  // preview with the first recipient's name
+  var first=(EM_RECIPIENTS[0].name||'').split(' ')[0]||'there';
+  var previewBody=body.replace(/\{\{\s*FirstName\s*\}\}/gi, first);
+  var previewSubject=subject.replace(/\{\{\s*FirstName\s*\}\}/gi, first);
+  var unfilled=(body.match(/\{\{[^}]+\}\}/g)||[]).filter(function(f){return !/FirstName/i.test(f);});
+  var warn = unfilled.length ? '<div style="background:rgba(232,138,42,.14);border:1px solid rgba(232,138,42,.4);border-radius:8px;padding:10px 12px;font-size:12.5px;color:#E88A2A;margin:10px 0">Unfilled placeholders will send literally: '+unfilled.join(', ')+'. Fill them before sending.</div>' : '';
+  var m=document.getElementById('emModal'), back=document.getElementById('emModalBack');
+  m.innerHTML='<h2 style="margin:0 0 4px">Confirm send</h2>'
+    +'<div style="font-size:13px;color:var(--tx2);margin-bottom:12px">To <b>'+EM_RECIPIENTS.length+'</b> recipient'+(EM_RECIPIENTS.length===1?'':'s')+' · preview shown for '+esc(EM_RECIPIENTS[0].name||EM_RECIPIENTS[0].email)+'</div>'
+    +warn
+    +'<div style="border:0.5px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-weight:700;font-size:13.5px;margin-bottom:8px">'+esc(previewSubject)+'</div><div style="font-size:13px;color:var(--tx2);line-height:1.6;white-space:pre-wrap">'+esc(previewBody)+'</div><div style="font-size:11px;color:var(--tx3);margin-top:12px;border-top:1px solid var(--bdr);padding-top:8px">+ standard STACS branding &amp; trust footer appended automatically</div></div>'
+    +'<button class="ap" onclick="emSend()">Send to '+EM_RECIPIENTS.length+' now</button> '
+    +'<button class="ghost" onclick="emCloseModal()" style="margin-left:8px">Cancel</button>'
+    +'<div id="emSendResult" style="font-size:13px;margin-top:12px"></div>';
+  back.classList.add('show'); document.body.classList.add('modal-open');
+}
+function emCloseModal(){ var b=document.getElementById('emModalBack'); if(b)b.classList.remove('show'); document.body.classList.remove('modal-open'); }
+var EM_ATTACHMENTS=[];
+function emFilesChange(){
+  var input=document.getElementById('emFiles'); var info=document.getElementById('emFilesInfo');
+  EM_ATTACHMENTS=[];
+  var files=input.files; if(!files||!files.length){ if(info) info.textContent=''; return; }
+  var loaded=0, skipped=0;
+  Array.prototype.forEach.call(files, function(f){
+    if(f.size>8*1024*1024){ skipped++; return; }
+    var rd=new FileReader();
+    rd.onload=function(){ EM_ATTACHMENTS.push({name:f.name, type:f.type, data:rd.result}); loaded++;
+      if(info) info.textContent=loaded+' file(s) ready'+(skipped?' ('+skipped+' skipped: over 8 MB)':''); };
+    rd.readAsDataURL(f);
+  });
+}
+function emSend(){
+  var res=document.getElementById('emSendResult');
+  res.textContent='Sending…';
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'admin-send-email', token:TOK.w, confirm:true,
+      subject:(document.getElementById('emSubject').value||'').trim(),
+      body:(document.getElementById('emBody').value||'').trim(),
+      recipients:EM_RECIPIENTS,
+      imageUrl:(document.getElementById('emImageUrl')||{}).value||'',
+      attachments:EM_ATTACHMENTS})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ res.innerHTML='<span style="color:#2ECC71">Sent '+d.sent+' of '+d.total+(d.failed?(' · '+d.failed+' failed'):'')+'.</span>';
+        setTimeout(function(){ emCloseModal(); document.getElementById('emStatus').innerHTML='<span style="color:#2ECC71">✓ Sent to '+d.sent+' recipient(s).</span>'; }, 1400); }
+      else { res.innerHTML='<span style="color:#E86A6A">'+((d&&d.error)||'Send failed')+'</span>'; }
+    }).catch(function(e){ res.innerHTML='<span style="color:#E86A6A">Could not reach the server ('+e+').</span>'; });
+}
+
+function hubCfg(hub){
+  var map={
+    skilled:{url:SKILLED_URL, tok:function(){return TOK.w;}, cats:false},
+    verifier:{url:VERIFIER_URL_ADMIN, tok:function(){return TOK.v;}, cats:true, catLabel:'Body'},
+    translator:{url:TRANSLATOR_URL_ADMIN, tok:function(){return TOK.t;}, cats:true, catLabel:'Tier'},
+    employer:{url:EMPLOYER_URL, tok:function(){return TOK.e;}, cats:false}
+  };
+  return map[hub];
+}
+function showPanel(name, btn){
+  document.querySelectorAll('.apanel').forEach(function(p){ p.classList.remove('show'); });
+  var el=document.getElementById('panel-'+name); if(el) el.classList.add('show');
+  document.querySelectorAll('.anav button').forEach(function(b){ b.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  if(name==='skilled'){ loadMembers('skilled'); loadUnverified('skilled'); }
+  else if(name==='verifiers'){ loadMembers('verifier'); loadUnverified('verifier'); loadApprovalQueues(); }
+  else if(name==='translators') loadMembers('translator');
+  else if(name==='employers') loadEmpVerification();
+  else if(name==='email') emInitTemplates();
+  else if(name==='fees') loadFees();
+  else if(name==='resumes') loadResumeAdmin();
+}
+/* ===== Employer verification management ===== */
+function loadEmpVerification(){
+  var el=document.getElementById('empVerList'); if(!el) return;
+  if(!TOK.e){ el.innerHTML='<div class="empty">Employer hub ADMIN_KEY does not match, or its receiver lacks the endpoint.</div>'; return; }
+  var q=(document.getElementById('empVerSearch')||{}).value||'';
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(EMPLOYER_URL+'?action=admin-employers&token='+encodeURIComponent(TOK.e)+'&q='+encodeURIComponent(q))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='<div class="empty">Could not load employers (add the admin-employers endpoint to the employer receiver, or check ADMIN_KEY).</div>'; return; }
+      if(!d.employers.length){ el.innerHTML='<div class="empty">No employers match.</div>'; return; }
+      el.innerHTML='<div style="font-size:11.5px;color:var(--tx3);margin-bottom:6px">'+d.count+' employer'+(d.count===1?'':'s')+'</div>'
+        +d.employers.map(function(e){
+          var vcol=/verified/i.test(e.verification)?'var(--grn)':/review/i.test(e.verification)?'var(--gold2)':/rejected/i.test(e.verification)?'#E86A6A':'var(--tx2)';
+          var states=['Waiting','In Review','Verified','Need more information','Rejected'];
+          var sel='<select onchange="setEmpVerification(\''+esc(e.id).replace(/\x27/g,"")+'\',this.value,this)" style="background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:12px">'
+            +states.map(function(s){return '<option'+(s===e.verification?' selected':'')+'>'+s+'</option>';}).join('')+'</select>';
+          return '<div class="row" style="align-items:center"><div class="info">'
+            +'<div class="nm">'+esc(e.company||e.name||'(no name)')+' <span style="font-size:10px;background:rgba(200,146,10,.15);color:var(--gold2);border-radius:100px;padding:2px 8px">'+esc(e.empType)+'</span></div>'
+            +'<div class="dt">'+esc(e.id)+' · '+esc(e.email)+(e.country?(' · '+esc(e.country)):'')+'</div>'
+            +'<div class="meta">Docs: '+e.docsDone+'/7 · Access: '+esc(e.access)+' · Verification: <b style="color:'+vcol+'">'+esc(e.verification)+'</b></div></div>'
+            +'<div style="text-align:right">'+sel+'<div id="evmsg-'+esc(e.id).replace(/\x27/g,"")+'" style="font-size:11px;margin-top:4px"></div></div></div>';
+        }).join('');
+    }).catch(function(){ el.innerHTML='<div class="empty">Could not reach the employer hub.</div>'; });
+}
+function setEmpVerification(id, state, selEl){
+  var msg=document.getElementById('evmsg-'+id); if(msg){ msg.style.color='var(--tx3)'; msg.textContent='Saving…'; }
+  fetch(EMPLOYER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'admin-set-verification',token:TOK.e,id:id,state:state})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ if(msg){ msg.style.color=/verified/i.test(state)?'var(--grn)':'var(--gold2)'; msg.textContent='✓ '+state; } }
+      else if(msg){ msg.style.color='#E86A6A'; msg.textContent=(d&&d.error)||'Failed'; }
+    }).catch(function(){ if(msg){ msg.style.color='#E86A6A'; msg.textContent='Could not reach hub'; } });
+}
+/* ===== Promotion fees editor ===== */
+var FEES=null;
+function loadFees(){
+  var el=document.getElementById('feesBody'); if(!el) return;
+  if(!TOK.w){ el.innerHTML='<div class="empty">Skilled hub ADMIN_KEY does not match.</div>'; return; }
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(SKILLED_URL+'?action=admin-fees&token='+encodeURIComponent(TOK.w))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='<div class="empty">Could not load fees.</div>'; return; }
+      FEES=d.fees; renderFees();
+    }).catch(function(){ el.innerHTML='<div class="empty">Could not reach the hub.</div>'; });
+}
+function renderFees(){
+  var el=document.getElementById('feesBody'); if(!el||!FEES) return;
+  // package multipliers
+  var pkgs='<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--gold2);font-weight:700;margin:6px 0 8px">Packages (name &amp; multiplier)</div>';
+  FEES.packages.forEach(function(p,i){
+    pkgs+='<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">'
+      +'<input value="'+esc(p.name)+'" onchange="FEES.packages['+i+'].name=this.value" style="flex:2;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:13px">'
+      +'<span style="font-size:12px;color:var(--tx3)">×</span>'
+      +'<input type="number" step="0.1" value="'+esc(p.mult)+'" onchange="FEES.packages['+i+'].mult=parseFloat(this.value)||1;renderFees()" style="width:90px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;color:var(--tx);font-size:13px">'
+      +'</div>';
+  });
+  // duration price grid
+  var cols=[['local','1 country'],['region','2–5'],['five','6–40'],['ww','Worldwide']];
+  var grid='<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--gold2);font-weight:700;margin:16px 0 8px">Base prices (₦) by duration × coverage</div>'
+    +'<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px"><thead><tr><th style="text-align:left;padding:6px 8px;color:var(--tx3)">Duration</th>'
+    +cols.map(function(c){return '<th style="padding:6px 8px;color:var(--tx3)">'+c[1]+'</th>';}).join('')+'</tr></thead><tbody>';
+  FEES.durations.forEach(function(d,ri){
+    grid+='<tr><td style="padding:4px 8px;color:var(--tx)">'+esc(d.label)+'</td>'
+      +cols.map(function(c){ return '<td style="padding:4px 6px"><input type="number" value="'+esc(d[c[0]])+'" onchange="FEES.durations['+ri+'].'+c[0]+'=parseFloat(this.value)||0" style="width:90px;background:var(--card2);border:1px solid var(--bdr);border-radius:7px;padding:6px 8px;color:var(--tx);font-size:12px"></td>'; }).join('')
+      +'</tr>';
+  });
+  grid+='</tbody></table></div>';
+  el.innerHTML=pkgs+grid
+    +'<div style="margin-top:16px"><button class="ap" onclick="saveFees()">Save fees</button> <button class="ghost" onclick="loadFees()" style="margin-left:8px">Reset (reload)</button></div>'
+    +'<div id="feesStatus" style="font-size:12.5px;margin-top:10px"></div>'
+    +'<div style="font-size:11.5px;color:var(--tx3);margin-top:12px">Example: a "'+esc(FEES.packages[0]?FEES.packages[0].name:'')+'" ×'+esc(FEES.packages[0]?FEES.packages[0].mult:'')+' at the 30-day 1-country base charges base × multiplier. Coverage tiers: 1 / 2–5 / 6–40 / worldwide.</div>';
+}
+function saveFees(){
+  var st=document.getElementById('feesStatus'); if(st) st.textContent='Saving…';
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'admin-save-fees',token:TOK.w,fees:FEES})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ if(st) st.innerHTML='<span style="color:var(--grn)">✓ Fees saved — live immediately.</span>'; }
+      else { if(st) st.innerHTML='<span style="color:#E86A6A">'+((d&&d.error)||'Save failed')+'</span>'; }
+    }).catch(function(){ if(st) st.innerHTML='<span style="color:#E86A6A">Could not reach the hub.</span>'; });
+}
+
+var _memTimers={};
+function memSearchDebounced(hub){ if(_memTimers[hub])clearTimeout(_memTimers[hub]); _memTimers[hub]=setTimeout(function(){loadMembers(hub);},300); }
+function loadMembers(hub){
+  var listId = hub==='skilled' ? 'memList' : 'memList-'+hub;
+  var el=document.getElementById(listId); if(!el) return;
+  var cfg=hubCfg(hub); var tok=cfg.tok();
+  if(!tok){ el.innerHTML='<div class="empty">This hub\'s ADMIN_KEY does not match, or its receiver lacks the member endpoint.</div>'; return; }
+  var searchId = hub==='skilled' ? 'memSearch' : 'memSearch-'+hub;
+  var q=(document.getElementById(searchId)||{}).value||'';
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(cfg.url+'?action=admin-members&token='+encodeURIComponent(tok)+'&q='+encodeURIComponent(q))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='<div class="empty">This hub does not expose a member directory yet (add the admin-members endpoint to its receiver).</div>'; return; }
+      if(!d.members.length){ el.innerHTML='<div class="empty">No members match.</div>'; return; }
+      var sortEl=document.getElementById('memSort-'+hub);
+      if(sortEl){
+        var by=sortEl.value;
+        d.members.sort(function(a,b){
+          if(by==='name')    return String(a.name||'').localeCompare(String(b.name||''));
+          if(by==='country') return String(a.country||a.category||'').localeCompare(String(b.country||b.category||''));
+          if(by==='status'){ var rank=function(s){return /pending/i.test(s)?0:/approved|active/i.test(s)?1:2;}; return rank(a.status)-rank(b.status); }
+          var ta=new Date(a.created||0).getTime(), tb=new Date(b.created||0).getTime();
+          return by==='oldest' ? (ta-tb) : (tb-ta);   // default 'recent' = newest first
+        });
+      }
+      el.innerHTML='<div style="font-size:11.5px;color:var(--tx3);margin-bottom:6px">'+d.count+' member'+(d.count===1?'':'s')+'</div>'
+        +d.members.map(function(m){
+          var stCol=/approved|active/i.test(m.status)?'var(--grn)':/pending/i.test(m.status)?'var(--gold2)':'var(--tx2)';
+          var cat = (cfg.cats && m.category) ? ('<span style="font-size:10px;background:rgba(200,146,10,.15);color:var(--gold2);border-radius:100px;padding:2px 8px;margin-left:6px">'+esc(m.category)+'</span>') : '';
+          var extra='';
+          if(m.verifiedBy) extra+=' · Approved by: '+esc(m.verifiedBy);
+          return '<div class="row" style="cursor:pointer" onclick="openMember(\''+hub+'\',\''+esc(m.id).replace(/\x27/g,"")+'\')">'
+            +'<div class="info"><div class="nm">'+esc(m.name)+(m.company?(' · '+esc(m.company)):'')+cat+'</div>'
+            +'<div class="dt">'+esc(m.id)+' · '+esc(m.email||'')+(m.phone?(' · '+esc(m.phone)):'')+'</div>'
+            +'<div class="meta">Registered: '+esc(fmtD(m.created)||'—')+(m.approvalDate?(' · Approved: '+esc(fmtD(m.approvalDate))):'')+esc(extra)+'</div></div>'
+            +'<span class="vbadge" style="background:transparent;color:'+stCol+';border:1px solid '+stCol+'">'+esc(m.status||'—')+'</span></div>';
+        }).join('');
+    }).catch(function(){ el.innerHTML='<div class="empty">Could not reach the hub.</div>'; });
+}
+
+/* ---------------- accounts stuck on unverified email ----------------
+   Same shape on every hub that supports it: list, then correct-and-resend.
+   Reuses hubCfg() exactly like the member directory above — one function
+   that works for any hub, not a copy per hub. */
+function loadUnverified(hub){
+  var el=document.getElementById('unverified-'+hub); if(!el) return;
+  var cfg=hubCfg(hub), tok=cfg.tok();
+  if(!tok){ el.innerHTML='<div class="empty">This hub\'s ADMIN_KEY does not match. Set the same secret in every receiver, then redeploy that hub.</div>'; return; }
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(cfg.url+'?action=unverified-accounts&token='+encodeURIComponent(tok))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='<div class="empty">This hub does not expose this yet (add the unverified-accounts endpoint to its receiver).</div>'; return; }
+      if(!d.unverified.length){ el.innerHTML='<div class="empty">No accounts waiting on email verification. 🎉</div>'; return; }
+      el.innerHTML=d.unverified.map(function(u,idx){
+        var fid='uv-'+hub+'-'+idx;
+        return '<div class="row" style="flex-direction:column;align-items:stretch">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+          +'<div class="info"><div class="nm">'+esc(u.name)+'</div><div class="dt">'+esc(u.email)+(u.phone?(' · '+esc(u.phone)):'')+' · registered '+esc(fmtD(u.created)||'—')+'</div></div>'
+          +'<span class="vbadge no">Unverified</span></div>'
+          +'<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+          +'<input id="'+fid+'" value="'+esc(u.email)+'" style="flex:1;min-width:220px;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:9px 11px;color:var(--tx);font-size:13px">'
+          +'<button class="ghost" onclick="resendUnverified(\''+hub+'\',\''+fid+'\',\''+esc(u.email)+'\')">Resend verification email</button>'
+          +'<button class="ghost" onclick="forceVerify(\''+hub+'\',\''+fid+'\',\''+esc(u.email)+'\')" title="Only use this if you have separately confirmed this person and this email address with them">Mark verified manually</button></div>'
+          +'<div class="msg" id="'+fid+'-msg" style="display:none;font-size:12px;margin-top:8px"></div></div>';
+      }).join('');
+    }).catch(function(){ el.innerHTML='<div class="empty">Could not reach the hub.</div>'; });
+}
+function resendUnverified(hub, fid, oldEmail){
+  var newEmail=(document.getElementById(fid)||{}).value||oldEmail;
+  var m=document.getElementById(fid+'-msg'); m.style.display='block'; m.style.color='var(--tx2)'; m.textContent='Sending…';
+  var cfg=hubCfg(hub);
+  fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'admin-resend-verify', token:cfg.tok(), oldEmail:oldEmail, newEmail:newEmail})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ m.style.color='var(--grn)'; m.textContent='Sent to '+d.sentTo+'.'; setTimeout(function(){loadUnverified(hub);},1200); }
+      else { m.style.color='var(--rd,#E86A6A)'; m.textContent=(d&&d.error)||'Could not resend.'; }
+    }).catch(function(){ m.style.color='var(--rd,#E86A6A)'; m.textContent='Could not reach the hub.'; });
+}
+function forceVerify(hub, fid, email){
+  if(!confirm('Mark '+email+' as verified without them clicking the link? Only do this if you have separately confirmed this is genuinely their email.')) return;
+  var m=document.getElementById(fid+'-msg'); m.style.display='block'; m.style.color='var(--tx2)'; m.textContent='Verifying…';
+  var cfg=hubCfg(hub);
+  fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'admin-force-verify', token:cfg.tok(), email:email})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ m.style.color='var(--grn)'; m.textContent=d.already?'Already verified.':'Verified.'; setTimeout(function(){loadUnverified(hub);},1200); }
+      else { m.style.color='var(--rd,#E86A6A)'; m.textContent=(d&&d.error)||'Could not verify.'; }
+    }).catch(function(){ m.style.color='var(--rd,#E86A6A)'; m.textContent='Could not reach the hub.'; });
+}
+
+var CUR_MEMBER=null;
+function openMember(hub, id){
+  var back=document.getElementById('memModalBack'), m=document.getElementById('memModal');
+  if(!back||!m) return;
+  CUR_MEMBER={hub:hub, id:id};
+  var cfg=hubCfg(hub);
+  m.innerHTML='<div class="empty">Loading '+esc(id)+'…</div>';
+  back.classList.add('show'); document.body.classList.add('modal-open');
+  fetch(cfg.url+'?action=admin-member&token='+encodeURIComponent(cfg.tok())+'&id='+encodeURIComponent(id))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ m.innerHTML='<div class="empty">Could not load this member.</div><button class="ghost" onclick="closeMember()">Close</button>'; return; }
+      m.innerHTML=renderMemberDetail(d);
+    }).catch(function(){ m.innerHTML='<div class="empty">Could not reach the hub.</div><button class="ghost" onclick="closeMember()">Close</button>'; });
+}
+function closeMember(){
+  var back=document.getElementById('memModalBack');
+  if(back) back.classList.remove('show');
+  document.body.classList.remove('modal-open');
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeMember(); });
+function kv(label,val){ return '<div style="display:flex;gap:12px;padding:5px 0;border-bottom:1px solid var(--bdr)"><span style="flex:0 0 40%;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3)">'+esc(label)+'</span><span style="flex:1;font-size:13px;color:var(--tx)">'+(val?esc(String(val)):'—')+'</span></div>'; }
+function sec(title,inner){ return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-bottom:12px"><div style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);font-weight:700;margin-bottom:8px">'+esc(title)+'</div>'+inner+'</div>'; }
+function renderMemberDetail(d){
+  var p=d.profile||{};
+  var title=(p.firstname||'')+' '+(p.surname||'');
+  if(!title.trim()) title=p.company||p.id||'Member';
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">'+esc(title)+(d.hub?(' <span style="font-size:11px;color:var(--gold2)">· '+esc(d.hub)+'</span>'):'')+'</h2>'
+    +'<button class="ghost" onclick="closeMember()">Close ✕</button></div>';
+
+  // Identity — common fields plus any hub-specific ones present
+  var idRows=kv('ID',p.id||p.stacsId)+kv('Email',p.email)+kv('Email verified',p.emailVerified)+kv('Phone',p.phone);
+  if(p.company!==undefined) idRows+=kv('Company',p.company)+kv('Trading name',p.trading)+kv('Reg no',p.regno)+kv('Sector',p.sector)+kv('Website',p.website)+kv('Role',p.role);
+  if(p.nationality!==undefined) idRows+=kv('Nationality',p.nationality);
+  if(p.residence!==undefined) idRows+=kv('Residence',p.residence);
+  if(p.country!==undefined) idRows+=kv('Country',p.country);
+  if(p.city!==undefined) idRows+=kv('City',p.city);
+  if(p.dob!==undefined) idRows+=kv('DOB',fmtD(p.dob));
+  if(p.tier!==undefined) idRows+=kv('Tier',p.tier);
+  if(p.body!==undefined) idRows+=kv('Accrediting body',p.body)+kv('Accreditation no',p.accredNo)+kv('Sectors',p.sectors)+kv('Credential types',p.credentialTypes);
+  if(p.certBody!==undefined) idRows+=kv('Certifying body',p.certBody)+kv('Certification no',p.certNo)+kv('Language pairs',p.pairs)+kv('Rate/page (USD)',p.ratePage);
+  idRows+=kv('Status',p.status)+(p.stage!==undefined?kv('Stage',p.stage):'')
+    +(p.reviewedBy!==undefined?kv('Reviewed/approved by',p.reviewedBy):'')
+    +(p.decisionDate!==undefined?kv('Decision date',fmtD(p.decisionDate)):'')
+    +kv('Created',fmtD(p.created));
+  html+=sec('Identity & profile', idRows);
+
+  // Verifier scope management — approve/deny each of the 8 tiers independently.
+  if(p.body!==undefined && (p.tiers!==undefined || p.requestedTiers!==undefined)){
+    html+=renderScopeAdmin(p);
+  }
+  // Verifier request history — including any declines with their reasons.
+  if(d.verifyRequests && d.verifyRequests.length){
+    var vr=d.verifyRequests.map(function(r){
+      var col = r.status==='Declined'?'#E86A6A':r.status==='Accepted'?'#2ECC71':r.status==='Pending'?'#C8920A':'var(--tx3)';
+      return '<div style="padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12.5px">'
+        +'<div><b>'+esc(r.document||'Document')+'</b> · '+esc(r.candidate||'')+' · <span style="color:'+col+';font-weight:700">'+esc(r.status||'')+'</span></div>'
+        +(r.reason?('<div style="color:#E86A6A;margin-top:2px">Decline reason: '+esc(r.reason)+'</div>'):'')
+        +'</div>';
+    }).join('');
+    html+=sec('Verification requests &amp; declines', vr);
+  }
+
+  // Skilled-only sections — render only when the data exists
+  if(p.payStatus!==undefined) html+=sec('Payment', kv('Pay status',p.payStatus)+kv('Amount',p.payAmount)+kv('Currency',p.payCurrency)+kv('Reference',p.payRef));
+  if(p.identityVer!==undefined) html+=sec('Verification', kv('Identity',p.identityVer||'Pending')+kv('Education',p.educationVer||'Pending')+kv('Employment',p.employmentVer||'Pending'));
+  if(d.skills){ var sk=(d.skills||[]).map(function(s){return '<div style="font-size:13px;padding:4px 0">• '+esc(s.profession)+' <span style="color:var(--tx3)">('+esc(s.status)+')</span></div>';}).join('')||'<div style="color:var(--tx3);font-size:13px">None</div>'; html+=sec('Skills',sk); }
+  if(d.academics){ var acs=(d.academics||[]).map(function(a){return '<div style="font-size:13px;padding:4px 0">• '+esc(a.qualification||'')+(a.institution?(' — '+esc(a.institution)):'')+(a.year?(' ('+esc(a.year)+')'):'')+(a.cv?' · CV':'')+'</div>';}).join('')||'<div style="color:var(--tx3);font-size:13px">None</div>'; html+=sec('Academics',acs); }
+  if(d.travelDoc){ var t=d.travelDoc; html+=sec('Travel document', kv('Status',t.has)+kv('Type',t.docType)+kv('Number',t.numberMasked)+kv('Country',t.country)+kv('Expiry',fmtD(t.expiry))+kv('Verification',t.verification)); }
+  if(d.documents){ var dc=d.documents||{}; html+=sec('Documents', kv('Photo ID',dc.id?'✓ Uploaded':'—')+kv('Resume/CV',dc.resume?'✓ Uploaded':'—')+kv('Credentials',dc.credentials?'✓ Uploaded':'—')+kv('Other',dc.other?'✓ Uploaded':'—')); }
+  if(d.activity){ var act=(d.activity||[]).slice(0,30).map(function(a){return '<div style="font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--tx3)">'+esc(fmtD(a.when))+'</span> · <b>'+esc(a.type)+'</b> · '+esc(a.detail)+'</div>';}).join('')||'<div style="color:var(--tx3);font-size:13px">No activity</div>'; html+=sec('Activity',act); }
+  return html;
+}
+/* ===== Verifier scope administration — approve / deny each tier ===== */
+var VTIERS=[['T1','Basic Verifier'],['T2','Professional Verifier'],['T3','Institutional Verifier'],['T4','Legal Verifier'],['T5','Healthcare Verifier'],['T6','Government Verifier'],['T7','Embassy / Diplomatic'],['T8','International Body']];
+function tset(s){ return String(s||'').split(/[,\s]+/).map(function(x){return x.trim().toUpperCase();}).filter(function(x){return /^T[1-8]$/.test(x);}); }
+function ngnA(n){ return '₦'+Number(n||0).toLocaleString('en-NG'); }
+function renderScopeAdmin(p){
+  var approved=tset(p.tiers), requested=tset(p.requestedTiers), denied=tset(p.deniedTiers), sd=p.scopeDetails||{};
+  var rows=VTIERS.map(function(t){
+    var code=t[0], state = approved.indexOf(code)>=0?'approved' : requested.indexOf(code)>=0?'pending' : denied.indexOf(code)>=0?'denied' : 'none';
+    var col = state==='approved'?'var(--grn)':state==='pending'?'var(--gold2)':state==='denied'?'#E86A6A':'var(--tx3)';
+    var label = state==='approved'?'Approved':state==='pending'?'Pending':state==='denied'?'Denied':'—';
+    var fee = (sd[code] && sd[code].feeNGN) ? (' · fee '+ngnA(sd[code].feeNGN)) : '';
+    var extra = (sd[code] && sd[code].extraDocs) ? ('<div style="font-size:11px;color:var(--tx3);margin-top:2px">Needs: '+esc(sd[code].extraDocs)+'</div>') : '';
+    var btns='';
+    if(state!=='approved') btns+='<button class="ap" style="padding:5px 10px;font-size:12px" onclick="setScope(\''+esc(p.email)+'\',\''+code+'\',\'\')">Approve</button> ';
+    if(state!=='denied')   btns+='<button class="ghost" style="padding:5px 10px;font-size:12px" onclick="setScope(\''+esc(p.email)+'\',\'\',\''+code+'\')">Deny</button>';
+    return '<div style="padding:9px 0;border-bottom:1px solid var(--bdr)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+      +'<div><b style="font-size:13px">'+code+' · '+esc(t[1])+'</b> <span style="color:'+col+';font-weight:700;font-size:12px">'+label+'</span>'+fee+extra+'</div>'
+      +'<div style="white-space:nowrap">'+btns+'</div></div></div>';
+  }).join('');
+  return sec('Verification scope — approve / deny by tier', rows
+    +'<div style="font-size:11px;color:var(--tx3);margin-top:8px">Approving a tier does not issue the AV-ID — approve the verifier first. Each tier is independent; a denied tier can be re-applied for by the verifier.</div>');
+}
+function setScope(email, approveTiers, denyTiers){
+  var msg=document.getElementById('msg');
+  fetch(VERIFIER_URL_ADMIN,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'admin-set-scope', token:TOK.v, email:email, approveTiers:approveTiers, denyTiers:denyTiers})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ if(msg){msg.className='msg ok';msg.textContent='Scope updated for '+email+'.';}
+        if(CUR_MEMBER) openMember(CUR_MEMBER.hub, CUR_MEMBER.id); }
+      else { if(msg){msg.className='msg err';msg.textContent='Could not update scope: '+((d&&d.error)||'error');} }
+    }).catch(function(){ if(msg){msg.className='msg err';msg.textContent='Network error updating scope.';} });
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmtD(v){ var s=String(v||'').trim(); if(!s)return ''; var d=s.split('T')[0]; return d; }
+
+/* ======================= RESUME REQUESTS (admin console) ======================= */
+var RES_CUR=null;
+var RES_ITEMS=[
+ {k:'currentRole',label:'Current role'},{k:'targetRole',label:'Target role'},
+ {k:'summary',label:'Summary of experience'},{k:'education',label:'Education'},
+ {k:'achievements',label:'Achievements'},{k:'workHistory',label:'Work history'},
+ {k:'skills',label:'Skills'},{k:'certifications',label:'Certifications'},
+ {k:'countryOfUse',label:'Country of use'},{k:'preferredStyle',label:'Preferred style'}
+];
+function resNgn(n){ return '₦'+Number(n||0).toLocaleString('en-NG'); }
+function resStatusPill(st){
+  st=String(st||''); var bg='#333',fg='#eee';
+  if(st==='Approved'){bg='#143d24';fg='#8DE0A6';}
+  else if(/await/i.test(st)){bg='#3d3414';fg='#E2C56A';}
+  else if(/lock/i.test(st)){bg='#1d2d46';fg='#9CC2F2';}
+  else if(/submit/i.test(st)){bg='#1d2d46';fg='#9CC2F2';}
+  return '<span style="background:'+bg+';color:'+fg+';border-radius:100px;padding:4px 11px;font-size:11px;font-weight:800">'+esc(st)+'</span>';
+}
+function loadResumeAdmin(){
+  var el=document.getElementById('resList'); if(!el) return;
+  if(!TOK.w){ el.innerHTML='<div class="empty">Not authorised for this hub.</div>'; return; }
+  var q=(document.getElementById('resSearch')||{}).value||'';
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(SKILLED_URL+'?action=resume-admin-list&token='+encodeURIComponent(TOK.w)+'&q='+encodeURIComponent(q))
+   .then(function(r){return r.json();}).then(function(d){
+     if(!d||!d.ok){ el.innerHTML='<div class="empty">'+((d&&d.error==='unauthorized')?'Session expired — lock and sign in again.':'Could not load requests.')+'</div>'; return; }
+     if(!d.requests.length){ el.innerHTML='<div class="empty">No resume requests yet.</div>'; return; }
+     var rows=d.requests.map(function(x){
+       return '<div onclick="openResumeReq(\''+esc(x.requestId)+'\')" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer">'
+         +'<div><div style="font-weight:800;color:var(--tx);font-size:13.5px">'+esc(x.candidateName||x.candidateId)+' <span style="color:var(--tx3);font-weight:500">· '+esc(x.pkgName||'')+'</span></div>'
+         +'<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+esc(x.requestId)+' · '+esc(x.speed||'')+' · '+resNgn(x.amount)+' · '+esc(x.paymentStatus||'')+'</div></div>'
+         +'<div style="text-align:right">'+resStatusPill(x.status)+'<div style="font-size:11px;color:var(--tx3);margin-top:4px">'+esc(x.updated||x.created||'')+'</div></div>'
+         +'</div>';
+     }).join('');
+     el.innerHTML=rows;
+   }).catch(function(){ el.innerHTML='<div class="empty">Network error.</div>'; });
+}
+function openResumeReq(id){
+  var box=document.getElementById('resDetail'); box.innerHTML='<div class="empty">Loading request…</div>';
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+  fetch(SKILLED_URL+'?action=resume-admin-get&token='+encodeURIComponent(TOK.w)+'&id='+encodeURIComponent(id))
+   .then(function(r){return r.json();}).then(function(d){
+     if(!d||!d.ok){ box.innerHTML='<div class="empty">Could not open this request.</div>'; return; }
+     RES_CUR=d; renderResumeConsole();
+   }).catch(function(){ box.innerHTML='<div class="empty">Network error.</div>'; });
+}
+function renderResumeConsole(){
+  var box=document.getElementById('resDetail'); if(!RES_CUR) return;
+  var o=RES_CUR.request, c=RES_CUR.contact||{}, ans=(o.intake&&o.intake.answers)||{}, f=(o.intake&&o.intake.fields)||{};
+  var presenceOpts=function(sel){ return ['present','review','add'].map(function(v){
+      var lbl=v==='present'?'Already present':(v==='review'?'Needs review':'Needs to be added');
+      return '<option value="'+v+'"'+(sel===v?' selected':'')+'>'+lbl+'</option>'; }).join(''); };
+  var checklist=RES_ITEMS.map(function(it){
+    return '<div><label style="font-size:11.5px;color:var(--tx2);font-weight:700;display:block;margin-bottom:4px">'+esc(it.label)+'</label>'
+      +'<select id="ra_'+it.k+'" class="resI"><option value="">Not set</option>'+presenceOpts(ans[it.k]||'')+'</select></div>'; }).join('');
+  var fieldArea=['summary','workHistory','skills','education','certifications','achievements'].map(function(k){
+    var lbl={summary:'Summary of experience',workHistory:'Work history',skills:'Skills',education:'Education',certifications:'Certifications',achievements:'Achievements and notes'}[k];
+    return '<div><label style="font-size:11.5px;color:var(--tx2);font-weight:700;display:block;margin-bottom:4px">'+lbl+'</label>'
+      +'<textarea id="rff_'+k+'" class="resI" rows="2">'+esc(f[k]||'')+'</textarea></div>'; }).join('');
+  var deliver='';
+  if(o.pdfContact||o.pdfPublic){
+    deliver='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">';
+    if(o.pdfContact) deliver+='<a href="'+esc(o.pdfContact)+'" target="_blank" rel="noopener" class="ap" style="text-decoration:none">Version 1 · With contact (candidate only)</a>';
+    if(o.pdfPublic) deliver+='<a href="'+esc(o.pdfPublic)+'" target="_blank" rel="noopener" class="ghost" style="text-decoration:none">Version 2 · No contact (employers)</a>';
+    deliver+='</div>';
+  } else { deliver='<div style="font-size:12px;color:var(--tx3);margin-top:4px">The two PDFs are produced when you press Approve.</div>'; }
+  if(o.wordUrl) deliver='<div style="margin-bottom:8px"><a href="'+esc(o.wordUrl)+'" target="_blank" rel="noopener" class="ghost" style="text-decoration:none">Download Word review draft</a></div>'+deliver;
+
+  box.innerHTML=''
+  +'<div style="background:var(--card);border:1px solid var(--gold2);border-radius:14px;padding:16px 18px">'
+  +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">'
+    +'<div><div style="font-size:17px;font-weight:800;color:var(--tx)">Custom Resume / CV Upgrade</div>'
+    +'<div style="font-size:12.5px;color:var(--tx3);margin-top:3px">'+esc(o.requestId)+' · '+esc(o.candidateName)+' ('+esc(o.candidateId)+') · '+esc(o.pkgName||'')+' · '+esc(o.speed||'')+' ('+esc(o.turnaround||'')+' days) · '+resNgn(o.amount)+' · '+esc(o.paymentStatus||'')+'</div></div>'
+    +'<div style="text-align:right">'+resStatusPill(o.status)+' <button class="ghost" onclick="document.getElementById(\'resDetail\').innerHTML=\'\'" style="margin-left:8px">Close</button></div>'
+  +'</div>'
+  +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">'
+    +'<button class="ap" onclick="resEmailOpen()">Email Candidate for Additional Information</button>'
+    +'<button class="ghost" onclick="resRegenerate()">Re-generate Resume/CV draft</button>'
+    +'<button class="ghost" onclick="resEdit()">Edit</button>'
+    +'<button class="ghost" onclick="resSaveLater()">Save to Continue Later</button>'
+    +'<button class="ghost" onclick="resLock()">Lock Final Version</button>'
+    +'<button class="ap" onclick="resApprove()">Approve</button>'
+  +'</div>'
+  +'<div id="resMsg" style="font-size:12.5px;min-height:16px;margin-bottom:10px"></div>'
+
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+    +'<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px">'
+      +'<div style="font-weight:800;font-size:13px;color:var(--tx);margin-bottom:10px">Candidate Profile Summary</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+        +'<div><label class="resL">Full name</label><input class="resI" value="'+esc(c.name||o.candidateName||'')+'" readonly></div>'
+        +'<div><label class="resL">Current role</label><input id="rff_currentRole" class="resI" value="'+esc(f.currentRole||'')+'"></div>'
+        +'<div><label class="resL">Target role</label><input id="rff_targetRole" class="resI" value="'+esc(f.targetRole||'')+'"></div>'
+        +'<div><label class="resL">Country of use</label><input id="rff_countryOfUse" class="resI" value="'+esc(f.countryOfUse||c.nationality||'')+'"></div>'
+      +'</div>'
+      +'<div style="font-size:11.5px;color:var(--tx3);margin-top:10px;line-height:1.5">Contact on file: '+esc([c.email,c.phone,c.location].filter(Boolean).join(' · ')||'none')+'</div>'
+    +'</div>'
+    +'<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px">'
+      +'<div style="font-weight:800;font-size:13px;color:var(--tx);margin-bottom:10px">What the candidate told us</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px">'+checklist+'</div>'
+    +'</div>'
+  +'</div>'
+
+  +'<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-top:14px">'
+    +'<div style="font-weight:800;font-size:13px;color:var(--tx);margin-bottom:10px">Details to work from (edit, then Re-generate to rebuild the draft)</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+fieldArea+'</div>'
+  +'</div>'
+
+  +'<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-top:14px">'
+    +'<div style="font-weight:800;font-size:13px;color:var(--tx);margin-bottom:8px">Professional Resume Draft (editable)</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
+      +'<button class="ghost" onclick="resCmd(\'bold\')"><b>B</b></button>'
+      +'<button class="ghost" onclick="resCmd(\'italic\')"><i>I</i></button>'
+      +'<button class="ghost" onclick="resCmd(\'underline\')"><u>U</u></button>'
+      +'<button class="ghost" onclick="resCmd(\'insertUnorderedList\')">Bullets</button>'
+      +'<button class="ghost" onclick="resCmd(\'insertOrderedList\')">Numbered</button>'
+    +'</div>'
+    +'<div id="resEditor" contenteditable="true" style="min-height:240px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;color:var(--tx);line-height:1.7;font-size:13.5px;outline:none">'+(o.draft||'<p>Prepare the professional draft here.</p>')+'</div>'
+    +'<div style="font-size:11.5px;color:var(--tx3);margin-top:8px;line-height:1.5">The final content reads naturally and professionally, with no machine-like phrasing. It is never presented as automatically generated.</div>'
+  +'</div>'
+
+  +'<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-top:14px">'
+    +'<label class="resL">Internal notes (not shown to the candidate)</label>'
+    +'<textarea id="resNotes" class="resI" rows="2">'+esc(o.notes||'')+'</textarea>'
+  +'</div>'
+
+  +'<div style="background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-top:14px">'
+    +'<div style="font-weight:800;font-size:13px;color:var(--tx);margin-bottom:8px">Candidate Delivery</div>'
+    +deliver
+    +'<label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:12.5px;color:var(--tx2);cursor:pointer"><input type="checkbox" id="resReplace" '+(o.replaceOld?'checked':'')+' style="width:auto"> Make the shareable version replace the old version</label>'
+    +'<div style="font-size:11.5px;color:var(--tx3);margin-top:4px;line-height:1.5">If ticked, the no-contact version becomes the default external copy. The candidate keeps the private version with contact details.</div>'
+  +'</div>'
+
+  +'<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px">'
+    +'<div style="font-size:11.5px;color:var(--tx3)">All activity is recorded in the Resume Requests tab.</div>'
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="ghost" onclick="resSaveLater()">Save and Continue</button><button class="ap" onclick="resApprove()">Approve</button></div>'
+  +'</div>'
+  +'</div>';
+}
+function resCmd(cmd){ document.execCommand(cmd,false,null); var e=document.getElementById('resEditor'); if(e)e.focus(); }
+function resEdit(){ var e=document.getElementById('resEditor'); if(e)e.focus(); resMsg('info','Edit mode. Make your changes, then Save and Continue.'); }
+function resMsg(type,t){ var m=document.getElementById('resMsg'); if(!m)return; m.textContent=t; m.style.color=type==='err'?'#E86A6A':type==='ok'?'#8DE0A6':'var(--tx2)'; }
+function resGatherIntake(){
+  var answers={}, fields={};
+  RES_ITEMS.forEach(function(it){ var s=document.getElementById('ra_'+it.k); if(s&&s.value) answers[it.k]=s.value; });
+  ['currentRole','targetRole','countryOfUse'].forEach(function(k){ var el=document.getElementById('rff_'+k); if(el) fields[k]=el.value.trim(); });
+  ['summary','workHistory','skills','education','certifications','achievements'].forEach(function(k){ var el=document.getElementById('rff_'+k); if(el) fields[k]=el.value.trim(); });
+  if(RES_CUR&&RES_CUR.request&&RES_CUR.request.intake&&RES_CUR.request.intake.fields&&RES_CUR.request.intake.fields.preferredStyle)
+    fields.preferredStyle=RES_CUR.request.intake.fields.preferredStyle;
+  return {answers:answers, fields:fields};
+}
+function resPost(body, okMsg, after){
+  body.token=TOK.w; body.requestId=RES_CUR.request.requestId;
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})
+   .then(function(r){return r.json();}).then(function(d){
+     if(d&&d.ok){ resMsg('ok',okMsg); if(after)after(d); loadResumeAdmin(); }
+     else { resMsg('err',(d&&d.error)||'Could not complete that action.'); }
+   }).catch(function(){ resMsg('err','Network error.'); });
+}
+function resSaveLater(){
+  var draft=(document.getElementById('resEditor')||{}).innerHTML||'';
+  var notes=(document.getElementById('resNotes')||{}).value||'';
+  resPost({action:'resume-admin-save', draft:draft, notes:notes, intake:resGatherIntake(), saveLater:true}, 'Saved.');
+}
+function resRegenerate(){
+  resMsg('info','Re-generating the draft from the current details…');
+  resPost({action:'resume-admin-regenerate', intake:resGatherIntake()}, 'Draft re-generated.', function(d){
+    var e=document.getElementById('resEditor'); if(e&&d.draft) e.innerHTML=d.draft;
+  });
+}
+function resLock(){
+  var draft=(document.getElementById('resEditor')||{}).innerHTML||'';
+  resPost({action:'resume-admin-lock', draft:draft}, 'Final version locked.');
+}
+function resApprove(){
+  if(!confirm('Approve this resume and produce the two PDFs (private with contact, shareable without contact)?')) return;
+  var draft=(document.getElementById('resEditor')||{}).innerHTML||'';
+  var replace=(document.getElementById('resReplace')||{}).checked||false;
+  resMsg('info','Approving and producing the PDFs…');
+  resPost({action:'resume-admin-approve', draft:draft, replaceOld:replace}, 'Approved. The two PDFs are ready.', function(){
+    openResumeReq(RES_CUR.request.requestId);
+  });
+}
+function resEmailOpen(){
+  var o=RES_CUR.request, c=RES_CUR.contact||{};
+  var first=((c.name||o.candidateName||'there').split(' ')[0]);
+  var subject='Additional information for your STACS resume request';
+  var body='Hello '+first+',\n\n'
+    +'Thank you for your resume request.\n\n'
+    +'We are preparing your professional version and would value a little more detail in a few areas so the final copy is as strong as possible.\n\n'
+    +'Please confirm or add anything helpful about:\n'
+    +'current role, target role, summary of experience, education, achievements, work history, skills, certifications, country of use and preferred style.\n\n'
+    +'Once we receive your reply we will continue the preparation and move towards final approval.\n\n'
+    +'Kind regards,\nSTACS Career Specialists';
+  document.getElementById('resEmailModal').innerHTML=''
+    +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px">'
+    +'<div style="font-size:15px;font-weight:800;color:var(--tx)">Email Candidate for Additional Information</div>'
+    +'<button class="ghost" onclick="resEmailClose()">Close</button></div>'
+    +'<div style="font-size:12px;color:var(--tx3);margin-bottom:10px">To: '+esc(c.email||o.candidateEmail||'')+'</div>'
+    +'<label class="resL">Subject</label><input id="resEmSubject" class="resI" value="'+esc(subject)+'" style="margin-bottom:10px">'
+    +'<label class="resL">Message (editable)</label><textarea id="resEmBody" class="resI" rows="12">'+esc(body)+'</textarea>'
+    +'<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px"><button class="ghost" onclick="resEmailClose()">Cancel</button><button class="ap" onclick="resEmailSend()">Send Email</button></div>';
+  document.getElementById('resEmailBack').classList.add('show');
+}
+function resEmailClose(){ document.getElementById('resEmailBack').classList.remove('show'); }
+function resEmailSend(){
+  var subject=(document.getElementById('resEmSubject')||{}).value||'';
+  var bodyTxt=(document.getElementById('resEmBody')||{}).value||'';
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'resume-admin-email', token:TOK.w, requestId:RES_CUR.request.requestId, subject:subject, body:bodyTxt})})
+   .then(function(r){return r.json();}).then(function(d){
+     if(d&&d.ok){ resEmailClose(); resMsg('ok','Email sent to the candidate.'); loadResumeAdmin(); }
+     else { alert((d&&d.error)||'Could not send the email.'); }
+   }).catch(function(){ alert('Network error sending the email.'); });
+}
+function loadList(base,token,elId,kind){
+ const el=document.getElementById(elId);el.innerHTML='<div class="empty">Loading…</div>';
+ if(!token){el.innerHTML='<div class="empty">Not authorised for this app.</div>';return;}
+ fetch(base+'?action=pending&token='+encodeURIComponent(token)).then(r=>r.json()).then(d=>{
+   if(!d.ok){el.innerHTML='<div class="empty">'+(d.error==='unauthorized'?'Session expired — lock and sign in again.':'Could not load.')+'</div>';return;}
+   const list=d.pending||[];
+   if(!list.length){el.innerHTML='<div class="empty">No pending '+kind+'s. 🎉</div>';return;}
+   el.innerHTML=list.map(p=>{
+     const title=kind==='employer'?(p.company||p.name):p.name;
+     const meta=kind==='employer'?(p.name+' · '+(p.country||'')):((p.skill||'')+' · '+(p.country||''));
+     const ver=p.verified==='Yes';
+     return `<div class="row" data-email="${p.email}"><div class="info"><div class="nm">${title}</div><div class="meta">${meta}</div><div class="dt">${p.email}</div></div>
+      <span class="vbadge ${ver?'':'no'}">${ver?'email ✓':'email ✗'}</span>
+      <button class="ap" onclick="approve('${hubCodeFor(base)}','${p.email}',this)">Approve</button></div>`;
+   }).join('');
+ }).catch(()=>{el.innerHTML='<div class="empty">Could not reach the server. Deploy the receiver and set access to Anyone.</div>';});
+}
+/* Maps a hub's receiver URL to its short code, so the Approve button routes to
+   the CORRECT backend. The old code only knew 'e' and 'w', so clicking Approve
+   on a verifier (or translator) wrongly sent it to the Skilled Worker hub —
+   which then said "already approved" because that person also has a WK- record.
+   That was the mysterious "already approved Verifiers" error. */
+function hubCodeFor(base){
+  if(base===EMPLOYER_URL) return 'e';
+  if(typeof VERIFIER_URL_ADMIN!=='undefined' && base===VERIFIER_URL_ADMIN) return 'v';
+  if(typeof TRANSLATOR_URL_ADMIN!=='undefined' && base===TRANSLATOR_URL_ADMIN) return 't';
+  return 'w';
+}
+function approve(which,email,btn){
+ var base, token;
+ if(which==='e'){ base=EMPLOYER_URL; token=TOK.e; }
+ else if(which==='v'){ base=VERIFIER_URL_ADMIN; token=TOK.v; }
+ else if(which==='t'){ base=TRANSLATOR_URL_ADMIN; token=TOK.t; }
+ else { base=SKILLED_URL; token=TOK.w; }
+ btn.disabled=true;btn.textContent='Approving…';
+ const msg=document.getElementById('msg');msg.className='msg';
+ fetch(base+'?action=approve&token='+encodeURIComponent(token)+'&email='+encodeURIComponent(email)).then(r=>r.json()).then(d=>{
+   if(d.ok){msg.className='msg ok';msg.textContent='Approved '+email+' → '+d.id;btn.closest('.row').remove();}
+   else{msg.className='msg err';msg.textContent='Could not approve '+email+': '+(d.error||'error');btn.disabled=false;btn.textContent='Approve';}
+ }).catch(()=>{msg.className='msg err';msg.textContent='Network error approving '+email;btn.disabled=false;btn.textContent='Approve';});
+}
+</script>
+<div id="wa-widget" style="position:fixed;bottom:22px;right:22px;z-index:99999;font-family:system-ui,-apple-system,sans-serif">
+ <div id="wa-panel" style="display:none;position:absolute;bottom:70px;right:0;width:300px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.3)">
+  <div style="background:#25D366;padding:16px 18px;color:#fff;position:relative">
+   <div style="font-size:19px;font-weight:800">Hello!</div>
+   <div style="font-size:12.5px;opacity:.96;margin-top:3px;line-height:1.4">Click a contact below to chat on WhatsApp</div>
+   <button onclick="waToggle()" aria-label="Close" style="position:absolute;top:11px;right:12px;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1">&times;</button>
+  </div>
+  <a href="https://wa.me/2348022268113" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:#111;background:#f6f6f3">
+   <img src="data:image/jpeg;base64,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" alt="" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid #dcdcd6;object-fit:cover">
+   <div style="flex:1"><div style="font-weight:700;font-size:14px">Leivotest STACS Support</div><div style="font-size:12px;color:#25D366">● Online · usually replies fast</div></div>
+   <svg viewBox="0 0 32 32" width="22" height="22" fill="#25D366"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.7.9 3.6 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7.7.7-3.6-.2-.4C6.5 18.5 6 16.8 6 15c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10zm5.5-7.5c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg>
+  </a>
+ </div>
+ <button id="wa-btn" onclick="waToggle()" style="display:flex;align-items:center;gap:9px;background:#25D366;color:#fff;border:none;border-radius:100px;padding:11px 18px 11px 13px;box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer;font-size:14px;font-weight:600">
+  <svg viewBox="0 0 32 32" width="26" height="26" fill="#fff"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.1 1.6 5.9L4 29l8.3-1.6c1.7.9 3.6 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7.7.7-3.6-.2-.4C6.5 18.5 6 16.8 6 15c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10zm5.5-7.5c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg><span id="wa-btn-txt">How can I help you?</span>
+ </button>
+</div>
+<script>function waToggle(){var p=document.getElementById('wa-panel');var o=p.style.display==='block';p.style.display=o?'none':'block';document.getElementById('wa-btn-txt').textContent=o?'How can I help you?':'Chat with us';}</script>
+<button id="themeBtn" onclick="stacsTheme()" aria-label="Toggle day / night view" title="Day / Night view" style="position:fixed;bottom:22px;left:22px;z-index:9998;width:46px;height:46px;border-radius:50%;background:var(--s1,#12502A);color:var(--gold2,#E2A53A);border:1px solid var(--bdr2,rgba(255,255,255,.22));cursor:pointer;font-size:19px;box-shadow:0 6px 16px rgba(0,0,0,.28)">&#127769;</button>
+<script>function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
+(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}catch(e){}})();</script>
+<script>
+/* ---- show / hide password on every password field ---- */
+(function(){
+  function attach(){
+    var ins=document.querySelectorAll('input[type=password]');
+    for(var i=0;i<ins.length;i++){
+      (function(inp){
+        if(inp.getAttribute('data-eye'))return;
+        inp.setAttribute('data-eye','1');
+        var w=document.createElement('div'); w.className='pw-wrap';
+        inp.parentNode.insertBefore(w,inp); w.appendChild(inp);
+        var b=document.createElement('button');
+        b.type='button'; b.className='pw-eye'; b.textContent='Show';
+        b.setAttribute('aria-label','Show or hide password');
+        b.onclick=function(){ var sh=inp.type==='password'; inp.type=sh?'text':'password'; b.textContent=sh?'Hide':'Show'; };
+        w.appendChild(b);
+      })(ins[i]);
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach); else attach();
+})();
+</script>
+</body></html>
