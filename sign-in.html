@@ -130,6 +130,7 @@ async function forgot(){
 }
 document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')signIn();});
 </script>
+<button id="themeBtn" onclick="stacsTheme()" aria-label="Toggle day / night view" title="Day / Night view" style="position:fixed;bottom:22px;left:22px;z-index:9998;width:46px;height:46px;border-radius:50%;background:var(--s1,#12502A);color:var(--gold2,#E2A53A);border:1px solid var(--bdr2,rgba(255,255,255,.22));cursor:pointer;font-size:19px;box-shadow:0 6px 16px rgba(0,0,0,.28)">&#127769;</button>
 <script>function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
 (function(){try{var t=localStorage.getItem("stacs_theme")||"dark";var b=document.getElementById("themeBtn");if(b)b.innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}catch(e){}})();</script>
 <script>
