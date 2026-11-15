@@ -67,14 +67,23 @@ body.modal-open{overflow:hidden}
 </style>
 </head><body>
 <div id="gate" class="gate">
- <h1>STACS Admin</h1><p>Enter your admin key to review and approve pending registrations.</p>
- <input id="key" type="password" placeholder="Admin key" onkeydown="if(event.key==='Enter')enter()">
- <button class="btn" onclick="enter()">Open console</button>
+ <h1>STACS Admin</h1><p>Sign in with your admin email and password.</p>
+ <input id="adEmail" type="email" placeholder="Your admin email" autocomplete="username" onkeydown="if(event.key==='Enter')adminSignIn()">
+ <input id="adPw" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminSignIn()">
+ <button class="btn" onclick="adminSignIn()">Sign in</button>
+ <div style="margin-top:10px;font-size:12.5px"><a href="#" onclick="adminForgot();return false" style="color:var(--gold2,#E2A53A);text-decoration:none">Forgot password?</a></div>
  <div class="msg" id="gateMsg"></div>
+ <div style="margin-top:16px;border-top:1px solid var(--bdr);padding-top:12px">
+   <a href="#" onclick="var o=document.getElementById('ownerBox');o.style.display='block';this.style.display='none';return false" style="color:var(--tx3);font-size:12px;text-decoration:none">Sign in with the owner key instead</a>
+   <div id="ownerBox" style="display:none;margin-top:10px">
+     <input id="key" type="password" placeholder="Owner admin key" onkeydown="if(event.key==='Enter')enter()">
+     <button class="btn" onclick="enter()" style="margin-top:8px">Open as owner</button>
+   </div>
+ </div>
 </div>
 <div id="app" style="display:none">
  <div class="top"><a href="index.html" class="brandlink" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit" title="Back to STACS home"><img class="logo" src="https://stacs.leivotest.com/images/logo.jpg" onerror="this.style.display='none'" alt="STACS"><div><div class="bn">STACS</div></a><div class="bt">ADMIN CONSOLE</div></div>
-  <div class="r"><button class="ghost" onclick="loadAll()">Refresh</button><button class="ghost" onclick="lock()">Lock</button></div></div>
+  <div class="r"><span id="whoAmI" style="font-size:12px;color:var(--tx3);margin-right:6px"></span><button class="ghost" onclick="loadAll()">Refresh</button><button class="ghost" onclick="lock()">Lock</button></div></div>
  <div class="ashell">
   <nav class="anav" id="adminNav">
     <div class="h">Console</div>
@@ -89,9 +98,50 @@ body.modal-open{overflow:hidden}
     <button data-panel="email" onclick="showPanel('email',this)"><span class="i">✉️</span>Send email</button>
     <button data-panel="fees" onclick="showPanel('fees',this)"><span class="i">💰</span>Promotion fees</button>
     <button data-panel="resumes" onclick="showPanel('resumes',this)"><span class="i">📝</span>Resume Requests</button>
+    <button data-panel="teamadmins" onclick="showPanel('teamadmins',this)" style="display:none"><span class="i">👥</span>Team Admins</button>
   </nav>
   <div class="acontent">
    <div class="msg" id="msg"></div>
+
+   <div class="apanel" id="panel-teamadmins">
+     <h2 style="margin-bottom:4px">Team Admins</h2>
+     <div class="sub">Add trusted people as admins, decide exactly what each one can touch, and see a running log of what everyone does. New admins set their own password from the invite email.</div>
+
+     <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin:14px 0">
+       <h3 style="margin:0 0 10px;font-size:14px">Add a team admin</h3>
+       <div style="display:flex;flex-wrap:wrap;gap:10px">
+         <div style="flex:1;min-width:200px">
+           <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Full name</label>
+           <input id="taName" placeholder="e.g. Grace Okafor" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px">
+         </div>
+         <div style="flex:1;min-width:200px">
+           <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Email address</label>
+           <input id="taEmail" type="email" placeholder="name@example.com" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px">
+         </div>
+         <div style="flex:0 0 190px;min-width:170px">
+           <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:5px">Role</label>
+           <select id="taRole" style="width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:13.5px">
+             <option>Administrator</option><option>Manager</option><option>Reviewer</option><option>Finance</option><option>Support</option>
+           </select>
+         </div>
+       </div>
+       <div style="margin-top:12px">
+         <label style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:7px">What can this admin access?</label>
+         <div id="taPerms" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+       </div>
+       <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+         <button class="btn" onclick="taAddAdmin()" style="border-radius:0">Send invite</button>
+         <div class="msg" id="taAddMsg" style="margin:0"></div>
+       </div>
+     </div>
+
+     <h3 style="margin:18px 0 6px;font-size:14px">Current admins</h3>
+     <div id="taList">Loading…</div>
+
+     <h3 style="margin:22px 0 6px;font-size:14px">Activity log</h3>
+     <div class="sub" style="margin-bottom:8px">Every sign-in and every change, newest first.</div>
+     <div id="taLog">Loading…</div>
+   </div>
 
    <div class="apanel show" id="panel-stats">
      <h2 style="margin-bottom:4px">Platform at a glance</h2>
@@ -296,23 +346,150 @@ const SKILLED_URL="https://script.google.com/macros/s/AKfycbwtUYMty_LLT2MohBVwnM
 const EMPLOYER_URL="https://script.google.com/macros/s/AKfycbwPlLG5bdp5MsTFUU6RYLdz6g5zWJLRkmjmkkenqqWBz4Xy9PoSIZVRDA4iZSRBHRBq/exec";
 let TOK={w:'',e:'',v:'',t:''};
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
-async function enter(){
- const key=document.getElementById('key').value.trim();const gm=document.getElementById('gateMsg');gm.className='msg';gm.textContent='';
- if(!key)return;
- const kh=await sha256(key);
- try{
-   const [rw,re,rv,rt]=await Promise.all([
-     fetch(SKILLED_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
-     fetch(EMPLOYER_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
-     fetch(VERIFIER_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
-     fetch(TRANSLATOR_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false}))
-   ]);
-   if(!rw.ok && !re.ok){gm.className='msg err';gm.textContent='Admin key rejected, or receivers not reachable.';return;}
-   TOK.w=rw.token||'';TOK.e=re.token||'';TOK.v=(rv&&rv.token)||'';TOK.t=(rt&&rt.token)||'';
-   document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';loadAll();
- }catch(e){gm.className='msg err';gm.textContent='Could not reach the receivers.';}
+let AS={token:'',perms:[],owner:false,kh:'',name:'',role:''};
+const ALL_PERMS=['members','payouts','packages','messaging','fees','verification','resume','manage_admins'];
+const PERM_LABELS={members:'Members',payouts:'Payouts',packages:'Packages / Services',messaging:'Messaging',fees:'Fees',verification:'Verification',resume:'Resume requests',manage_admins:'Manage admins'};
+const PANEL_PERM={stats:null,skilled:'members',verifiers:'verification',translators:'verification',employers:'members',qa:'verification',payouts:'payouts',reports:'members',email:'messaging',fees:'fees',resumes:'packages',teamadmins:'manage_admins'};
+function can(p){ return !!AS && (AS.owner || (AS.perms && AS.perms.indexOf(p)>=0)); }
+
+async function adminSignIn(){
+  const email=(document.getElementById('adEmail').value||'').trim();
+  const pw=document.getElementById('adPw').value||'';
+  const gm=document.getElementById('gateMsg'); gm.className='msg'; gm.textContent='';
+  if(!email||!pw){ gm.className='msg err'; gm.textContent='Enter your email and password.'; return; }
+  gm.textContent='Signing in…';
+  try{
+    const h=await sha256(pw);
+    const r=await fetch(SKILLED_URL+'?action=team-admin-login&email='+encodeURIComponent(email)+'&h='+h).then(r=>r.json());
+    if(!r||!r.ok){ gm.className='msg err'; gm.textContent=(r&&r.error)||'Could not sign in.'; return; }
+    AS={token:r.token, perms:r.permissions||[], owner:false, kh:r.kh, name:r.name||'Admin', role:r.role||''};
+    await afterAdminAuth();
+  }catch(e){ gm.className='msg err'; gm.textContent='Could not reach the server.'; }
 }
-function lock(){TOK={w:'',e:'',v:'',t:''};location.reload();}
+async function enter(){
+  const key=(document.getElementById('key').value||'').trim(); const gm=document.getElementById('gateMsg'); gm.className='msg'; gm.textContent='';
+  if(!key)return;
+  gm.textContent='Opening…';
+  try{
+    const kh=await sha256(key);
+    const rw=await fetch(SKILLED_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false}));
+    if(!rw||!rw.ok){ gm.className='msg err'; gm.textContent='Admin key rejected, or receiver not reachable.'; return; }
+    AS={token:'', perms:ALL_PERMS.slice(), owner:true, kh:kh, name:'Owner', role:'Owner'};
+    await afterAdminAuth();
+  }catch(e){ gm.className='msg err'; gm.textContent='Could not reach the receivers.'; }
+}
+async function afterAdminAuth(){
+  const kh=AS.kh;
+  try{
+    const [rw,re,rv,rt]=await Promise.all([
+      fetch(SKILLED_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
+      fetch(EMPLOYER_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
+      fetch(VERIFIER_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
+      fetch(TRANSLATOR_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false}))
+    ]);
+    TOK.w=(rw&&rw.token)||'';TOK.e=(re&&re.token)||'';TOK.v=(rv&&rv.token)||'';TOK.t=(rt&&rt.token)||'';
+  }catch(e){}
+  applyPermissions();
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  const w=document.getElementById('whoAmI'); if(w) w.textContent = AS.owner?'Owner':((AS.name||'Admin')+(AS.role?(' · '+AS.role):''));
+  loadAll();
+}
+function applyPermissions(){
+  document.querySelectorAll('.anav button[data-panel]').forEach(function(b){
+    const p=b.getAttribute('data-panel'); const need=PANEL_PERM[p];
+    b.style.display=(!need||can(need))?'':'none';
+  });
+  showPanel('stats', document.querySelector('.anav button[data-panel="stats"]'));
+}
+async function adminForgot(){
+  const email=(document.getElementById('adEmail').value||'').trim();
+  const gm=document.getElementById('gateMsg'); gm.className='msg';
+  if(!email){ gm.className='msg err'; gm.textContent='Enter your email above first, then tap Forgot password.'; return; }
+  gm.textContent='Sending…';
+  try{
+    const r=await fetch(SKILLED_URL,{method:'POST',body:JSON.stringify({action:'team-admin-reset',email:email})}).then(r=>r.json());
+    gm.className='msg'; gm.textContent=(r&&r.message)||'If that email is a STACS admin, a reset link is on its way.';
+  }catch(e){ gm.className='msg err'; gm.textContent='Could not reach the server.'; }
+}
+function lock(){ AS={token:'',perms:[],owner:false,kh:'',name:'',role:''}; TOK={w:'',e:'',v:'',t:''}; location.reload(); }
+
+/* ===== Team Admins panel ===== */
+function taMgmtAuthParams(){ return AS.owner ? ('ownerkh='+encodeURIComponent(AS.kh)) : ('token='+encodeURIComponent(AS.token)); }
+function taAuthBody(extra){ const o=extra||{}; if(AS.owner) o.ownerkh=AS.kh; else o.token=AS.token; return JSON.stringify(o); }
+function loadTeamAdmins(){
+  const pc=document.getElementById('taPerms');
+  if(pc && !pc.getAttribute('data-built')){
+    pc.setAttribute('data-built','1');
+    pc.innerHTML=ALL_PERMS.map(function(p){
+      return '<label style="display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--bdr);padding:7px 10px;font-size:12.5px;cursor:pointer"><input type="checkbox" value="'+p+'" class="taPermCk"> '+PERM_LABELS[p]+'</label>';
+    }).join('');
+  }
+  const el=document.getElementById('taList'); if(!el) return;
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(SKILLED_URL+'?action=team-admin-list&'+taMgmtAuthParams()).then(r=>r.json()).then(function(d){
+    if(!d||!d.ok){ el.innerHTML='<div class="empty">'+((d&&d.error==='unauthorized')?'You do not have permission to manage admins.':'Could not load admins.')+'</div>'; return; }
+    if(!d.admins.length){ el.innerHTML='<div class="empty">No team admins yet. Add one above.</div>'; return; }
+    el.innerHTML=d.admins.map(function(a){
+      const st=String(a.status||'').toLowerCase();
+      const col=st==='active'?'var(--grn,#2ECC71)':st==='suspended'?'var(--gold2,#E2A53A)':'var(--tx3)';
+      const perms=(a.permissions||[]).map(function(p){return PERM_LABELS[p]||p;}).join(', ')||'No areas yet';
+      const isMe=(d.me===a.adminId);
+      let actions='';
+      if(st==='active'){ actions+='<button class="ghost" onclick="taSetStatus(\''+a.adminId+'\',\'Suspended\')" style="border-radius:0">Suspend</button>'; }
+      else if(st==='suspended'){ actions+='<button class="ghost" onclick="taSetStatus(\''+a.adminId+'\',\'Active\')" style="border-radius:0">Reactivate</button>'; }
+      actions+=' <button class="ghost" onclick="taSetStatus(\''+a.adminId+'\',\'Deleted\')" style="border-radius:0;color:#E86A6A">Delete</button>';
+      if(isMe && !d.owner) actions='<span style="font-size:11.5px;color:var(--tx3)">This is you</span>';
+      return '<div class="row" style="align-items:flex-start"><div class="info" style="flex:1">'
+        +'<div style="font-weight:700">'+esc(a.name)+' <span style="font-size:11px;color:'+col+';font-weight:700">● '+esc(a.status)+'</span></div>'
+        +'<div style="font-size:12.5px;color:var(--tx2)">'+esc(a.email)+' · '+esc(a.role||'')+(a.adminId?(' · '+esc(a.adminId)):'')+'</div>'
+        +'<div style="font-size:12px;color:var(--tx3);margin-top:3px">Access: '+esc(perms)+'</div>'
+        +'<div style="font-size:11px;color:var(--tx3);margin-top:2px">Added by '+esc(a.createdBy||'')+(a.createdOn?(' on '+esc(a.createdOn)):'')+(a.lastLogin?(' · last in '+esc(a.lastLogin)):' · never signed in')+'</div>'
+        +'</div><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+actions+'</div></div>';
+    }).join('');
+  }).catch(function(){ el.innerHTML='<div class="empty">Could not load admins.</div>'; });
+}
+function taAddAdmin(){
+  const name=(document.getElementById('taName').value||'').trim();
+  const email=(document.getElementById('taEmail').value||'').trim();
+  const role=document.getElementById('taRole').value;
+  const perms=[].slice.call(document.querySelectorAll('.taPermCk:checked')).map(function(c){return c.value;});
+  const m=document.getElementById('taAddMsg'); m.className='msg'; m.style.color='';
+  if(!name||!email){ m.style.color='#E86A6A'; m.textContent='Enter the name and email.'; return; }
+  m.style.color='var(--tx3)'; m.textContent='Sending invite…';
+  fetch(SKILLED_URL,{method:'POST',body:taAuthBody({action:'team-admin-create',name:name,email:email,role:role,permissions:perms})})
+    .then(r=>r.json()).then(function(d){
+      if(!d||!d.ok){ m.style.color='#E86A6A'; m.textContent=(d&&d.error)||'Could not add admin.'; return; }
+      m.style.color='var(--grn,#2ECC71)'; m.textContent='Invite sent to '+email+'. They set their own password from the email.';
+      document.getElementById('taName').value='';document.getElementById('taEmail').value='';
+      [].slice.call(document.querySelectorAll('.taPermCk:checked')).forEach(function(c){c.checked=false;});
+      loadTeamAdmins(); loadAdminLog();
+    }).catch(function(){ m.style.color='#E86A6A'; m.textContent='Could not reach the server.'; });
+}
+function taSetStatus(id,status){
+  if(status==='Deleted' && !confirm('Delete this admin account? They will be signed out and blocked. Their activity log stays.')) return;
+  if(status==='Suspended' && !confirm('Suspend this admin? They will be signed out and cannot sign in until reactivated.')) return;
+  fetch(SKILLED_URL,{method:'POST',body:taAuthBody({action:'team-admin-status',adminId:id,status:status})})
+    .then(r=>r.json()).then(function(d){
+      if(!d||!d.ok){ alert((d&&d.error)||'Could not update.'); return; }
+      loadTeamAdmins(); loadAdminLog();
+    }).catch(function(){ alert('Could not reach the server.'); });
+}
+function loadAdminLog(){
+  const el=document.getElementById('taLog'); if(!el) return;
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(SKILLED_URL+'?action=team-admin-log&limit=100&'+taMgmtAuthParams()).then(r=>r.json()).then(function(d){
+    if(!d||!d.ok){ el.innerHTML='<div class="empty">Could not load the activity log.</div>'; return; }
+    if(!d.log.length){ el.innerHTML='<div class="empty">No activity yet.</div>'; return; }
+    el.innerHTML='<div style="border:1px solid var(--bdr);border-radius:10px;overflow:hidden">'+d.log.map(function(e,i){
+      return '<div style="display:flex;gap:10px;padding:9px 12px;'+(i%2?'background:var(--card2)':'')+';font-size:12.5px">'
+        +'<div style="flex:0 0 125px;color:var(--tx3)">'+esc(e.at)+'</div>'
+        +'<div style="flex:0 0 150px;color:var(--tx)">'+esc(e.name||'')+'</div>'
+        +'<div style="flex:0 0 120px;font-weight:700;color:var(--tx2)">'+esc(e.action||'')+'</div>'
+        +'<div style="flex:1;color:var(--tx2)">'+esc(e.detail||'')+'</div></div>';
+    }).join('')+'</div>';
+  }).catch(function(){ el.innerHTML='<div class="empty">Could not load the activity log.</div>'; });
+}
 
 const VERIFIER_URL_ADMIN="https://script.google.com/macros/s/AKfycbzyh4HEurpOl9T_Ap5HXpGZlro0jCz3xBet7yQMFZcVwUFa7bQD5PtzkWJe4iABUkgf/exec";
 
@@ -924,6 +1101,7 @@ function showPanel(name, btn){
   else if(name==='email') emInitTemplates();
   else if(name==='fees') loadFees();
   else if(name==='resumes') loadResumeAdmin();
+  else if(name==='teamadmins'){ loadTeamAdmins(); loadAdminLog(); }
 }
 /* ===== Employer verification management ===== */
 function loadEmpVerification(){
