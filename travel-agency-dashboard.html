@@ -79,7 +79,7 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
 .uprow img{border:1px solid var(--bdr);background:var(--card2)}
 </style></head><body>
 <div class="topbar">
- <img src="https://www.leivotest.com/stacs/images/logo.jpg" alt="STACS" onerror="this.style.display='none'">
+ <img src="https://stacs.leivotest.com/images/logo.jpg" alt="STACS" onerror="this.style.display='none'">
  <div class="t"><b>STACS · Travel Agency</b><small>LEIVOTEST</small></div>
  <div class="sp"><span class="taid" id="taid"></span><button class="lnk" onclick="stacsTheme()" id="themeBtn">&#127769;</button><button class="lnk" onclick="signOut()">Sign out</button></div>
 </div>
@@ -87,6 +87,7 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
  <div class="nav">
   <button class="on" data-p="overview" onclick="go('overview',this)"><span class="ic">&#128202;</span>Overview</button>
   <button data-p="profile" onclick="go('profile',this)"><span class="ic">&#127970;</span>Profile</button>
+  <button data-p="clients" onclick="go('clients',this)"><span class="ic">&#128101;</span>My Clients</button>
   <button data-p="packages" onclick="go('packages',this)"><span class="ic">&#128230;</span>My Packages</button>
   <button data-p="build" onclick="go('build',this)"><span class="ic">&#10133;</span>Create Package</button>
   <button data-p="progress" onclick="go('progress',this)"><span class="ic">&#128506;</span>Progress &amp; Status</button>
@@ -200,6 +201,17 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
    <div class="card"><h1>My Packages</h1><div class="sub">Every package you submit is reviewed by our Compliance Team before candidates can see it.</div><div id="pkgList">Loading…</div></div>
   </div>
 
+  <!-- MY CLIENTS -->
+  <div class="panel" id="p-clients">
+   <div class="card">
+    <h1>My Clients</h1>
+    <div class="sub">Every candidate who selects one of your approved packages appears here as a client card. From a card you can view the candidate by their STACS reference, see their current stage and next target, manage the case, and message the candidate inside STACS.</div>
+    <div id="clientList"><div class="note">No clients yet. A client card appears here once a candidate selects one of your approved packages and signs the agreement. Each card will let you view and manage the case, message the candidate and read their replies, and will show the stage that the candidate also sees when they sign in and that drives their Telegram updates.</div></div>
+    <div class="sec">What each client card will show</div>
+    <div class="note" style="line-height:1.8">Candidate STACS reference (no personal contact details) · Selected package · Current stage and next target · Message thread (all messaging stays inside STACS) · Documents requested and received · Key dates. Sharing or requesting direct contact details is blocked, to protect both sides.</div>
+   </div>
+  </div>
+
   <!-- PROGRESS & STATUS -->
   <div class="panel" id="p-progress">
    <div class="card">
@@ -247,6 +259,13 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
    <div class="field"><label>Regulatory / accrediting body</label><input id="pf_regbody" placeholder="e.g. NANTA, IATA, government"></div>
    <div class="field"><label>Operations contact (phone)</label><input id="pf_opsphone" placeholder="Best number for processing"></div>
   </div>
+  <div class="sec">Contact &amp; messaging</div>
+  <div class="grid3">
+   <div class="field"><label>WhatsApp number</label><input id="pf_whatsapp" placeholder="For STACS to reach you"></div>
+   <div class="field"><label>Telegram number</label><input id="pf_telnum" placeholder="The number on your Telegram"></div>
+   <div class="field"><label>Telegram username</label><input id="pf_teluser" placeholder="e.g. @youragency"></div>
+  </div>
+  <div class="note" style="margin:-4px 0 4px">Telegram is used for your weekly case updates once you are engaged with your first client. Please make sure your Telegram username is set, as that is how we connect your updates.</div>
   <div class="sec">Services you offer</div>
   <div id="servicesBox" class="grid3"></div>
   <div class="sec">Destinations you serve</div>
@@ -327,6 +346,7 @@ function loadProfile(){
    document.getElementById('b_agent').value=BASE.agent||'';document.getElementById('b_email').value=BASE.orgEmail||'';
    document.getElementById('pf_year').value=PROF.year||'';document.getElementById('pf_licence').value=PROF.licence||'';
    document.getElementById('pf_regbody').value=PROF.regbody||'';document.getElementById('pf_opsphone').value=PROF.opsphone||'';
+   document.getElementById('pf_whatsapp').value=PROF.whatsapp||'';document.getElementById('pf_telnum').value=PROF.telnum||'';document.getElementById('pf_teluser').value=PROF.teluser||'';
    document.getElementById('pf_about').value=PROF.about||'';
    if(PROF.logoUrl)document.getElementById('prevLogo').src=PROF.logoUrl;
    if(PROF.coverUrl)document.getElementById('prevCover').src=PROF.coverUrl;
@@ -370,7 +390,11 @@ function uploadAsset(kind,input){
  var rd=new FileReader();rd.onload=function(){
    fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'agency-asset-upload',token:S.token,kind:kind,base64:rd.result,mime:f.type})})
     .then(function(r){return r.json();}).then(function(d){
-      if(d&&d.ok){ASSETS[kind]=d.url;st.textContent='Uploaded.';var pv=document.getElementById('prev'+kind.charAt(0).toUpperCase()+kind.slice(1));if(pv)pv.src=d.url;}
+      if(d&&d.ok){ASSETS[kind]=d.url;st.textContent='Uploaded.';var pv=document.getElementById('prev'+kind.charAt(0).toUpperCase()+kind.slice(1));if(pv)pv.src=d.url;
+        // show on the profile corner right away
+        if(kind==='logo'){var cl=document.getElementById('coverLogo');cl.src=d.url;cl.style.visibility='visible';}
+        if(kind==='cover'){document.getElementById('coverBox').style.backgroundImage='url('+d.url+')';}
+      }
       else{st.textContent=(d&&d.error)||'Upload failed.';}
     }).catch(function(){st.textContent='Network error during upload.';});
  };rd.readAsDataURL(f);
@@ -379,6 +403,7 @@ function saveProfile(){
  var services=[];document.querySelectorAll('.svc:checked').forEach(function(c){services.push(c.value);});
  var prof={year:document.getElementById('pf_year').value.trim(),licence:document.getElementById('pf_licence').value.trim(),
    regbody:document.getElementById('pf_regbody').value.trim(),opsphone:document.getElementById('pf_opsphone').value.trim(),
+   whatsapp:document.getElementById('pf_whatsapp').value.trim(),telnum:document.getElementById('pf_telnum').value.trim(),teluser:document.getElementById('pf_teluser').value.trim(),
    destinations:PICK.dest.slice(),about:document.getElementById('pf_about').value.trim(),services:services,
    logoUrl:ASSETS.logo||'',coverUrl:ASSETS.cover||'',passportUrl:ASSETS.passport||''};
  fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'agency-profile-save',token:S.token,profile:prof})})
