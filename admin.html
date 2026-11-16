@@ -98,10 +98,26 @@ body.modal-open{overflow:hidden}
     <button data-panel="email" onclick="showPanel('email',this)"><span class="i">✉️</span>Send email</button>
     <button data-panel="fees" onclick="showPanel('fees',this)"><span class="i">💰</span>Promotion fees</button>
     <button data-panel="resumes" onclick="showPanel('resumes',this)"><span class="i">📝</span>Resume Requests</button>
+    <button data-panel="agreements" onclick="showPanel('agreements',this)" style="display:none"><span class="i">✍️</span>Agreements</button>
     <button data-panel="teamadmins" onclick="showPanel('teamadmins',this)" style="display:none"><span class="i">👥</span>Team Admins</button>
   </nav>
   <div class="acontent">
    <div class="msg" id="msg"></div>
+
+   <div class="apanel" id="panel-agreements">
+     <h2 style="margin-bottom:4px">SafeAgreements</h2>
+     <div class="sub">Agreements that partners have signed and sent for processing. Review each one, then approve to stamp and email the signed copy, or return it with a note.</div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+       <select id="agrFilter" onchange="loadAgreements()" style="background:var(--card2);border:1px solid var(--bdr);border-radius:0;padding:9px 12px;color:var(--tx);font-size:13px">
+         <option value="Submitted">Awaiting review</option>
+         <option value="Approved">Approved</option>
+         <option value="Declined">Returned</option>
+         <option value="">All</option>
+       </select>
+       <button class="ghost" onclick="loadAgreements()" style="border-radius:0">Refresh</button>
+     </div>
+     <div id="agrList">Loading…</div>
+   </div>
 
    <div class="apanel" id="panel-teamadmins">
      <h2 style="margin-bottom:4px">Team Admins</h2>
@@ -344,12 +360,13 @@ body.modal-open{overflow:hidden}
 <script>
 const SKILLED_URL="https://script.google.com/macros/s/AKfycbwtUYMty_LLT2MohBVwnMoCNRsm-r2b1A4rJRcU6q9B8x-1eOHJgzctiagmKrybo5alqg/exec";
 const EMPLOYER_URL="https://script.google.com/macros/s/AKfycbwPlLG5bdp5MsTFUU6RYLdz6g5zWJLRkmjmkkenqqWBz4Xy9PoSIZVRDA4iZSRBHRBq/exec";
-let TOK={w:'',e:'',v:'',t:''};
+let TOK={w:'',e:'',v:'',t:'',ta:''};
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 let AS={token:'',perms:[],owner:false,kh:'',name:'',role:''};
-const ALL_PERMS=['members','payouts','packages','messaging','fees','verification','resume','manage_admins'];
-const PERM_LABELS={members:'Members',payouts:'Payouts',packages:'Packages / Services',messaging:'Messaging',fees:'Fees',verification:'Verification',resume:'Resume requests',manage_admins:'Manage admins'};
-const PANEL_PERM={stats:null,skilled:'members',verifiers:'verification',translators:'verification',employers:'members',qa:'verification',payouts:'payouts',reports:'members',email:'messaging',fees:'fees',resumes:'packages',teamadmins:'manage_admins'};
+const ALL_PERMS=['members','payouts','packages','messaging','fees','verification','resume','agreements','manage_admins'];
+const PERM_LABELS={members:'Members',payouts:'Payouts',packages:'Packages / Services',messaging:'Messaging',fees:'Fees',verification:'Verification',resume:'Resume requests',agreements:'Agreements',manage_admins:'Manage admins'};
+const PANEL_PERM={stats:null,skilled:'members',verifiers:'verification',translators:'verification',employers:'members',qa:'verification',payouts:'payouts',reports:'members',email:'messaging',fees:'fees',resumes:'packages',agreements:'agreements',teamadmins:'manage_admins'};
+const TRAVEL_URL="https://script.google.com/macros/s/AKfycbzv4v5pktq9j3fIzwaB5zCpySYJO9DjfMzV78lftWjZoFoKMVIpN1_zRb3OVzdOv5FQjg/exec";
 function can(p){ return !!AS && (AS.owner || (AS.perms && AS.perms.indexOf(p)>=0)); }
 
 async function adminSignIn(){
@@ -381,13 +398,14 @@ async function enter(){
 async function afterAdminAuth(){
   const kh=AS.kh;
   try{
-    const [rw,re,rv,rt]=await Promise.all([
+    const [rw,re,rv,rt,rta]=await Promise.all([
       fetch(SKILLED_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
       fetch(EMPLOYER_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
       fetch(VERIFIER_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
-      fetch(TRANSLATOR_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false}))
+      fetch(TRANSLATOR_URL_ADMIN+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false})),
+      fetch(TRAVEL_URL+'?action=admin-login&kh='+kh).then(r=>r.json()).catch(()=>({ok:false}))
     ]);
-    TOK.w=(rw&&rw.token)||'';TOK.e=(re&&re.token)||'';TOK.v=(rv&&rv.token)||'';TOK.t=(rt&&rt.token)||'';
+    TOK.w=(rw&&rw.token)||'';TOK.e=(re&&re.token)||'';TOK.v=(rv&&rv.token)||'';TOK.t=(rt&&rt.token)||'';TOK.ta=(rta&&rta.token)||'';
   }catch(e){}
   applyPermissions();
   document.getElementById('gate').style.display='none';
@@ -412,7 +430,7 @@ async function adminForgot(){
     gm.className='msg'; gm.textContent=(r&&r.message)||'If that email is a STACS admin, a reset link is on its way.';
   }catch(e){ gm.className='msg err'; gm.textContent='Could not reach the server.'; }
 }
-function lock(){ AS={token:'',perms:[],owner:false,kh:'',name:'',role:''}; TOK={w:'',e:'',v:'',t:''}; location.reload(); }
+function lock(){ AS={token:'',perms:[],owner:false,kh:'',name:'',role:''}; TOK={w:'',e:'',v:'',t:'',ta:''}; location.reload(); }
 
 /* ===== Team Admins panel ===== */
 function taMgmtAuthParams(){ return AS.owner ? ('ownerkh='+encodeURIComponent(AS.kh)) : ('token='+encodeURIComponent(AS.token)); }
@@ -489,6 +507,70 @@ function loadAdminLog(){
         +'<div style="flex:1;color:var(--tx2)">'+esc(e.detail||'')+'</div></div>';
     }).join('')+'</div>';
   }).catch(function(){ el.innerHTML='<div class="empty">Could not load the activity log.</div>'; });
+}
+
+/* ===== SafeAgreements review (Travel hub) ===== */
+function loadAgreements(){
+  var el=document.getElementById('agrList'); if(!el) return;
+  if(!TOK.ta){ el.innerHTML='<div class="empty">Travel hub not reachable, or its ADMIN_KEY does not match. Check the Travel receiver is deployed with the same admin key.</div>'; return; }
+  var status=(document.getElementById('agrFilter')||{}).value||'';
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(TRAVEL_URL+'?action=agreement-admin-list&token='+encodeURIComponent(TOK.ta)+'&status='+encodeURIComponent(status))
+    .then(r=>r.json()).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='<div class="empty">Could not load agreements.</div>'; return; }
+      if(!d.agreements.length){ el.innerHTML='<div class="empty">Nothing here.</div>'; return; }
+      el.innerHTML=d.agreements.map(function(a){
+        var st=String(a.status||'').toLowerCase();
+        var col=st==='approved'?'var(--grn,#2ECC71)':st==='declined'?'#E86A6A':'var(--gold2,#E2A53A)';
+        var actions='';
+        if(st==='submitted'){
+          actions='<button class="ghost" onclick="agrApprove(\''+a.id+'\')" style="border-radius:0">Approve &amp; stamp</button>'
+                 +' <button class="ghost" onclick="agrDecline(\''+a.id+'\')" style="border-radius:0;color:#E86A6A">Return</button>';
+        } else if(a.pdfUrl){
+          actions='<a class="ghost" style="text-decoration:none;border-radius:0" href="'+a.pdfUrl+'" target="_blank" rel="noopener">View PDF</a>';
+        }
+        return '<div class="row" style="align-items:flex-start"><div class="info" style="flex:1">'
+          +'<div style="font-weight:700">'+esc(a.partyName||a.signer||a.partyId)+' <span style="font-size:11px;color:'+col+';font-weight:700">● '+esc(a.status)+'</span></div>'
+          +'<div style="font-size:12.5px;color:var(--tx2)">'+esc(a.type)+' agreement v'+esc(a.version||'')+' · '+esc(a.partyId)+' · signed '+esc(a.signedAt||'')+'</div>'
+          +'<div style="font-size:12px;color:var(--tx3);margin-top:3px">'+esc(a.signer||'')+' · '+esc(a.email||'')+(a.adminNote?(' · note: '+esc(a.adminNote)):'')+'</div>'
+          +'<div style="margin-top:8px"><button class="ghost" onclick="agrView(\''+a.id+'\')" style="border-radius:0">View signature &amp; passport</button></div>'
+          +'<div id="agrDetail-'+a.id+'" style="margin-top:8px"></div>'
+          +'</div><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+actions+'</div></div>';
+      }).join('');
+    }).catch(function(){ el.innerHTML='<div class="empty">Could not reach the Travel hub.</div>'; });
+}
+function agrView(id){
+  var box=document.getElementById('agrDetail-'+id); if(!box) return;
+  if(box.getAttribute('data-open')==='1'){ box.innerHTML=''; box.removeAttribute('data-open'); return; }
+  box.setAttribute('data-open','1');
+  box.innerHTML='<div class="note" style="color:var(--tx3)">Loading…</div>';
+  fetch(TRAVEL_URL+'?action=agreement-admin-get&token='+encodeURIComponent(TOK.ta)+'&id='+encodeURIComponent(id))
+    .then(r=>r.json()).then(function(d){
+      if(!d||!d.ok){ box.innerHTML='<div class="note" style="color:#E86A6A">Could not load details.</div>'; return; }
+      var a=d.agreement;
+      box.innerHTML='<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;border:1px solid var(--bdr);padding:10px;border-radius:8px">'
+        +(a.sigUrl?'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Signature</div><img src="'+a.sigUrl+'" style="max-width:220px;background:#fff;border:1px solid var(--bdr);padding:4px" onerror="this.outerHTML=&quot;<span class=\\&quot;note\\&quot;>signature image unavailable</span>&quot;"></div>':'')
+        +(a.passUrl?'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Passport</div><a class="ghost" style="text-decoration:none;border-radius:0" href="'+a.passUrl+'" target="_blank" rel="noopener">Open passport file</a></div>':'')
+        +'</div>';
+    }).catch(function(){ box.innerHTML='<div class="note" style="color:#E86A6A">Could not load details.</div>'; });
+}
+function agrApprove(id){
+  if(!confirm('Approve this agreement? It will be stamped, saved to Drive, and the signed copy emailed to the partner.')) return;
+  fetch(TRAVEL_URL,{method:'POST',body:JSON.stringify({action:'agreement-approve',id:id,token:TOK.ta})})
+    .then(r=>r.json()).then(function(d){
+      if(!d||!d.ok){ alert((d&&d.error)||'Could not approve.'); return; }
+      alert('Approved. The signed, stamped copy has been emailed and filed.');
+      loadAgreements();
+    }).catch(function(){ alert('Could not reach the Travel hub.'); });
+}
+function agrDecline(id){
+  var note=prompt('What should the partner fix before you can approve it? This note is emailed to them.','');
+  if(note===null) return;
+  fetch(TRAVEL_URL,{method:'POST',body:JSON.stringify({action:'agreement-decline',id:id,token:TOK.ta,note:note})})
+    .then(r=>r.json()).then(function(d){
+      if(!d||!d.ok){ alert((d&&d.error)||'Could not return it.'); return; }
+      loadAgreements();
+    }).catch(function(){ alert('Could not reach the Travel hub.'); });
 }
 
 const VERIFIER_URL_ADMIN="https://script.google.com/macros/s/AKfycbzyh4HEurpOl9T_Ap5HXpGZlro0jCz3xBet7yQMFZcVwUFa7bQD5PtzkWJe4iABUkgf/exec";
@@ -1101,6 +1183,7 @@ function showPanel(name, btn){
   else if(name==='email') emInitTemplates();
   else if(name==='fees') loadFees();
   else if(name==='resumes') loadResumeAdmin();
+  else if(name==='agreements') loadAgreements();
   else if(name==='teamadmins'){ loadTeamAdmins(); loadAdminLog(); }
 }
 /* ===== Employer verification management ===== */
