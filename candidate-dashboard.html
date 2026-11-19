@@ -284,6 +284,15 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
    <div style="font-size:12.5px;color:var(--tx2);margin-bottom:12px">Written automatically from the verification reports on your profile. This is what employers understand about you at a glance.</div>
    <div id="sumBody" style="font-size:14px;color:var(--tx2);line-height:1.7">Loading…</div>
  </div>
+ <div class="card" id="packagesCard">
+   <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+     <h3 style="margin:0">Browse packages &amp; services</h3>
+   </div>
+   <div style="font-size:12.5px;color:var(--tx2);margin-bottom:12px">Verified travel and mobility packages published by STACS agencies. Tap “Ask a question” on any package to speak with the provider here on STACS — safely, before you commit to anything.</div>
+   <input id="pkgSearch" oninput="renderPkgs()" placeholder="Search destination, title or type…" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--tx);font-size:13.5px;margin-bottom:12px">
+   <div id="pkgList" style="display:grid;gap:10px">Loading…</div>
+ </div>
+
  <div class="card" id="messagesCard">
    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
      <h3 style="margin:0">Messages</h3>
@@ -306,6 +315,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
      <div id="msgThreadHead" style="font-weight:800;font-size:15px;margin-bottom:2px"></div>
      <div id="msgThreadSub" style="font-size:11.5px;color:var(--tx3);margin-bottom:12px"></div>
      <div id="msgBody" style="max-height:360px;overflow-y:auto;padding:4px 2px;margin-bottom:12px;display:flex;flex-direction:column;gap:9px"></div>
+     <div id="msgTurnNote" style="display:none;font-size:12px;border-radius:9px;padding:9px 11px;margin-bottom:10px"></div>
      <div id="msgBlockNote" style="display:none;font-size:12px;color:#ffb4b4;background:rgba(255,80,80,.09);border:1px solid rgba(255,80,80,.25);border-radius:9px;padding:9px 11px;margin-bottom:10px"></div>
      <div style="display:flex;gap:8px;align-items:flex-end">
        <textarea id="msgInput" rows="2" placeholder="Write a message… (no phone numbers, emails or outside links)" style="flex:1;resize:vertical;min-height:42px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--tx);font-family:inherit;font-size:13.5px"></textarea>
@@ -472,6 +482,9 @@ const SKILLED_URL="https://script.google.com/macros/s/AKfycbwtUYMty_LLT2MohBVwnM
 /* The Verifier Hub receiver — used to browse approved verifiers per tier and
    send a Request to Verify / Submit Offer. Public GET/POST, same /exec. */
 const VERIFIER_PUBLIC_URL="https://script.google.com/macros/s/AKfycbzyh4HEurpOl9T_Ap5HXpGZlro0jCz3xBet7yQMFZcVwUFa7bQD5PtzkWJe4iABUkgf/exec";
+/* Travel Agency hub — public package marketplace (approved-packages) and the
+   agency messaging bridge live at the same /exec. */
+const TRAVEL_URL="https://script.google.com/macros/s/AKfycbzv4v5pktq9j3fIzwaB5zCpySYJO9DjfMzV78lftWjZoFoKMVIpN1_zRb3OVzdOv5FQjg/exec";
 if(!S||S.role!=='worker'){ location.href='sign-in.html'; }
 else {
  if(S.token){ fetch(SKILLED_URL+'?action=session&token='+encodeURIComponent(S.token)).then(r=>r.json()).then(d=>{ if(d&&d.ok===false){ logout(); } }).catch(()=>{}); }
@@ -495,6 +508,7 @@ else {
  try{ loadSkillPhotos(); }catch(e){}
  try{ loadVerification(); }catch(e){}
  try{ loadMessages(); }catch(e){}
+ try{ loadPackages(); }catch(e){}
  try{ checkDeclarationGate(); }catch(e){}
  const approved=(S.status==='Approved'||S.status==='Active');
  document.getElementById('name').textContent='Hello, '+(S.name||'there');
@@ -1384,6 +1398,7 @@ function buildSideNav(){
     {id:'healthCard', label:'Health & Medicals', icon:'⚕️'},
     {id:'verifyCard', label:'Trust & Verification Centre', icon:'🛡️'},
     {id:'summaryCard', label:'Professional Summary', icon:'⭐'},
+    {id:'packagesCard', label:'Browse Packages', icon:'🧳'},
     {id:'messagesCard', label:'Messages', icon:'✉️'},
     {id:'nextCard', label:'Recommended Next Step', icon:'➡️'}
   ];
@@ -1410,6 +1425,56 @@ function navTo(id){
   if(card.classList.contains('collapsed')) card.classList.remove('collapsed');
   card.scrollIntoView({behavior:'smooth',block:'start'});
   if(id==='messagesCard'){ try{ loadMessages(); }catch(e){} }
+  if(id==='packagesCard'){ try{ loadPackages(); }catch(e){} }
+}
+
+/* ===== Package marketplace ===== */
+var PKG_DATA=[];
+function loadPackages(){
+  var el=document.getElementById('pkgList'); if(!el) return;
+  if(PKG_DATA.length){ renderPkgs(); return; }
+  el.innerHTML='Loading…';
+  fetch(TRAVEL_URL+'?action=approved-packages').then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ el.innerHTML='<div style="color:var(--tx3)">Couldn’t load packages right now.</div>'; return; }
+    PKG_DATA=d.packages||[]; renderPkgs();
+  }).catch(function(){ el.innerHTML='<div style="color:var(--tx3)">Couldn’t reach the package service.</div>'; });
+}
+function renderPkgs(){
+  var el=document.getElementById('pkgList'); if(!el) return;
+  var q=((document.getElementById('pkgSearch')||{}).value||'').toLowerCase();
+  var list=PKG_DATA.filter(function(p){ return !q || (p.title+' '+p.destination+' '+(p.category||'')+' '+(p.agencyName||'')).toLowerCase().indexOf(q)>=0; });
+  if(!list.length){ el.innerHTML='<div style="color:var(--tx3);padding:6px 0">'+(PKG_DATA.length?'No packages match your search.':'No packages published yet. Check back soon.')+'</div>'; return; }
+  el.innerHTML=list.map(function(p){
+    var price=p.candidateTotal?('₦'+Number(p.candidateTotal).toLocaleString()):'Price on enquiry';
+    var poster=p.poster?('<img src="'+esc(p.poster)+'" alt="" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto" onerror="this.style.display=\'none\'">'):'';
+    return '<div style="display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">'
+      +poster
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-weight:800;font-size:14px">'+esc(p.title||'Package')+'</div>'
+      +'<div style="font-size:12px;color:var(--tx3);margin-top:2px">'+esc(p.destination||'')+(p.category?(' · '+esc(p.category)):'')+' · '+esc(p.agencyName||'STACS Agency')+'</div>'
+      +(p.summary?'<div style="font-size:12.5px;color:var(--tx2);margin-top:6px;line-height:1.5">'+esc(p.summary)+'</div>':'')
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap">'
+      +'<span style="font-weight:800;font-size:14px;color:var(--gold2,#e0b000)">'+price+'</span>'
+      +'<button class="btn" style="padding:7px 13px;font-size:12.5px" onclick="pkgAsk(\''+esc(p.packageId)+'\')">💬 Ask a question</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+function pkgAsk(pkgId){
+  var p=null; for(var i=0;i<PKG_DATA.length;i++){ if(String(PKG_DATA[i].packageId)===String(pkgId)){ p=PKG_DATA[i]; break; } }
+  if(!p) return;
+  var taId=p.taId, agency=p.agencyName||'Travel Agency', title=p.title||'Package';
+  MSG_CUR={isNew:true, provider:true, toRole:'travel', toId:taId, toName:agency||'Travel Agency', packageId:pkgId, subject:('Enquiry · '+(title||'Package')).slice(0,120)};
+  navTo('messagesCard');
+  document.getElementById('msgThreadHead').textContent=agency||'Travel Agency';
+  document.getElementById('msgThreadSub').textContent='About: '+(title||'Package');
+  document.getElementById('msgBody').innerHTML='<div style="color:var(--tx3);font-size:12.5px;text-align:center;padding:12px 0">Write your question below.</div>';
+  document.getElementById('msgInput').value=''; document.getElementById('msgInput').disabled=false;
+  document.getElementById('msgSendBtn').disabled=false;
+  msgShowView();
+  var tn=document.getElementById('msgTurnNote'); tn.style.display='block';
+  tn.style.color='#d9c178'; tn.style.background='rgba(224,176,0,.10)'; tn.style.border='1px solid rgba(224,176,0,.28)';
+  tn.textContent='Tip: ask everything in one message. Once you send, you can’t send again until the provider replies — this keeps the conversation clear for both sides.';
+  setTimeout(function(){ try{ document.getElementById('msgInput').focus(); }catch(e){} },150);
 }
 
 /* ===== In-platform Messaging ===== */
@@ -1429,18 +1494,27 @@ function loadMessages(){
     if(!d||d.ok===false){ if(list) list.innerHTML='<span style="color:var(--tx3)">Couldn’t load messages right now.</span>'; if(badge) badge.textContent='—'; return; }
     var th=d.threads||[];
     if(badge) badge.textContent=th.length?String(th.length):'0';
+    msgNavDot(!!d.unread);
     if(!th.length){ if(list) list.innerHTML='<div style="color:var(--tx3);padding:6px 0">No conversations yet. Use “Message STACS Support” to start one.</div>'; return; }
     var html='';
     th.forEach(function(t){
       var who=(t.other&&t.other.name)||'STACS Support';
       var when=t.lastAt?esc(String(t.lastAt).replace('T',' ').slice(0,16)):'';
       var st=(t.status&&t.status!=='Open')?' · '+esc(t.status):'';
+      var dot=t.unread?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E86A6A;margin-left:7px"></span>':'';
       html+='<button class="snlink" style="width:100%;text-align:left;padding:11px 12px;border-radius:10px;margin-bottom:7px;display:block;background:rgba(255,255,255,.03)" onclick="msgOpenThread(\''+esc(t.threadId)+'\')">'
-        +'<div style="font-weight:800;font-size:13.5px">'+esc(who)+'</div>'
+        +'<div style="font-weight:800;font-size:13.5px">'+esc(who)+dot+'</div>'
         +'<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+esc(t.subject||'Conversation')+st+(when?(' · '+when):'')+'</div></button>';
     });
     if(list) list.innerHTML=html;
   });
+}
+/* Red dot on the sidebar "Messages" link when someone has replied. */
+function msgNavDot(on){
+  var link=document.querySelector('.snlink[data-target="messagesCard"]'); if(!link) return;
+  var dot=link.querySelector('.navDot');
+  if(on){ if(!dot){ dot=document.createElement('span'); dot.className='navDot'; dot.style.cssText='display:inline-block;width:8px;height:8px;border-radius:50%;background:#E86A6A;margin-left:6px;vertical-align:middle'; link.appendChild(dot); } }
+  else if(dot){ dot.remove(); }
 }
 function msgShowList(){
   document.getElementById('msgListWrap').style.display='';
@@ -1456,7 +1530,8 @@ function msgStartSupport(){
   document.getElementById('msgThreadHead').textContent='STACS Support';
   document.getElementById('msgThreadSub').textContent='Start a new conversation — we usually reply within working hours.';
   document.getElementById('msgBody').innerHTML='<div style="color:var(--tx3);font-size:12.5px;text-align:center;padding:14px 0">Write your first message below.</div>';
-  document.getElementById('msgInput').value='';
+  document.getElementById('msgInput').value=''; document.getElementById('msgInput').disabled=false; document.getElementById('msgSendBtn').disabled=false;
+  var tn=document.getElementById('msgTurnNote'); if(tn) tn.style.display='none';
   msgShowView();
   setTimeout(function(){ try{ document.getElementById('msgInput').focus(); }catch(e){} },120);
 }
@@ -1468,10 +1543,26 @@ function msgOpenThread(threadId){
   msgShowView();
   msgApi('msg-thread','token='+encodeURIComponent(S.token)+'&threadId='+encodeURIComponent(threadId)).then(function(d){
     if(!d||d.ok===false){ body.innerHTML='<div style="color:var(--tx3)">Couldn’t open this conversation.</div>'; return; }
+    MSG_CUR={threadId:threadId, provider:(d.kind==='provider'), canSend:(d.canSend!==false)};
     document.getElementById('msgThreadHead').textContent=(d.other&&d.other.name)||'STACS Support';
     document.getElementById('msgThreadSub').textContent=esc(d.subject||'Conversation')+(d.status&&d.status!=='Open'?(' · '+esc(d.status)):'');
     msgRenderMessages(d.messages||[]);
+    msgApplyTurn(d);
   });
+}
+/* Lock/unlock the composer for turn-based provider threads, and show the status note. */
+function msgApplyTurn(d){
+  var input=document.getElementById('msgInput'), btn=document.getElementById('msgSendBtn'), tn=document.getElementById('msgTurnNote');
+  if(d.kind!=='provider'){ input.disabled=false; btn.disabled=false; input.placeholder='Write a message…'; if(tn) tn.style.display='none'; return; }
+  if(d.canSend===false){
+    input.disabled=true; btn.disabled=true; input.placeholder='Waiting for the provider to reply…';
+    if(tn){ tn.style.display='block'; tn.style.color='#9fb8d8'; tn.style.background='rgba(120,160,220,.10)'; tn.style.border='1px solid rgba(120,160,220,.25)';
+      tn.textContent='Your question has been sent. You’ll be able to reply again once the provider responds.'; }
+  } else {
+    input.disabled=false; btn.disabled=false; input.placeholder='Reply… (you can send one message, then it’s their turn)';
+    if(tn){ tn.style.display='block'; tn.style.color='#d9c178'; tn.style.background='rgba(224,176,0,.10)'; tn.style.border='1px solid rgba(224,176,0,.28)';
+      tn.textContent='It’s your turn — reply with everything at once; after you send, you’ll wait for their response.'; }
+  }
 }
 function msgRenderMessages(msgs){
   var body=document.getElementById('msgBody');
@@ -1499,7 +1590,7 @@ function msgSendCurrent(){
   var btn=document.getElementById('msgSendBtn'); btn.disabled=true; var old=btn.textContent; btn.textContent='Sending…';
   var done=function(){ btn.disabled=false; btn.textContent=old; };
   if(MSG_CUR.isNew){
-    msgPost({action:'msg-start', token:S.token, toRole:MSG_CUR.toRole||'stacs', body:txt, subject:'Support request'}).then(function(d){
+    msgPost({action:'msg-start', token:S.token, toRole:MSG_CUR.toRole||'stacs', toId:MSG_CUR.toId||'', toName:MSG_CUR.toName||'', packageId:MSG_CUR.packageId||'', body:txt, subject:MSG_CUR.subject||'Support request'}).then(function(d){
       done();
       if(!d){ if(bn){ bn.style.display='block'; bn.textContent='Network problem — please try again.'; } return; }
       if(d.blocked){ if(bn){ bn.style.display='block'; bn.textContent=d.error||'That message can’t be sent.'; } return; }
