@@ -141,6 +141,26 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
     <h1 id="buildTitle">Create a Managed Destination Mobility Package</h1>
     <div class="sub">Build a clear, sectioned package. Candidates compare packages and select one, then sign the agreement. Enter your own fees; STACS platform fees are applied on top and included in the candidate price. Your agency name is never shown to candidates.</div>
 
+    <div class="sec">Package type</div>
+    <div class="grid">
+     <div class="field"><label>How do you want to build this?</label>
+      <select id="pk_mode" onchange="setPkgMode(this.value)"><option value="full">Full managed package</option><option value="simple">Simple package (destinations and a short note)</option></select></div>
+     <div class="field"><label>Package category</label>
+      <select id="pk_category" onchange="applyCategory(this.value)"><option value="">Select a category…</option><option>Conference Visit</option><option>Travel &amp; Tour Visit</option><option>Travel &amp; Work Temporarily</option><option>Immigrate Permanently</option><option>Study &amp; Work</option><option>Business Mobility</option><option>Other</option></select></div>
+    </div>
+
+    <div id="simpleBlock" style="display:none">
+     <div class="sec">Simple package</div>
+     <div class="field"><label>Package title</label><input id="sp_title" placeholder="e.g. Dubai Tour Package"></div>
+     <div class="field"><label>Destinations you cover (pick one or more)</label>
+      <div class="chips" id="chips_spdest"></div>
+      <select id="sel_spdest" onchange="addChip('spdest',this.value);this.value='';"><option value="">Add a destination…</option></select></div>
+     <div class="field"><label>Short description (up to 500 characters)</label>
+      <textarea id="sp_note" maxlength="500" oninput="countChars('sp_note','sp_count',500)" placeholder="Describe the package briefly"></textarea>
+      <div class="note"><span id="sp_count">0</span>/500 characters. Once approved this cannot be edited unless STACS reopens it.</div></div>
+    </div>
+
+    <div id="fullBlock">
     <div class="sec">1. Package overview</div>
     <div class="field"><label>Package title</label><input id="ov_title" placeholder="e.g. Canada Care Worker Mobility Package"></div>
     <div class="grid">
@@ -188,6 +208,29 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
     <div class="sec">5. Other optional services</div>
     <div id="osBox"></div>
     <button class="btn ghost sm" onclick="addOS()">+ Add optional service</button>
+    </div><!-- /fullBlock -->
+
+    <div class="sec">Compliance (internal, not shown to candidates)</div>
+    <div class="note" style="margin-bottom:8px;border-color:rgba(200,146,10,.5)">This note is not for public consumption. However it is required for your package to be approved by the STACS compliance team, as this will serve as your reference point and ensure you indicate your source.</div>
+    <div class="field"><label>Normal processing steps (required)</label>
+     <textarea id="cmp_steps" maxlength="5000" oninput="countChars('cmp_steps','cmp_count',5000)" placeholder="Set out the real, normal steps for this package from start to visa, and clearly indicate your source."></textarea>
+     <div class="note"><span id="cmp_count">0</span>/5000 characters</div></div>
+    <div class="sec" style="margin-top:12px">Source (who requested these workers)</div>
+    <div class="note" style="margin-bottom:8px">For STACS audit and documentation only. STACS will not contact them about this approval.</div>
+    <div class="grid">
+     <div class="field"><label>Source type</label><select id="src_type"><option>Recruitment Agency</option><option>Employer</option><option>Direct / self-sourced</option></select></div>
+     <div class="field"><label>Official name</label><input id="src_name" placeholder="Organisation name"></div>
+    </div>
+    <div class="grid">
+     <div class="field"><label>Address</label><input id="src_address" placeholder="Registered address"></div>
+     <div class="field"><label>Contact (phone or email)</label><input id="src_contact" placeholder="Official contact"></div>
+    </div>
+    <div class="field"><label>Website</label><input id="src_website" placeholder="https://"></div>
+
+    <div class="sec">Package poster (optional)</div>
+    <div class="note" style="margin-bottom:8px">Optional. A JPEG up to 1.5 MB. We compress it automatically while keeping it clear and zoomable on any device.</div>
+    <input type="file" id="posterFile" accept="image/jpeg,image/jpg,image/png" onchange="onPoster()">
+    <div id="posterPreview" style="margin-top:8px"></div>
 
     <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
      <button class="btn" onclick="savePackage()">Submit for review</button>
@@ -291,7 +334,7 @@ var MEDICAL=["None required","Basic medical","Full medical examination","Chest X
 var FEEKEYS=[["government","Government Fees"],["embassy","Embassy Fees"],["medical","Medical"],["translation","Translation"],["agencyAdmin","Travel Agency Administrative Fee"],["orientation","Orientation Programme"],["documentation","Documentation Processing"],["visa","Visa Package"],["other","Other Optional Services"]];
 var EDIT_ID='';
 var ASSETS={logo:'',cover:'',passport:''};
-var PICK={emp:[],med:[],dest:[]};
+var PICK={emp:[],med:[],dest:[],spdest:[]};
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function ngn(n){return '₦'+Number(n||0).toLocaleString('en-NG');}
@@ -308,7 +351,7 @@ function renderChips(kind){var box=document.getElementById('chips_'+kind);box.in
 // build dropdowns + boxes
 (function(){
  var ds=document.getElementById('ov_destination');COUNTRIES.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;ds.appendChild(o);});
- fillSelect('sel_emp',EMPLOYMENT);fillSelect('sel_med',MEDICAL);fillSelect('sel_dest',COUNTRIES);fillSelect('ov_processingTime',PROCESSING);
+ fillSelect('sel_emp',EMPLOYMENT);fillSelect('sel_med',MEDICAL);fillSelect('sel_dest',COUNTRIES);fillSelect('sel_spdest',COUNTRIES);fillSelect('ov_processingTime',PROCESSING);
  var sb=document.getElementById('servicesBox');SERVICES.forEach(function(s){sb.insertAdjacentHTML('beforeend','<label class="chk"><input type="checkbox" class="svc" value="'+esc(s)+'"> '+esc(s)+'</label>');});
  var fb=document.getElementById('feesBox');FEEKEYS.forEach(function(f){fb.insertAdjacentHTML('beforeend','<div class="feeline"><label>'+esc(f[1])+'</label><input type="number" min="0" class="fee" data-k="'+f[0]+'" placeholder="0" oninput="feeSum()"></div>');});
  addOS();
@@ -414,9 +457,40 @@ function saveProfile(){
 loadProfile();
 
 // package builder
+function setPkgMode(m){var simple=(m==='simple');document.getElementById('simpleBlock').style.display=simple?'block':'none';document.getElementById('fullBlock').style.display=simple?'none':'block';}
+var VISIT_CATS={'Conference Visit':1,'Travel & Tour Visit':1};
+function applyCategory(cat){
+ var isVisit=!!VISIT_CATS[cat];
+ ['emp','med'].forEach(function(k){var box=document.getElementById('chips_'+k);if(box){var fld=box.closest('.field');if(fld)fld.style.display=isVisit?'none':'';}});
+ var lang=document.getElementById('ov_language');if(lang&&lang.closest('.field'))lang.closest('.field').style.display=isVisit?'none':'';
+ var tied=document.getElementById('ov_tiedEmployer');if(tied&&tied.closest('.field'))tied.closest('.field').style.display=isVisit?'none':'';
+}
+function countChars(id,countId,max){var t=document.getElementById(id),c=document.getElementById(countId);if(t&&c)c.textContent=String((t.value||'').length);}
+function onPoster(){
+ var f=document.getElementById('posterFile').files[0],pv=document.getElementById('posterPreview');window._posterData=null;
+ if(!f){pv.innerHTML='';return;}
+ if(!/image\/(jpeg|jpg|png)/.test(f.type)){pv.innerHTML='<div class="msg err" style="display:block">Please choose a JPEG image.</div>';return;}
+ if(f.size>1.5*1024*1024){pv.innerHTML='<div class="msg err" style="display:block">That image is larger than 1.5 MB. Please choose a smaller one.</div>';document.getElementById('posterFile').value='';return;}
+ pv.innerHTML='<div class="note">Compressing…</div>';
+ var img=new Image(),url=URL.createObjectURL(f);
+ img.onload=function(){
+   var max=1400,w=img.width,h=img.height;
+   if(w>max||h>max){if(w>=h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}}
+   var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+   var q=0.82,data=cv.toDataURL('image/jpeg',q);
+   while(data.length>420000&&q>0.4){q-=0.1;data=cv.toDataURL('image/jpeg',q);}
+   URL.revokeObjectURL(url);window._posterData=data;
+   var kb=Math.round(data.length*0.75/1024);
+   pv.innerHTML='<img src="'+data+'" style="max-width:220px;border:1px solid var(--bdr);border-radius:8px"><div class="note">Compressed to about '+kb+' KB, kept sharp and zoomable.</div>';
+ };
+ img.onerror=function(){pv.innerHTML='<div class="msg err" style="display:block">Could not read that image.</div>';};
+ img.src=url;
+}
 function gatherPkg(){
  var fees={};document.querySelectorAll('.fee').forEach(function(i){fees[i.getAttribute('data-k')]=Number(i.value)||0;});
- return {overview:{title:document.getElementById('ov_title').value.trim(),destination:document.getElementById('ov_destination').value,
+ return {mode:document.getElementById('pk_mode').value,category:document.getElementById('pk_category').value,
+  simple:{title:document.getElementById('sp_title').value.trim(),destinations:PICK.spdest.slice(),note:document.getElementById('sp_note').value.trim()},
+  overview:{title:document.getElementById('ov_title').value.trim(),destination:document.getElementById('ov_destination').value,
     employmentTypes:PICK.emp.slice(),visaCategory:document.getElementById('ov_visaCategory').value.trim(),
     processingTime:document.getElementById('ov_processingTime').value,validUntil:document.getElementById('ov_validUntil').value,
     slots:document.getElementById('ov_slots').value,tiedEmployer:document.getElementById('ov_tiedEmployer').value,
@@ -424,12 +498,22 @@ function gatherPkg(){
     insurance:document.getElementById('ov_insurance').value,orientation:'Mandatory',
     language:document.getElementById('ov_language').value.trim(),medical:PICK.med.slice()},
   fees:fees,payment:{deposit:Number(document.getElementById('pay_deposit').value)||0,workingDeposit:Number(document.getElementById('pay_working').value)||0,balanceNote:document.getElementById('pay_balance').value.trim()},
-  refund:{notes:document.getElementById('refund_notes').value.trim()},optionalServices:collectOS()};
+  refund:{notes:document.getElementById('refund_notes').value.trim()},optionalServices:collectOS(),
+  compliance:{steps:document.getElementById('cmp_steps').value.trim(),source:{type:document.getElementById('src_type').value,name:document.getElementById('src_name').value.trim(),address:document.getElementById('src_address').value.trim(),contact:document.getElementById('src_contact').value.trim(),website:document.getElementById('src_website').value.trim()}},
+  poster:window._posterData||''};
 }
 function savePackage(){
  var p=gatherPkg();
- if(!p.overview.title){msg('buildMsg','err','Please give the package a title.');return;}
- if(!p.overview.destination){msg('buildMsg','err','Please choose a destination country.');return;}
+ if(!p.category){msg('buildMsg','err','Please choose a package category.');return;}
+ if(p.mode==='simple'){
+   if(!p.simple.title){msg('buildMsg','err','Please give the package a title.');return;}
+   if(!p.simple.destinations.length){msg('buildMsg','err','Please pick at least one destination.');return;}
+   if(!p.simple.note){msg('buildMsg','err','Please add a short description.');return;}
+ } else {
+   if(!p.overview.title){msg('buildMsg','err','Please give the package a title.');return;}
+   if(!p.overview.destination){msg('buildMsg','err','Please choose a destination country.');return;}
+ }
+ if(!p.compliance.steps){msg('buildMsg','err','Please fill the Normal processing steps. It is required for compliance.');return;}
  var body=Object.assign({action:'package-save',token:S.token},p);if(EDIT_ID)body.packageId=EDIT_ID;
  msg('buildMsg','warn','Submitting your package…');
  fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})
@@ -438,7 +522,7 @@ function savePackage(){
     else{msg('buildMsg','err',(d&&d.error)||'Could not submit the package.');}
   }).catch(function(){msg('buildMsg','err','Network error. Please try again.');});
 }
-function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';PICK.emp=[];PICK.med=[];renderChips('emp');renderChips('med');document.querySelectorAll('.fee').forEach(function(i){i.value='';});document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
+function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes','sp_title','sp_note','cmp_steps','src_name','src_address','src_contact','src_website'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';document.getElementById('pk_category').value='';document.getElementById('pk_mode').value='full';setPkgMode('full');applyCategory('');PICK.emp=[];PICK.med=[];PICK.spdest=[];renderChips('emp');renderChips('med');renderChips('spdest');countChars('sp_note','sp_count',500);countChars('cmp_steps','cmp_count',5000);window._posterData=null;var pf=document.getElementById('posterFile');if(pf)pf.value='';document.getElementById('posterPreview').innerHTML='';document.querySelectorAll('.fee').forEach(function(i){i.value='';});document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
 
 function loadPackages(){
  var el=document.getElementById('pkgList');el.innerHTML='Loading…';
@@ -463,6 +547,17 @@ function editPkg(id){var p=(window._PKGS||[]).filter(function(x){return x.packag
  document.getElementById('pay_deposit').value=pay.deposit||'';document.getElementById('pay_working').value=pay.workingDeposit||'';document.getElementById('pay_balance').value=pay.balanceNote||'Payable after visa approval';
  document.getElementById('refund_notes').value=rf.notes||'';
  document.getElementById('osBox').innerHTML='';if(os.length)os.forEach(function(s){addOS(s.name,s.desc,s.fee,s.mandatory);});else addOS();
+ var md=p.data||{};
+ document.getElementById('pk_mode').value=md.mode||'full';setPkgMode(md.mode||'full');
+ document.getElementById('pk_category').value=md.category||'';applyCategory(md.category||'');
+ var sp=md.simple||{};document.getElementById('sp_title').value=sp.title||'';document.getElementById('sp_note').value=sp.note||'';countChars('sp_note','sp_count',500);
+ PICK.spdest=Array.isArray(sp.destinations)?sp.destinations.slice():[];renderChips('spdest');
+ var cmp=md.compliance||{},srcd=cmp.source||{};
+ document.getElementById('cmp_steps').value=cmp.steps||'';countChars('cmp_steps','cmp_count',5000);
+ document.getElementById('src_type').value=srcd.type||'Recruitment Agency';document.getElementById('src_name').value=srcd.name||'';
+ document.getElementById('src_address').value=srcd.address||'';document.getElementById('src_contact').value=srcd.contact||'';document.getElementById('src_website').value=srcd.website||'';
+ window._posterData=null;document.getElementById('posterFile').value='';
+ document.getElementById('posterPreview').innerHTML=md.posterUrl?('<img src="'+md.posterUrl+'" style="max-width:220px;border:1px solid var(--bdr);border-radius:8px"><div class="note">Current poster. Upload a new one to replace it.</div>'):'';
  go('build',document.querySelector('[data-p=build]'));
 }
 </script>
