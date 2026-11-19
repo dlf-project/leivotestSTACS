@@ -93,6 +93,7 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
   <button data-p="build" onclick="go('build',this)"><span class="ic">&#10133;</span>Create Package</button>
   <button data-p="progress" onclick="go('progress',this)"><span class="ic">&#128506;</span>Progress &amp; Status</button>
   <button data-p="payouts" onclick="go('payouts',this)"><span class="ic">&#128179;</span>My Payouts</button>
+  <button data-p="messages" onclick="go('messages',this)"><span class="ic">&#128172;</span>Messages<span id="msgNavDot" style="display:none;width:8px;height:8px;border-radius:50%;background:#E86A6A;margin-left:7px"></span></button>
  </div>
  <div class="main">
 
@@ -278,6 +279,26 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
    </div>
   </div>
 
+  <!-- MESSAGES -->
+  <div class="panel" id="p-messages">
+   <div class="card">
+    <h1>Messages</h1>
+    <div class="sub">Candidates’ questions about your published packages. They ask one message, then it’s your turn — <b>answer fully and constructively in one reply</b>, because after you send it the candidate speaks next. Phone numbers, emails, usernames and off-platform links are blocked automatically, to keep everyone safe on STACS.</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-top:14px">
+      <div style="flex:1;min-width:240px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3,#8a8f98)">Conversations</span>
+          <button class="btn ghost sm" onclick="loadTvMsgThreads()">Refresh</button>
+        </div>
+        <div id="tvMsgList">Loading…</div>
+      </div>
+      <div style="flex:1.4;min-width:300px">
+        <div id="tvMsgThread" class="note">Select a conversation to read and reply.</div>
+      </div>
+    </div>
+   </div>
+  </div>
+
  </div>
 </div>
 
@@ -338,7 +359,70 @@ var PICK={emp:[],med:[],dest:[],spdest:[]};
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function ngn(n){return '₦'+Number(n||0).toLocaleString('en-NG');}
-function go(p,btn){document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('on');});document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.nav button').forEach(function(b){b.classList.remove('on');});if(btn)btn.classList.add('on');if(p==='packages')loadPackages();window.scrollTo({top:0,behavior:'smooth'});}
+function go(p,btn){document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('on');});document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.nav button').forEach(function(b){b.classList.remove('on');});if(btn)btn.classList.add('on');if(p==='packages')loadPackages();if(p==='messages')loadTvMsgThreads();window.scrollTo({top:0,behavior:'smooth'});}
+/* ===== Agency inbox (turn-based, relayed through the member hub) ===== */
+function tvMsgDot(on){ var d=document.getElementById('msgNavDot'); if(d) d.style.display=on?'inline-block':'none'; }
+function checkTvUnread(){ fetch(TRAVEL_URL+'?action=msg-unread&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){ tvMsgDot(d&&d.unread); }).catch(function(){}); }
+var TV_MSG_CUR=null;
+function loadTvMsgThreads(){
+  var el=document.getElementById('tvMsgList'); if(!el) return; el.innerHTML='<div class="note">Loading…</div>';
+  fetch(TRAVEL_URL+'?action=msg-threads&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ el.innerHTML='<div class="note">Couldn’t load conversations.</div>'; return; }
+    tvMsgDot(d.unread);
+    var th=d.threads||[];
+    if(!th.length){ el.innerHTML='<div class="note">No candidate enquiries yet. They appear here when a candidate asks about one of your packages.</div>'; return; }
+    el.innerHTML=th.map(function(t){
+      var when=t.lastAt?esc(String(t.lastAt).replace('T',' ').slice(0,16)):'';
+      var turn=t.myTurn?'<span style="color:#2ec47a;font-weight:700">● Your turn</span>':'<span style="color:var(--tx3,#8a8f98)">Waiting on candidate</span>';
+      var dot=t.unread?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E86A6A;margin-left:6px"></span>':'';
+      return '<button class="btn ghost" style="display:block;width:100%;text-align:left;margin-bottom:7px;padding:10px 12px" onclick="openTvMsgThread(\''+esc(t.threadId)+'\')">'
+        +'<div style="font-weight:700">'+esc((t.candidate&&t.candidate.name)||'Candidate')+dot+'</div>'
+        +'<div style="font-size:11.5px;color:var(--tx3,#8a8f98);margin-top:2px">'+esc(t.subject||'Enquiry')+(when?(' · '+when):'')+'</div>'
+        +'<div style="font-size:11px;margin-top:3px">'+turn+'</div></button>';
+    }).join('');
+  }).catch(function(){ el.innerHTML='<div class="note">Couldn’t reach the server.</div>'; });
+}
+function openTvMsgThread(threadId){
+  TV_MSG_CUR=threadId;
+  var box=document.getElementById('tvMsgThread'); box.className=''; box.innerHTML='<div class="note">Loading…</div>';
+  fetch(TRAVEL_URL+'?action=msg-thread&token='+encodeURIComponent(S.token)+'&threadId='+encodeURIComponent(threadId)).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ box.innerHTML='<div class="note">Couldn’t open this conversation.</div>'; return; }
+    var msgs=(d.messages||[]).map(function(m){
+      var mine=!!m.mine; var who=mine?'You':esc(m.fromName||'Candidate');
+      return '<div style="margin-bottom:10px;text-align:'+(mine?'right':'left')+'">'
+        +'<div style="font-size:10.5px;color:var(--tx3,#8a8f98);margin-bottom:3px">'+who+(m.at?(' · '+esc(m.at)):'')+'</div>'
+        +'<div style="display:inline-block;max-width:85%;text-align:left;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;'
+        +(mine?'background:#2ec47a;color:#05230f':'background:rgba(255,255,255,.06);color:var(--tx,#e8eaed);border:1px solid rgba(255,255,255,.12)')+'">'+esc(m.body||'').replace(/\n/g,'<br>')+'</div></div>';
+    }).join('') || '<div class="note">No messages yet.</div>';
+    var reply;
+    if(d.myTurn){
+      reply='<div style="border-top:2px solid #2ec47a;margin-top:10px;padding-top:10px">'
+        +'<div style="font-size:11.5px;color:#2ec47a;font-weight:700;margin-bottom:6px">● Your reply window is open — answer everything in one message.</div>'
+        +'<div id="tvReplyNote" class="note" style="display:none"></div>'
+        +'<textarea id="tvReplyBox" rows="3" placeholder="Reply constructively (no phone numbers, emails or outside links)…" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--tx,#e8eaed);font:inherit;font-size:13px"></textarea>'
+        +'<button class="btn" id="tvReplyBtn" onclick="sendTvReply()" style="margin-top:8px">Send reply</button></div>';
+    } else {
+      reply='<div class="note" style="margin-top:10px">It’s the candidate’s turn. You’ll be able to reply once they send their next message.</div>';
+    }
+    box.innerHTML='<div style="font-weight:800;font-size:15px">'+esc((d.candidate&&d.candidate.name)||'Candidate')+'</div>'
+      +'<div style="font-size:11.5px;color:var(--tx3,#8a8f98);margin-bottom:12px">'+esc(d.subject||'Enquiry')+'</div>'
+      +'<div style="max-height:340px;overflow-y:auto;margin-bottom:6px">'+msgs+'</div>'+reply;
+  }).catch(function(){ box.innerHTML='<div class="note">Couldn’t reach the server.</div>'; });
+}
+function sendTvReply(){
+  if(!TV_MSG_CUR) return;
+  var ta=document.getElementById('tvReplyBox'), txt=(ta.value||'').trim(), note=document.getElementById('tvReplyNote');
+  if(note){ note.style.display='none'; note.textContent=''; }
+  if(!txt){ ta.focus(); return; }
+  var btn=document.getElementById('tvReplyBtn'); btn.disabled=true; var old=btn.textContent; btn.textContent='Sending…';
+  fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'msg-reply',token:S.token,threadId:TV_MSG_CUR,body:txt})})
+    .then(function(r){return r.json();}).then(function(d){
+      btn.disabled=false; btn.textContent=old;
+      if(!d){ if(note){ note.style.display='block'; note.textContent='Network problem — please try again.'; } return; }
+      if(d.blocked||d.ok===false){ if(note){ note.style.display='block'; note.textContent=d.error||'Could not send.'; } return; }
+      openTvMsgThread(TV_MSG_CUR); loadTvMsgThreads();
+    }).catch(function(){ btn.disabled=false; btn.textContent=old; if(note){ note.style.display='block'; note.textContent='Could not reach the server.'; } });
+}
 function signOut(){localStorage.removeItem('stacs_session');location.href='sign-in.html';}
 function stacsTheme(){var d=document.documentElement,t=d.getAttribute("data-theme")==="light"?"dark":"light";d.setAttribute("data-theme",t);try{localStorage.setItem("stacs_theme",t);}catch(e){}document.getElementById("themeBtn").innerHTML=t==="light"?"&#9728;&#65039;":"&#127769;";}
 
@@ -366,6 +450,7 @@ function msg(id,cls,txt){var m=document.getElementById(id);m.className='msg '+cl
 
 // session check
 fetch(TRAVEL_URL+'?action=session&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){if(d&&d.ok===false){signOut();}}).catch(function(){});
+try{ checkTvUnread(); }catch(e){}
 
 // profile
 var BASE={},PROF={};
