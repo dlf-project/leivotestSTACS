@@ -549,10 +549,20 @@ function agrView(id){
       if(!d||!d.ok){ box.innerHTML='<div class="note" style="color:#E86A6A">Could not load details.</div>'; return; }
       var a=d.agreement;
       box.innerHTML='<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;border:1px solid var(--bdr);padding:10px;border-radius:8px">'
-        +(a.sigUrl?'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Signature</div><img src="'+a.sigUrl+'" style="max-width:220px;background:#fff;border:1px solid var(--bdr);padding:4px" onerror="this.outerHTML=&quot;<span class=\\&quot;note\\&quot;>signature image unavailable</span>&quot;"></div>':'')
-        +(a.passUrl?'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Passport</div><a class="ghost" style="text-decoration:none;border-radius:0" href="'+a.passUrl+'" target="_blank" rel="noopener">Open passport file</a></div>':'')
+        +'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Signature</div>'
+        +(a.sigData?'<img src="'+a.sigData+'" style="max-width:220px;background:#fff;border:1px solid var(--bdr);padding:4px">':'<span class="note">No signature on file</span>')+'</div>'
+        +(a.hasPassport?'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Passport</div><button class="ghost" style="border-radius:0" onclick="agrPassport(\''+id+'\',this)">Open passport</button></div>':'')
         +'</div>';
     }).catch(function(){ box.innerHTML='<div class="note" style="color:#E86A6A">Could not load details.</div>'; });
+}
+function agrPassport(id,btn){
+  if(btn){ btn.disabled=true; btn.textContent='Loading…'; }
+  fetch(TRAVEL_URL+'?action=agreement-admin-file&which=passport&token='+encodeURIComponent(TOK.ta)+'&id='+encodeURIComponent(id))
+    .then(r=>r.json()).then(function(d){
+      if(btn){ btn.disabled=false; btn.textContent='Open passport'; }
+      if(!d||!d.ok||!d.dataUri){ alert((d&&d.error)||'Could not load the passport.'); return; }
+      fetch(d.dataUri).then(function(r){return r.blob();}).then(function(blob){ window.open(URL.createObjectURL(blob),'_blank'); });
+    }).catch(function(){ if(btn){ btn.disabled=false; btn.textContent='Open passport'; } alert('Could not reach the server.'); });
 }
 function agrApprove(id){
   if(!confirm('Approve this agreement? It will be stamped, saved to Drive, and the signed copy emailed to the partner.')) return;
