@@ -48,7 +48,7 @@ input:focus{outline:none;border-color:var(--gold)}
   <div class="hubsec">Open now — choose your hub</div>
   <div class="hubgrid">
    <button type="button" class="hub on" id="hub_worker"   onclick="setRole('worker')"><span class="ic">&#128296;</span><span class="nm">Skilled Worker</span><span class="id">WK-</span></button>
-   <button type="button" class="hub"    id="hub_employer" onclick="setRole('employer')"><span class="ic">&#127970;</span><span class="nm">Employer</span><span class="id">EM-</span></button>
+   <button type="button" class="hub"    id="hub_employer" onclick="setRole('employer')"><span class="ic">&#127970;</span><span class="nm">Employers / Recruiters</span><span class="id">EM-</span></button>
    <button type="button" class="hub"    id="hub_verifier" onclick="setRole('verifier')"><span class="ic">&#128269;</span><span class="nm">Verifier</span><span class="id">VF-</span></button>
    <button type="button" class="hub"    id="hub_translator" onclick="setRole('translator')"><span class="ic">&#127760;</span><span class="nm">Translator</span><span class="id">TR-</span></button>
    <button type="button" class="hub"    id="hub_travel" onclick="setRole('travel')"><span class="ic">&#9992;</span><span class="nm">Travel Agency</span><span class="id">TA-</span></button>
@@ -108,7 +108,7 @@ async function signIn(){
      location.href=ROLE==='employer'?'employer-dashboard.html':ROLE==='verifier'?'verifier-dashboard.html':ROLE==='translator'?'translator-dashboard.html':ROLE==='travel'?'travel-agency-dashboard.html':'candidate-dashboard.html';
    } else { msg.className='msg err';var e=(d&&d.error)||'';
        msg.textContent = (e==='No account'||e.indexOf('No account')===0)
-         ? 'We could not find an account with that email in the '+(ROLE==='worker'?'Skilled Worker':ROLE==='employer'?'Employer':ROLE==='verifier'?'Verifier':ROLE==='travel'?'Travel Agency':'Translator')+' hub. Check you have selected the right hub above, or register first.'
+         ? 'We could not find an account with that email in the '+(ROLE==='worker'?'Skilled Worker':ROLE==='employer'?'Employers / Recruiters':ROLE==='verifier'?'Verifier':ROLE==='travel'?'Travel Agency':'Translator')+' hub. Check you have selected the right hub above, or register first.'
          : (e||'Incorrect email or password, or your account is not yet approved.');btn.disabled=false;btn.textContent='Sign in'; }
  }catch(e){ msg.className='msg err';msg.textContent='Could not reach the server. Check the login endpoint is deployed.';btn.disabled=false;btn.textContent='Sign in'; }
 }
