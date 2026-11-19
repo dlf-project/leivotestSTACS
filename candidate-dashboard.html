@@ -96,11 +96,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
  <div class="shell" style="margin:0;padding:0;max-width:none">
  <nav class="sidenav" id="sideNav"><div class="snhead">Sections</div></nav>
  <div class="content">
- <div class="card" id="weeklyCard" style="display:none;border:1px solid var(--gold2)">
-   <div style="font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold2);font-weight:800;margin-bottom:8px">This week on your journey</div>
-   <div id="weeklyBody" style="font-size:14px;line-height:1.6;color:var(--tx)"></div>
-   <div id="weeklyStep" style="font-size:13.5px;font-weight:700;color:var(--gold2);margin-top:10px"></div>
- </div>
  <div class="card" id="labsCard" style="display:none">
    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold2);font-weight:800;margin-bottom:4px">Recommended Laboratories</div>
    <div style="font-size:12.5px;color:var(--tx2);line-height:1.5;margin-bottom:10px">Trusted laboratories for your medical tests. Going to a recommended lab helps your results be accepted smoothly.</div>
@@ -3763,19 +3758,7 @@ function resumeToggleReplace(reqId, checked){
      box.style.display='block';
    }).catch(function(){});
 })();
-/* This week on your journey, mirrors the weekly Telegram message */
-(function(){
-  if(!S||!S.token) return;
-  fetch(SKILLED_URL+'?action=my-weekly-message&token='+encodeURIComponent(S.token))
-   .then(function(r){return r.json();}).then(function(d){
-     var msg=(d&&(d.text||d.body))||'';
-     if(!d||!d.ok||!d.has||!msg) return;
-     var c=document.getElementById('weeklyCard'); if(!c) return;
-     var b=document.getElementById('weeklyBody'); b.style.whiteSpace='pre-wrap'; b.textContent=msg;
-     var st=document.getElementById('weeklyStep'); if(st){ st.style.display='none'; st.textContent=''; }
-     c.style.display='block';
-   }).catch(function(){});
-})();
+/* The weekly note lives only in Telegram now, not on the STACS dashboard. */
 </script>
 <script src="data/session.js"></script>
 <script>(function(){function go(){if(window.STACSSession)STACSSession.init();}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go();})();</script>
