@@ -100,6 +100,7 @@ body.modal-open{overflow:hidden}
     <button data-panel="resumes" onclick="showPanel('resumes',this)"><span class="i">📝</span>Resume Requests</button>
     <button data-panel="agreements" onclick="showPanel('agreements',this)" style="display:none"><span class="i">✍️</span>Agreements</button>
     <button data-panel="teamadmins" onclick="showPanel('teamadmins',this)" style="display:none"><span class="i">👥</span>Team Admins</button>
+    <button data-panel="messages" onclick="showPanel('messages',this)"><span class="i">💬</span>Messages</button>
   </nav>
   <div class="acontent">
    <div class="msg" id="msg"></div>
@@ -117,6 +118,30 @@ body.modal-open{overflow:hidden}
        <button class="ghost" onclick="loadAgreements()" style="border-radius:0">Refresh</button>
      </div>
      <div id="agrList">Loading…</div>
+   </div>
+
+   <div class="apanel" id="panel-messages">
+     <h2 style="margin-bottom:4px">Messages</h2>
+     <div class="sub">Conversations members are having on STACS — with STACS Support and, as it rolls out, with employers and recruiters. Reply to members here as STACS Support. Contact details are blocked automatically; blocked attempts are logged below for oversight.</div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+       <button class="ghost" onclick="loadAdminMsgThreads()" style="border-radius:0">Refresh</button>
+     </div>
+     <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+       <div style="flex:1;min-width:260px">
+         <div style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);margin-bottom:8px">Conversations</div>
+         <div id="msgAdminList">Loading…</div>
+       </div>
+       <div style="flex:1.4;min-width:300px">
+         <div id="msgAdminThread" style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px">
+           <div style="color:var(--tx3);font-size:13px">Select a conversation to read and reply.</div>
+         </div>
+       </div>
+     </div>
+     <div style="margin-top:22px">
+       <h3 style="margin:0 0 4px;font-size:14px">Blocked contact-sharing attempts</h3>
+       <div class="sub" style="margin-bottom:10px">Messages the system stopped because they tried to share a phone number, email, handle or off-platform link. Most recent first.</div>
+       <div id="msgAdminBlocks">Loading…</div>
+     </div>
    </div>
 
    <div class="apanel" id="panel-teamadmins">
@@ -365,7 +390,7 @@ async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEn
 let AS={token:'',perms:[],owner:false,kh:'',name:'',role:''};
 const ALL_PERMS=['members','payouts','packages','messaging','fees','verification','resume','agreements','manage_admins'];
 const PERM_LABELS={members:'Members',payouts:'Payouts',packages:'Packages / Services',messaging:'Messaging',fees:'Fees',verification:'Verification',resume:'Resume requests',agreements:'Agreements',manage_admins:'Manage admins'};
-const PANEL_PERM={stats:null,skilled:'members',verifiers:'verification',translators:'verification',employers:'members',qa:'verification',payouts:'payouts',reports:'members',email:'messaging',fees:'fees',resumes:'packages',agreements:'agreements',teamadmins:'manage_admins'};
+const PANEL_PERM={stats:null,skilled:'members',verifiers:'verification',translators:'verification',employers:'members',qa:'verification',payouts:'payouts',reports:'members',email:'messaging',fees:'fees',resumes:'packages',agreements:'agreements',teamadmins:'manage_admins',messages:'messaging'};
 const TRAVEL_URL="https://script.google.com/macros/s/AKfycbzv4v5pktq9j3fIzwaB5zCpySYJO9DjfMzV78lftWjZoFoKMVIpN1_zRb3OVzdOv5FQjg/exec";
 function can(p){ return !!AS && (AS.owner || (AS.perms && AS.perms.indexOf(p)>=0)); }
 
@@ -1195,6 +1220,80 @@ function showPanel(name, btn){
   else if(name==='resumes') loadResumeAdmin();
   else if(name==='agreements') loadAgreements();
   else if(name==='teamadmins'){ loadTeamAdmins(); loadAdminLog(); }
+  else if(name==='messages'){ loadAdminMsgThreads(); loadAdminMsgBlocks(); }
+}
+/* ===== Messaging moderation ===== */
+var MSG_ADMIN_CUR=null;
+function loadAdminMsgThreads(){
+  var el=document.getElementById('msgAdminList'); if(!el) return;
+  if(!TOK.w){ el.innerHTML='<div class="empty">Admin session for the member hub is not available.</div>'; return; }
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(SKILLED_URL+'?action=msg-admin-threads&token='+encodeURIComponent(TOK.w)).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ el.innerHTML='<div class="empty">Could not load conversations.</div>'; return; }
+    var th=d.threads||[];
+    if(!th.length){ el.innerHTML='<div class="empty">No conversations yet.</div>'; return; }
+    el.innerHTML=th.map(function(t){
+      var member=(t.a&&t.a.role!=='stacs')?t.a:(t.b||{});
+      var when=t.lastAt?esc(String(t.lastAt).replace('T',' ').slice(0,16)):'';
+      var unread=(t.lastFrom&&t.lastFrom!=='stacs')?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold2);margin-left:6px"></span>':'';
+      return '<button class="ghost" style="display:block;width:100%;text-align:left;border-radius:0;margin-bottom:6px;padding:10px 12px" onclick="openAdminMsgThread(\''+esc(t.threadId).replace(/\x27/g,'')+'\')">'
+        +'<div style="font-weight:700;font-size:13px">'+esc((member&&member.name)||'Member')+' <span style="font-weight:400;color:var(--tx3)">('+esc((member&&member.role)||'')+')</span>'+unread+'</div>'
+        +'<div style="font-size:11px;color:var(--tx3);margin-top:2px">'+esc(t.subject||'Conversation')+(when?(' · '+when):'')+'</div></button>';
+    }).join('');
+  }).catch(function(){ el.innerHTML='<div class="empty">Could not reach the server.</div>'; });
+}
+function openAdminMsgThread(threadId){
+  MSG_ADMIN_CUR=threadId;
+  var box=document.getElementById('msgAdminThread'); box.innerHTML='<div style="color:var(--tx3)">Loading…</div>';
+  fetch(SKILLED_URL+'?action=msg-thread&token='+encodeURIComponent(TOK.w)+'&threadId='+encodeURIComponent(threadId)).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ box.innerHTML='<div style="color:var(--tx3)">Could not open this conversation.</div>'; return; }
+    var msgs=d.messages||[];
+    var body=msgs.map(function(m){
+      var stacs=(m.fromRole==='stacs');
+      var who=stacs?'STACS Support':(esc(m.fromName||'Member'));
+      return '<div style="margin-bottom:10px;text-align:'+(stacs?'right':'left')+'">'
+        +'<div style="font-size:10.5px;color:var(--tx3);margin-bottom:3px">'+who+(m.at?(' · '+esc(m.at)):'')+'</div>'
+        +'<div style="display:inline-block;max-width:85%;text-align:left;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;'
+        +(stacs?'background:var(--gold2);color:#1a1200':'background:var(--card2);color:var(--tx);border:1px solid var(--bdr)')+'">'+esc(m.body||'').replace(/\n/g,'<br>')+'</div></div>';
+    }).join('') || '<div style="color:var(--tx3);font-size:12.5px">No messages yet.</div>';
+    box.innerHTML='<div style="font-weight:800;font-size:14px;margin-bottom:2px">'+esc((d.other&&d.other.name)||'Member')+'</div>'
+      +'<div style="font-size:11px;color:var(--tx3);margin-bottom:12px">'+esc(d.subject||'Conversation')+(d.status&&d.status!=='Open'?(' · '+esc(d.status)):'')+'</div>'
+      +'<div style="max-height:340px;overflow-y:auto;margin-bottom:12px">'+body+'</div>'
+      +'<div id="msgAdminReplyNote" class="msg" style="display:none;margin-bottom:8px"></div>'
+      +'<div style="display:flex;gap:8px;align-items:flex-end">'
+      +'<textarea id="msgAdminReplyBox" rows="2" placeholder="Reply as STACS Support…" style="flex:1;resize:vertical;min-height:44px;padding:9px 11px;border-radius:10px;border:1px solid var(--bdr);background:var(--card2);color:var(--tx);font-family:inherit;font-size:13px"></textarea>'
+      +'<button class="btn" id="msgAdminReplyBtn" onclick="sendAdminMsgReply()" style="white-space:nowrap">Send reply</button></div>';
+  }).catch(function(){ box.innerHTML='<div style="color:var(--tx3)">Could not reach the server.</div>'; });
+}
+function sendAdminMsgReply(){
+  if(!MSG_ADMIN_CUR) return;
+  var ta=document.getElementById('msgAdminReplyBox'), txt=(ta.value||'').trim();
+  var note=document.getElementById('msgAdminReplyNote');
+  if(note){ note.style.display='none'; note.className='msg'; note.textContent=''; }
+  if(!txt){ ta.focus(); return; }
+  var btn=document.getElementById('msgAdminReplyBtn'); btn.disabled=true; var old=btn.textContent; btn.textContent='Sending…';
+  fetch(SKILLED_URL,{method:'POST',body:JSON.stringify({action:'msg-admin-reply',token:TOK.w,threadId:MSG_ADMIN_CUR,body:txt})})
+    .then(function(r){return r.json();}).then(function(d){
+      btn.disabled=false; btn.textContent=old;
+      if(!d||!d.ok){ if(note){ note.style.display='block'; note.className='msg err'; note.textContent=(d&&d.error)||'Could not send reply.'; } return; }
+      openAdminMsgThread(MSG_ADMIN_CUR); loadAdminMsgThreads();
+    }).catch(function(){ btn.disabled=false; btn.textContent=old; if(note){ note.style.display='block'; note.className='msg err'; note.textContent='Could not reach the server.'; } });
+}
+function loadAdminMsgBlocks(){
+  var el=document.getElementById('msgAdminBlocks'); if(!el) return;
+  if(!TOK.w){ el.innerHTML='<div class="empty">Admin session for the member hub is not available.</div>'; return; }
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(SKILLED_URL+'?action=msg-admin-blocks&token='+encodeURIComponent(TOK.w)).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ el.innerHTML='<div class="empty">Could not load the block log.</div>'; return; }
+    var bl=d.blocks||[];
+    if(!bl.length){ el.innerHTML='<div class="empty">No blocked attempts recorded.</div>'; return; }
+    el.innerHTML=bl.map(function(b){
+      return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;margin-bottom:7px">'
+        +'<div style="font-size:11px;color:var(--tx3)">'+esc(b.at||'')+' · '+esc(b.fromRole||'')+' '+esc(b.fromId||'')+'</div>'
+        +'<div style="font-size:12.5px;margin-top:3px;color:var(--tx2)">'+esc(b.reason||'')+'</div>'
+        +'<div style="font-size:12px;margin-top:4px;color:var(--tx3);font-style:italic">“'+esc(b.text||'')+'”</div></div>';
+    }).join('');
+  }).catch(function(){ el.innerHTML='<div class="empty">Could not reach the server.</div>'; });
 }
 /* ===== Employer verification management ===== */
 function loadEmpVerification(){
