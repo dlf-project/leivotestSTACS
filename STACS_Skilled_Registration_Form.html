@@ -190,6 +190,10 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
    <div class="f full"><label>Preferred destination countries / continent(s)</label>
      <div id="destPicker"></div><input type="hidden" id="destinations">
      <div class="hint">Pick as many as you like — a whole region (e.g. <b>Europe</b>) or specific countries (e.g. <b>Canada</b>, <b>United Arab Emirates</b>).</div></div>
+   <div class="f full"><label>Who referred you? <span style="color:#8a8a8a;font-weight:400">(optional — your marketer's code)</span></label>
+     <input id="referralCode" placeholder="e.g. MK-7K2Q" autocomplete="off"
+       oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')" onblur="checkReferral()">
+     <div class="hint" id="refNote">If someone helped you register, enter their code so they get credited.</div></div>
   </div>
  </div>
  <div class="card" data-stage="2">
@@ -347,7 +351,19 @@ function collect(){return{role:"WK",surname:val('surname'),firstname:val('firstn
  residence:val('residence'),city:val('city'),profession:val('profession'),gender:val('gender'),locality:val('locality'),address:val('address'),shipping:val('shipping'),sector:val('sector'),skillSlots:(document.getElementById('skillSlots')?document.getElementById('skillSlots').value:''),experience:val('experience'),
  qualification:val('qualification'),workstatus:val('workstatus'),employer:val('employer'),certs:val('certs'),
  languages:val('languages'),passport:val('passport'),relocate:val('relocate'),destinations:val('destinations'),
+ referralCode:val('referralCode'),
  photoBase64:PHOTO_B64,photoType:PHOTO_TYPE};}
+
+function checkReferral(){
+ var el=document.getElementById('referralCode'), note=document.getElementById('refNote');
+ var code=(el.value||'').trim(); if(!code){ note.style.color=''; note.textContent='If someone helped you register, enter their code so they get credited.'; return; }
+ note.style.color='#8a8a8a'; note.textContent='Checking…';
+ fetch(APPS_SCRIPT_URL+'?action=referral-check&code='+encodeURIComponent(code))
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.valid){ note.style.color='#1B7A43'; note.textContent='✓ Referred by '+d.name; }
+    else { note.style.color='#B3352F'; note.textContent='That code was not recognised — you can still continue without it.'; }
+  }).catch(function(){ note.style.color=''; note.textContent='Could not check the code now — you can still continue.'; });
+}
 
 function submitFree(){
  const err=document.getElementById('msgErr'),ok=document.getElementById('msgOk');err.style.display='none';ok.style.display='none';
