@@ -485,6 +485,8 @@ const VERIFIER_PUBLIC_URL="https://script.google.com/macros/s/AKfycbzyh4HEurpOl9
 /* Travel Agency hub — public package marketplace (approved-packages) and the
    agency messaging bridge live at the same /exec. */
 const TRAVEL_URL="https://script.google.com/macros/s/AKfycbzv4v5pktq9j3fIzwaB5zCpySYJO9DjfMzV78lftWjZoFoKMVIpN1_zRb3OVzdOv5FQjg/exec";
+/* Employer hub — public approved-jobs feed for the candidate marketplace. */
+const EMPLOYER_URL="https://script.google.com/macros/s/AKfycbwPlLG5bdp5MsTFUU6RYLdz6g5zWJLRkmjmkkenqqWBz4Xy9PoSIZVRDA4iZSRBHRBq/exec";
 if(!S||S.role!=='worker'){ location.href='sign-in.html'; }
 else {
  if(S.token){ fetch(SKILLED_URL+'?action=session&token='+encodeURIComponent(S.token)).then(r=>r.json()).then(d=>{ if(d&&d.ok===false){ logout(); } }).catch(()=>{}); }
@@ -1428,45 +1430,60 @@ function navTo(id){
   if(id==='packagesCard'){ try{ loadPackages(); }catch(e){} }
 }
 
-/* ===== Package marketplace ===== */
-var PKG_DATA=[];
+/* ===== Marketplace: travel packages + employer jobs ===== */
+var PKG_DATA=[], PKG_LOADED=false;
 function loadPackages(){
   var el=document.getElementById('pkgList'); if(!el) return;
-  if(PKG_DATA.length){ renderPkgs(); return; }
+  if(PKG_LOADED){ renderPkgs(); return; }
   el.innerHTML='Loading…';
-  fetch(TRAVEL_URL+'?action=approved-packages').then(function(r){return r.json();}).then(function(d){
-    if(!d||!d.ok){ el.innerHTML='<div style="color:var(--tx3)">Couldn’t load packages right now.</div>'; return; }
-    PKG_DATA=d.packages||[]; renderPkgs();
-  }).catch(function(){ el.innerHTML='<div style="color:var(--tx3)">Couldn’t reach the package service.</div>'; });
+  var pTravel=fetch(TRAVEL_URL+'?action=approved-packages').then(function(r){return r.json();}).catch(function(){return null;});
+  var pJobs=fetch(EMPLOYER_URL+'?action=approved-jobs').then(function(r){return r.json();}).catch(function(){return null;});
+  Promise.all([pTravel,pJobs]).then(function(res){
+    var out=[];
+    var t=res[0]; if(t&&t.ok&&t.packages){ t.packages.forEach(function(p){
+      out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:p.agencyName||'STACS Agency',
+        title:p.title||'Package', sub:(p.destination||'')+(p.category?(' · '+p.category):''), summary:p.summary||'',
+        price:p.candidateTotal?('₦'+Number(p.candidateTotal).toLocaleString()):'Price on enquiry', poster:p.poster||'' });
+    }); }
+    var j=res[1]; if(j&&j.ok&&j.jobs){ j.jobs.forEach(function(p){
+      out.push({ kind:'job', id:p.jobId, providerRole:'employer', providerId:p.emId, provider:p.company||'Employer',
+        title:p.title||'Role', sub:(p.country||'')+(p.sector?(' · '+p.sector):'')+(p.type?(' · '+p.type):''), summary:p.description||'',
+        price:(p.positions?(p.positions+' position(s)'):''), poster:'' });
+    }); }
+    PKG_DATA=out; PKG_LOADED=true; renderPkgs();
+  });
 }
 function renderPkgs(){
   var el=document.getElementById('pkgList'); if(!el) return;
   var q=((document.getElementById('pkgSearch')||{}).value||'').toLowerCase();
-  var list=PKG_DATA.filter(function(p){ return !q || (p.title+' '+p.destination+' '+(p.category||'')+' '+(p.agencyName||'')).toLowerCase().indexOf(q)>=0; });
-  if(!list.length){ el.innerHTML='<div style="color:var(--tx3);padding:6px 0">'+(PKG_DATA.length?'No packages match your search.':'No packages published yet. Check back soon.')+'</div>'; return; }
+  var list=PKG_DATA.filter(function(p){ return !q || (p.title+' '+p.sub+' '+p.provider).toLowerCase().indexOf(q)>=0; });
+  if(!list.length){ el.innerHTML='<div style="color:var(--tx3);padding:6px 0">'+(PKG_DATA.length?'No results match your search.':'Nothing published yet. Check back soon.')+'</div>'; return; }
   el.innerHTML=list.map(function(p){
-    var price=p.candidateTotal?('₦'+Number(p.candidateTotal).toLocaleString()):'Price on enquiry';
+    var tag=(p.kind==='job')
+      ? '<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;background:rgba(120,160,220,.16);color:#9fb8d8;padding:2px 8px;border-radius:100px">JOB</span>'
+      : '<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;background:rgba(224,176,0,.16);color:#d9c178;padding:2px 8px;border-radius:100px">TRAVEL</span>';
     var poster=p.poster?('<img src="'+esc(p.poster)+'" alt="" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto" onerror="this.style.display=\'none\'">'):'';
+    var interest=(p.kind==='job')?('<button class="btn ghost" style="padding:7px 13px;font-size:12.5px" onclick="pkgInterest(\''+esc(p.id)+'\',this)">⭐ Express interest</button>'):'';
     return '<div style="display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">'
       +poster
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-weight:800;font-size:14px">'+esc(p.title||'Package')+'</div>'
-      +'<div style="font-size:12px;color:var(--tx3);margin-top:2px">'+esc(p.destination||'')+(p.category?(' · '+esc(p.category)):'')+' · '+esc(p.agencyName||'STACS Agency')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:800;font-size:14px">'+esc(p.title)+'</span>'+tag+'</div>'
+      +'<div style="font-size:12px;color:var(--tx3);margin-top:2px">'+esc(p.sub)+' · '+esc(p.provider)+'</div>'
       +(p.summary?'<div style="font-size:12.5px;color:var(--tx2);margin-top:6px;line-height:1.5">'+esc(p.summary)+'</div>':'')
       +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap">'
-      +'<span style="font-weight:800;font-size:14px;color:var(--gold2,#e0b000)">'+price+'</span>'
-      +'<button class="btn" style="padding:7px 13px;font-size:12.5px" onclick="pkgAsk(\''+esc(p.packageId)+'\')">💬 Ask a question</button>'
+      +'<span style="font-weight:800;font-size:13.5px;color:var(--gold2,#e0b000)">'+esc(p.price||'')+'</span>'
+      +'<span style="display:flex;gap:8px;flex-wrap:wrap">'+interest
+      +'<button class="btn" style="padding:7px 13px;font-size:12.5px" onclick="pkgAsk(\''+esc(p.id)+'\')">💬 Ask a question</button></span>'
       +'</div></div></div>';
   }).join('');
 }
-function pkgAsk(pkgId){
-  var p=null; for(var i=0;i<PKG_DATA.length;i++){ if(String(PKG_DATA[i].packageId)===String(pkgId)){ p=PKG_DATA[i]; break; } }
-  if(!p) return;
-  var taId=p.taId, agency=p.agencyName||'Travel Agency', title=p.title||'Package';
-  MSG_CUR={isNew:true, provider:true, toRole:'travel', toId:taId, toName:agency||'Travel Agency', packageId:pkgId, subject:('Enquiry · '+(title||'Package')).slice(0,120)};
+function pkgFind(id){ for(var i=0;i<PKG_DATA.length;i++){ if(String(PKG_DATA[i].id)===String(id)) return PKG_DATA[i]; } return null; }
+function pkgAsk(id){
+  var p=pkgFind(id); if(!p) return;
+  MSG_CUR={isNew:true, provider:true, toRole:p.providerRole, toId:p.providerId, toName:p.provider, packageId:p.id, subject:('Enquiry · '+p.title).slice(0,120)};
   navTo('messagesCard');
-  document.getElementById('msgThreadHead').textContent=agency||'Travel Agency';
-  document.getElementById('msgThreadSub').textContent='About: '+(title||'Package');
+  document.getElementById('msgThreadHead').textContent=p.provider;
+  document.getElementById('msgThreadSub').textContent='About: '+p.title;
   document.getElementById('msgBody').innerHTML='<div style="color:var(--tx3);font-size:12.5px;text-align:center;padding:12px 0">Write your question below.</div>';
   document.getElementById('msgInput').value=''; document.getElementById('msgInput').disabled=false;
   document.getElementById('msgSendBtn').disabled=false;
@@ -1475,6 +1492,15 @@ function pkgAsk(pkgId){
   tn.style.color='#d9c178'; tn.style.background='rgba(224,176,0,.10)'; tn.style.border='1px solid rgba(224,176,0,.28)';
   tn.textContent='Tip: ask everything in one message. Once you send, you can’t send again until the provider replies — this keeps the conversation clear for both sides.';
   setTimeout(function(){ try{ document.getElementById('msgInput').focus(); }catch(e){} },150);
+}
+function pkgInterest(jobId, btn){
+  if(!S||!S.token) return;
+  btn.disabled=true; var old=btn.textContent; btn.textContent='Sending…';
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'express-interest',token:S.token,jobId:jobId})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ btn.textContent=d.already?'✓ Already interested':'✓ Interest sent'; btn.style.color='#2ec47a'; }
+      else { btn.disabled=false; btn.textContent=old; }
+    }).catch(function(){ btn.disabled=false; btn.textContent=old; });
 }
 
 /* ===== In-platform Messaging ===== */
