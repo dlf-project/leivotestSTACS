@@ -87,7 +87,7 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
  <div class="nav">
   <button class="on" data-p="overview" onclick="go('overview',this)"><span class="ic">&#128202;</span>Overview</button>
   <button data-p="profile" onclick="go('profile',this)"><span class="ic">&#127970;</span>Profile</button>
-  <button onclick="location.href='safe-agreement.html?type=travel'"><span class="ic">&#9997;&#65039;</span>SafeAgreement</button>
+  <button onclick="location.href='safe-agreement.html?type=travel'"><span class="ic">&#9997;&#65039;</span>User Agreement</button>
   <button data-p="clients" onclick="go('clients',this)"><span class="ic">&#128101;</span>My Clients</button>
   <button data-p="packages" onclick="go('packages',this)"><span class="ic">&#128230;</span>My Packages</button>
   <button data-p="build" onclick="go('build',this)"><span class="ic">&#10133;</span>Create Package</button>
@@ -211,11 +211,11 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
     <button class="btn ghost sm" onclick="addOS()">+ Add optional service</button>
     </div><!-- /fullBlock -->
 
-    <div class="sec">Compliance (internal, not shown to candidates)</div>
-    <div class="note" style="margin-bottom:8px;border-color:rgba(200,146,10,.5)">This note is not for public consumption. However it is required for your package to be approved by the STACS compliance team, as this will serve as your reference point and ensure you indicate your source.</div>
-    <div class="field"><label>Normal processing steps (required)</label>
-     <textarea id="cmp_steps" maxlength="5000" oninput="countChars('cmp_steps','cmp_count',5000)" placeholder="Set out the real, normal steps for this package from start to visa, and clearly indicate your source."></textarea>
-     <div class="note"><span id="cmp_count">0</span>/5000 characters</div></div>
+    <div class="sec">Processing &amp; Execution Note (internal, not shown to candidates)</div>
+    <div class="note" style="margin-bottom:8px;border-color:rgba(200,146,10,.5)">This note is not for public consumption. It is required for your package to be approved by the STACS compliance team, and it is your own reference point. Answer each question concisely and truthfully — these are the real steps and your source.</div>
+    <div id="cmpQA"></div>
+    <label style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;margin-top:6px"><input type="checkbox" id="cmp_declaration" style="margin-top:3px"><span>I confirm these answers are true and complete, and that I am the source of this demand or authorised by the source.</span></label>
+    <textarea id="cmp_steps" style="display:none"></textarea>
     <div class="sec" style="margin-top:12px">Source (who requested these workers)</div>
     <div class="note" style="margin-bottom:8px">For STACS audit and documentation only. STACS will not contact them about this approval.</div>
     <div class="grid">
@@ -355,6 +355,16 @@ var MEDICAL=["None required","Basic medical","Full medical examination","Chest X
 var FEEKEYS=[["government","Government Fees"],["embassy","Embassy Fees"],["medical","Medical"],["translation","Translation"],["agencyAdmin","Travel Agency Administrative Fee"],["orientation","Orientation Programme"],["documentation","Documentation Processing"],["visa","Visa Package"],["other","Other Optional Services"]];
 var EDIT_ID='';
 var ASSETS={logo:'',cover:'',passport:''};
+var CMP_QUESTIONS=[
+ 'What exactly does this package deliver for the candidate (the end outcome)?',
+ 'What are the real, normal steps from start to visa or placement?',
+ 'Who is the source of this demand (recruiter or employer), and what is their role?',
+ 'What does the candidate pay, and what is each payment for, stage by stage?',
+ 'What is the realistic processing time, and what can delay it?',
+ 'Which documents must the candidate provide, and which do you handle?',
+ 'If the embassy denies the visa, what happens (refund and next steps)?',
+ 'What is NOT included, and what should the candidate not expect?'
+];
 var PICK={emp:[],med:[],dest:[],spdest:[]};
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -439,6 +449,7 @@ function renderChips(kind){var box=document.getElementById('chips_'+kind);box.in
  var sb=document.getElementById('servicesBox');SERVICES.forEach(function(s){sb.insertAdjacentHTML('beforeend','<label class="chk"><input type="checkbox" class="svc" value="'+esc(s)+'"> '+esc(s)+'</label>');});
  var fb=document.getElementById('feesBox');FEEKEYS.forEach(function(f){fb.insertAdjacentHTML('beforeend','<div class="feeline"><label>'+esc(f[1])+'</label><input type="number" min="0" class="fee" data-k="'+f[0]+'" placeholder="0" oninput="feeSum()"></div>');});
  addOS();
+ renderCmpQA();
  document.getElementById('taid').textContent=S.id||'';
  document.getElementById('themeBtn').innerHTML=(document.documentElement.getAttribute('data-theme')==='light')?'&#9728;&#65039;':'&#127769;';
 })();
@@ -571,6 +582,19 @@ function onPoster(){
  img.onerror=function(){pv.innerHTML='<div class="msg err" style="display:block">Could not read that image.</div>';};
  img.src=url;
 }
+function renderCmpQA(){
+ var box=document.getElementById('cmpQA'); if(!box) return;
+ box.innerHTML=CMP_QUESTIONS.map(function(q,i){
+  return '<div class="field" style="margin-bottom:10px"><label style="font-weight:700">'+(i+1)+'. '+esc(q)+'</label>'
+   +'<textarea id="cmp_a'+i+'" maxlength="900" placeholder="Your concise answer…" style="min-height:52px"></textarea></div>';
+ }).join('');
+}
+function gatherCmpQA(){ return CMP_QUESTIONS.map(function(q,i){ var el=document.getElementById('cmp_a'+i); return {q:q, a:el?el.value.trim():''}; }); }
+function reopenPkg(id){
+ if(!confirm('Reopen this approved package for editing? The current approved version is archived as a PDF for STACS, and your changes will go back through approval.')) return;
+ fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'package-reopen',token:S.token,packageId:id})})
+  .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok){ loadPackages(); } else { alert((d&&d.error)||'Could not reopen.'); } }).catch(function(){ alert('Network error.'); });
+}
 function gatherPkg(){
  var fees={};document.querySelectorAll('.fee').forEach(function(i){fees[i.getAttribute('data-k')]=Number(i.value)||0;});
  return {mode:document.getElementById('pk_mode').value,category:document.getElementById('pk_category').value,
@@ -584,7 +608,7 @@ function gatherPkg(){
     language:document.getElementById('ov_language').value.trim(),medical:PICK.med.slice()},
   fees:fees,payment:{deposit:Number(document.getElementById('pay_deposit').value)||0,workingDeposit:Number(document.getElementById('pay_working').value)||0,balanceNote:document.getElementById('pay_balance').value.trim()},
   refund:{notes:document.getElementById('refund_notes').value.trim()},optionalServices:collectOS(),
-  compliance:{steps:document.getElementById('cmp_steps').value.trim(),source:{type:document.getElementById('src_type').value,name:document.getElementById('src_name').value.trim(),address:document.getElementById('src_address').value.trim(),contact:document.getElementById('src_contact').value.trim(),website:document.getElementById('src_website').value.trim()}},
+  compliance:{qa:gatherCmpQA(),steps:gatherCmpQA().filter(function(x){return x.a;}).map(function(x){return 'Q: '+x.q+'\nA: '+x.a;}).join('\n\n'),declaration:!!(document.getElementById('cmp_declaration')&&document.getElementById('cmp_declaration').checked),source:{type:document.getElementById('src_type').value,name:document.getElementById('src_name').value.trim(),address:document.getElementById('src_address').value.trim(),contact:document.getElementById('src_contact').value.trim(),website:document.getElementById('src_website').value.trim()}},
   poster:window._posterData||''};
 }
 function savePackage(){
@@ -598,7 +622,9 @@ function savePackage(){
    if(!p.overview.title){msg('buildMsg','err','Please give the package a title.');return;}
    if(!p.overview.destination){msg('buildMsg','err','Please choose a destination country.');return;}
  }
- if(!p.compliance.steps){msg('buildMsg','err','Please fill the Normal processing steps. It is required for compliance.');return;}
+ var answered=(p.compliance.qa||[]).filter(function(x){return x.a;}).length;
+ if(answered<(p.compliance.qa||[]).length){msg('buildMsg','err','Please answer all Processing & Execution questions — they are required for compliance.');return;}
+ if(!p.compliance.declaration){msg('buildMsg','err','Please tick the declaration to confirm your answers are true.');return;}
  var body=Object.assign({action:'package-save',token:S.token},p);if(EDIT_ID)body.packageId=EDIT_ID;
  msg('buildMsg','warn','Submitting your package…');
  fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})
@@ -607,7 +633,7 @@ function savePackage(){
     else{msg('buildMsg','err',(d&&d.error)||'Could not submit the package.');}
   }).catch(function(){msg('buildMsg','err','Network error. Please try again.');});
 }
-function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes','sp_title','sp_note','cmp_steps','src_name','src_address','src_contact','src_website'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';document.getElementById('pk_category').value='';document.getElementById('pk_mode').value='full';setPkgMode('full');applyCategory('');PICK.emp=[];PICK.med=[];PICK.spdest=[];renderChips('emp');renderChips('med');renderChips('spdest');countChars('sp_note','sp_count',500);countChars('cmp_steps','cmp_count',5000);window._posterData=null;var pf=document.getElementById('posterFile');if(pf)pf.value='';document.getElementById('posterPreview').innerHTML='';document.querySelectorAll('.fee').forEach(function(i){i.value='';});document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
+function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes','sp_title','sp_note','cmp_steps','src_name','src_address','src_contact','src_website'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';document.getElementById('pk_category').value='';document.getElementById('pk_mode').value='full';setPkgMode('full');applyCategory('');PICK.emp=[];PICK.med=[];PICK.spdest=[];renderChips('emp');renderChips('med');renderChips('spdest');countChars('sp_note','sp_count',500);CMP_QUESTIONS.forEach(function(q,i){var el=document.getElementById('cmp_a'+i);if(el)el.value='';});var _dc=document.getElementById('cmp_declaration');if(_dc)_dc.checked=false;window._posterData=null;var pf=document.getElementById('posterFile');if(pf)pf.value='';document.getElementById('posterPreview').innerHTML='';document.querySelectorAll('.fee').forEach(function(i){i.value='';});document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
 
 function loadPackages(){
  var el=document.getElementById('pkgList');el.innerHTML='Loading…';
@@ -615,7 +641,7 @@ function loadPackages(){
    if(!d||!d.ok){el.innerHTML='Could not load packages.';return;}
    if(!d.packages.length){el.innerHTML='<div class="note">No packages yet. Use Create Package to build your first one.</div>';return;}
    el.innerHTML=d.packages.map(function(p){var cls=p.status==='Approved'?'ok':(/return/i.test(p.status)?'ret':'rev');
-     return '<div class="card" style="margin:0 0 12px;padding:14px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong style="font-size:14px">'+esc(p.title)+'</strong><div class="note">'+esc(p.destination)+' · '+esc(p.packageId)+'</div></div><span class="pill '+cls+'">'+esc(p.status)+'</span></div><div class="statrow" style="margin-top:8px"><span>Your fees</span><strong>'+ngn(p.agencySubtotal)+'</strong></div><div class="statrow"><span>Candidate price (STACS fees included)</span><strong>'+ngn(p.candidateTotal)+'</strong></div>'+(p.adminNote?('<div class="msg warn" style="display:block;margin-top:8px">Reviewer note: '+esc(p.adminNote)+'</div>'):'')+'<div style="margin-top:10px"><button class="btn ghost sm" onclick="editPkg(\''+p.packageId+'\')">Edit</button></div></div>';}).join('');
+     return '<div class="card" style="margin:0 0 12px;padding:14px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong style="font-size:14px">'+esc(p.title)+'</strong><div class="note">'+esc(p.destination)+' · '+esc(p.packageId)+'</div></div><span class="pill '+cls+'">'+esc(p.status)+'</span></div><div class="statrow" style="margin-top:8px"><span>Your fees</span><strong>'+ngn(p.agencySubtotal)+'</strong></div><div class="statrow"><span>Candidate price (STACS fees included)</span><strong>'+ngn(p.candidateTotal)+'</strong></div>'+(p.adminNote?('<div class="msg warn" style="display:block;margin-top:8px">Reviewer note: '+esc(p.adminNote)+'</div>'):'')+'<div style="margin-top:10px">'+(p.status==='Approved'?('<button class="btn ghost sm" onclick="reopenPkg(\''+p.packageId+'\')">🔓 Request to edit</button> <span class="note" style="display:inline-block;margin-left:6px">Approved &amp; locked</span>'):('<button class="btn ghost sm" onclick="editPkg(\''+p.packageId+'\')">Edit</button>'))+'</div></div>';}).join('');
    window._PKGS=d.packages;
  }).catch(function(){el.innerHTML='Network error.';});
 }
@@ -638,7 +664,7 @@ function editPkg(id){var p=(window._PKGS||[]).filter(function(x){return x.packag
  var sp=md.simple||{};document.getElementById('sp_title').value=sp.title||'';document.getElementById('sp_note').value=sp.note||'';countChars('sp_note','sp_count',500);
  PICK.spdest=Array.isArray(sp.destinations)?sp.destinations.slice():[];renderChips('spdest');
  var cmp=md.compliance||{},srcd=cmp.source||{};
- document.getElementById('cmp_steps').value=cmp.steps||'';countChars('cmp_steps','cmp_count',5000);
+ var _qa=(cmp.qa||[]);CMP_QUESTIONS.forEach(function(q,i){var el=document.getElementById('cmp_a'+i);if(!el)return;var fo=_qa.filter(function(x){return x.q===q;})[0];el.value=fo?fo.a:'';});var dc=document.getElementById('cmp_declaration');if(dc)dc.checked=!!cmp.declaration;
  document.getElementById('src_type').value=srcd.type||'Recruitment Agency';document.getElementById('src_name').value=srcd.name||'';
  document.getElementById('src_address').value=srcd.address||'';document.getElementById('src_contact').value=srcd.contact||'';document.getElementById('src_website').value=srcd.website||'';
  window._posterData=null;document.getElementById('posterFile').value='';
