@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <script>(function(){try{var t=localStorage.getItem("stacs_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>STACS SafeAgreement</title>
+<title>STACS User Agreement</title>
 <style>
 :root{--bg:#0A2E16;--bg2:#0F3D1E;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.14);--bdr2:rgba(255,255,255,.26);--tx:#F0F0EC;--tx2:rgba(240,240,236,.82);--tx3:rgba(240,240,236,.6);--gold:#E2A53A;--gold2:#C8920A;--grn:#2ECC71;--rd:#E86A6A}
 :root[data-theme="light"]{--bg:#F3F1EA;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F5F4EE;--bdr:rgba(15,59,46,.14);--bdr2:rgba(15,59,46,.26);--tx:#1E241C;--tx2:#4f574a;--tx3:#6c7466;--gold:#8A6508;--gold2:#7A5A07;--grn:#1B7A43;--rd:#B3352F}
@@ -19,95 +19,104 @@ h1{font-size:21px;margin:0 0 4px}
 .ghost{background:transparent;color:var(--tx);border:1px solid var(--bdr2);border-radius:0;padding:10px 16px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .msg{font-size:13.5px;margin-top:10px}
-label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--tx2);cursor:pointer;margin:14px 0}
+label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--tx2);cursor:pointer;margin:14px 0 0}
 .sigwrap{border:1px dashed var(--bdr2);border-radius:10px;background:var(--card2);position:relative}
 #sigPad{width:100%;height:190px;display:block;touch-action:none;cursor:crosshair}
 .sighint{position:absolute;left:14px;bottom:10px;color:var(--tx3);font-size:12px;pointer-events:none}
 .sigline{position:absolute;left:14px;right:14px;bottom:38px;border-top:1px solid var(--bdr2);pointer-events:none}
 .filechip{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--bdr);padding:8px 12px;font-size:12.5px;margin-top:8px}
-.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
-.modal-back.show{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:14px;max-width:720px;width:100%;max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
-.modal .mh{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center}
-.modal .mb{padding:18px;overflow:auto;-webkit-user-select:none;user-select:none}
-.agree h3{font-size:15px;margin:18px 0 6px;color:var(--gold)}
-.agree p{margin:0 0 10px;font-size:13.5px;color:var(--tx2)}
-.agree ol{padding-left:18px}.agree li{margin-bottom:8px;font-size:13.5px;color:var(--tx2)}
 .pill{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:0;border:1px solid var(--bdr2)}
-.x{background:none;border:none;color:var(--tx);font-size:20px;cursor:pointer}
 .note{font-size:12.5px;color:var(--tx3)}
+.in{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:14px;font-family:inherit}
+/* stepper */
+.pbar{height:6px;background:var(--card2);border:1px solid var(--bdr);border-radius:999px;overflow:hidden;margin:4px 0 16px}
+.pfill{height:100%;background:var(--gold2);width:0;transition:width .25s ease}
+.stepmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.clauseH{font-size:16px;color:var(--gold);margin:2px 0 10px;font-weight:800}
+.clauseP{margin:0 0 10px;font-size:14px;color:var(--tx2)}
+.tickdone{color:var(--grn);font-weight:700;font-size:12.5px}
 </style></head><body>
 <div class="wrap">
-  <div class="top"><img src="https://stacs.leivotest.com/images/logo.jpg" onerror="this.style.display='none'" alt="STACS"><div><b>LEIVOTEST — STACS</b><small>SafeAgreement</small></div></div>
+  <div class="top"><img src="https://stacs.leivotest.com/images/logo.jpg" onerror="this.style.display='none'" alt="STACS"><div><b>LEIVOTEST — STACS</b><small>User Agreement</small></div></div>
 
   <div id="loading" class="card">Loading your agreement…</div>
 
   <div id="main" style="display:none">
-    <h1 id="agTitle">STACS SafeAgreement</h1>
-    <div class="sub" id="agSub">Please read the agreement in full, then sign and send it for processing.</div>
+    <h1 id="agTitle">STACS User Agreement</h1>
+    <div class="sub" id="agSub">Read each point, tick to confirm, and move forward. At the end you sign once.</div>
 
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <div><div style="font-weight:700" id="agName">Agreement</div><div class="note" id="agVer"></div></div>
-        <span class="pill" id="agStatus">Not signed</span>
+    <!-- CLAUSE STEPPER -->
+    <div id="stepArea">
+      <div class="stepmeta">
+        <span class="note" id="stepCount">Point 1</span>
+        <span class="pill" id="agStatusPill">Not signed</span>
       </div>
-      <p class="note" style="margin:12px 0 14px">This agreement opens in a view-only window. You cannot download it from here. Once STACS reviews and stamps it, a signed copy is emailed to you and kept on file.</p>
-      <button class="ghost" onclick="openAgreement()">Read the agreement</button>
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="card">
+        <div class="clauseH" id="clauseH">…</div>
+        <div id="clauseBody"></div>
+        <label class="chk"><input type="checkbox" id="clauseChk"> <span>I have read and understood this point and I agree to it.</span></label>
+        <div class="row" style="margin-top:16px;justify-content:space-between">
+          <button class="ghost" id="backBtn" onclick="prevClause()">Back</button>
+          <button class="btn" id="nextBtn" onclick="nextClause()" disabled>Next</button>
+        </div>
+      </div>
+      <div class="note">This is the summarised agreement. Every point above carries the full indemnity, release and limitation of liability in favour of Leivotest and STACS.</div>
     </div>
 
-    <!-- SIGNING -->
-    <div id="signArea">
+    <!-- SIGN -->
+    <div id="signArea" style="display:none">
       <div class="card">
-        <div style="font-weight:700;margin-bottom:4px">1. Confirm you have read it</div>
-        <label class="chk"><input type="checkbox" id="chkRead"> <span id="chkText">I have read the full agreement above, including the indemnity, release and limitation of liability, and I agree to its terms.</span></label>
+        <div style="font-weight:800;margin-bottom:6px">You have read every point <span class="tickdone">✓</span></div>
+        <div class="note">Now sign once below to accept the whole agreement.</div>
       </div>
-
       <div class="card">
-        <div style="font-weight:700;margin-bottom:4px">2. Sign here</div>
-        <div class="note" style="margin-bottom:10px">Draw your signature in the box with your mouse or finger. Use Erase to start again.</div>
+        <div style="font-weight:700;margin-bottom:4px">Sign here</div>
+        <div class="note" style="margin-bottom:10px">Draw your signature with your mouse or finger. Use Erase to start again.</div>
         <div class="sigwrap"><canvas id="sigPad"></canvas><div class="sigline"></div><div class="sighint" id="sigHint">Sign above the line</div></div>
         <div class="row" style="margin-top:10px">
           <button class="ghost" type="button" onclick="eraseSig()">Erase</button>
           <span class="note" id="sigStamp"></span>
         </div>
       </div>
-
       <div class="card" id="passportCard">
-        <div style="font-weight:700;margin-bottom:4px">3. Upload your identity document</div>
-        <div class="note" style="margin-bottom:10px">A clear photo or scan of your international passport or government ID data page (image preferred, so it can be attached to your signed agreement; PDF also accepted).</div>
+        <div style="font-weight:700;margin-bottom:4px">Upload your identity document</div>
+        <div class="note" style="margin-bottom:10px">A clear photo or scan of your international passport or government ID data page (image preferred so it sits on your signed agreement; PDF also accepted).</div>
         <input type="file" id="passport" accept="image/*,application/pdf" onchange="onPassport()">
         <div id="passportChip"></div>
       </div>
-
       <div class="card" id="purposeCard" style="display:none">
-        <div style="font-weight:700;margin-bottom:4px">4. What is this for? <span class="note" style="font-weight:400">(optional)</span></div>
-        <div class="note" style="margin-bottom:10px">If you are pursuing a specific service, tell us briefly — it goes on your personal consent form. Example: “Travel &amp; Work in Georgia package”. You can leave this blank for a general agreement.</div>
-        <input type="text" id="agPurpose" placeholder="e.g. Travel &amp; Work in Georgia package" style="width:100%;background:var(--card2,#0F4423);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:14px;margin-bottom:8px">
-        <input type="text" id="agProviderId" placeholder="Service provider STACS ID (optional, e.g. TA-xxxx)" style="width:100%;background:var(--card2,#0F4423);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:14px">
+        <div style="font-weight:700;margin-bottom:4px">What is this for? <span class="note" style="font-weight:400">(optional)</span></div>
+        <div class="note" style="margin-bottom:10px">If you are pursuing a specific service, tell us briefly. It goes on your Acknowledgement. You can leave this blank for a general agreement.</div>
+        <input type="text" id="agPurpose" placeholder="e.g. Travel &amp; Work in Georgia package" class="in" style="margin-bottom:8px">
+        <input type="text" id="agProviderId" placeholder="Service provider STACS ID (optional, e.g. TA-xxxx)" class="in">
       </div>
-
       <div class="card">
-        <button class="btn" id="sendBtn" onclick="sendForProcessing()">Send for Processing</button>
+        <div class="row" style="justify-content:space-between">
+          <button class="ghost" onclick="backToClauses()">Back to the points</button>
+          <button class="btn" id="sendBtn" onclick="sendForProcessing()">Sign &amp; Submit</button>
+        </div>
         <div class="msg" id="sendMsg"></div>
       </div>
     </div>
 
-    <!-- AFTER SUBMIT / APPROVED -->
+    <!-- DONE -->
     <div id="doneArea" style="display:none">
       <div class="card">
-        <div style="font-weight:700;margin-bottom:6px" id="doneTitle"></div>
+        <div style="font-weight:800;margin-bottom:6px" id="doneTitle"></div>
         <div class="note" id="doneBody"></div>
         <div id="doneLink" style="margin-top:12px"></div>
       </div>
+      <!-- acknowledgement upload (candidates) -->
+      <div class="card" id="ackCard" style="display:none">
+        <div style="font-weight:700;margin-bottom:4px">Upload your signed Acknowledgement</div>
+        <div class="note" id="ackHint" style="margin-bottom:10px">Print the Acknowledgement we emailed you, sign it by hand in all three places, scan or photograph every page, and upload it here within 7 days. You can keep using STACS in the meantime.</div>
+        <input type="file" id="ackFile" accept="image/*,application/pdf" onchange="onAckFile()">
+        <div id="ackChip"></div>
+        <div class="row" style="margin-top:12px"><button class="btn" id="ackBtn" onclick="uploadAck()" disabled>Upload signed copy</button></div>
+        <div class="msg" id="ackMsg"></div>
+      </div>
     </div>
-  </div>
-</div>
-
-<!-- pop-forward, view-only agreement -->
-<div class="modal-back" id="agBack" onclick="if(event.target===this)closeAgreement()">
-  <div class="modal">
-    <div class="mh"><div style="font-weight:800" id="mTitle">STACS SafeAgreement</div><button class="x" onclick="closeAgreement()">&times;</button></div>
-    <div class="mb agree" id="mBody" oncontextmenu="return false"></div>
   </div>
 </div>
 
@@ -124,9 +133,10 @@ const TYPES={
 function qp(k){return new URLSearchParams(location.search).get(k);}
 const TYPE=(qp("type")||"travel").toLowerCase();
 const CONF=TYPES[TYPE]||TYPES.travel;
-let SESSION=null, AGREEMENT=null, sigDrawn=false, signedAt="", passportData=null;
+let SESSION=null, AGREEMENT=null, CLAUSES=[], step=0, sigDrawn=false, signedAt="", passportData=null, ackData=null;
 
 function getSession(){ try{return JSON.parse(localStorage.getItem("stacs_session")||"null");}catch(e){return null;} }
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
 
 function init(){
   SESSION=getSession();
@@ -137,53 +147,87 @@ function init(){
   fetch(CONF.url+"?action=agreement-get&type="+encodeURIComponent(TYPE)+"&token="+encodeURIComponent(SESSION.token))
     .then(r=>r.json()).then(d=>{
       if(!d||!d.ok){ document.getElementById("loading").textContent=(d&&d.error)||"Could not load your agreement."; return; }
-      AGREEMENT=d;
+      AGREEMENT=d; CLAUSES=Array.isArray(d.clauses)?d.clauses:[];
       document.getElementById("loading").style.display="none";
       document.getElementById("main").style.display="block";
-      document.getElementById("agName").textContent=d.title||"STACS SafeAgreement";
-      document.getElementById("mTitle").textContent=d.title||"STACS SafeAgreement";
-      document.getElementById("agTitle").textContent=d.title||"STACS SafeAgreement";
-      document.getElementById("agVer").textContent=(d.version?("Version "+d.version):"")+(d.party?(" · "+d.party):"");
-      document.getElementById("mBody").innerHTML=d.bodyHtml||"<p>Agreement text is being prepared.</p>";
-      // candidates also complete a short purpose for their personal consent form
+      const title=d.title||"STACS User Agreement";
+      document.getElementById("agTitle").textContent=title;
+      document.getElementById("agStatusPill").textContent=d.status||"Not signed";
       if(TYPE==="candidate"){ var pu=document.getElementById("purposeCard"); if(pu) pu.style.display="block"; }
-      renderState(d.status, d);
-      if(document.getElementById("signArea").style.display!=="none") setupPad();
+      routeByStatus(d);
     }).catch(()=>{ document.getElementById("loading").textContent="Could not reach the server. Please try again shortly."; });
 }
-function renderState(status, d){
-  const st=String(status||"Not signed");
-  const pill=document.getElementById("agStatus"); pill.textContent=st;
-  const low=st.toLowerCase();
-  if(low.indexOf("approv")>=0 || low.indexOf("submit")>=0 || low.indexOf("review")>=0 || low.indexOf("declin")>=0){
-    document.getElementById("signArea").style.display="none";
-    document.getElementById("doneArea").style.display="block";
-    if(low.indexOf("approv")>=0){
-      document.getElementById("doneTitle").textContent="Your agreement is signed and stamped";
-      document.getElementById("doneBody").textContent="STACS has reviewed and stamped your agreement. A signed copy has been emailed to you and kept on file.";
-      if(d.pdfUrl) document.getElementById("doneLink").innerHTML='<a class="ghost" style="text-decoration:none" href="'+d.pdfUrl+'" target="_blank" rel="noopener">View your stamped agreement</a>';
-    } else if(low.indexOf("declin")>=0){
-      document.getElementById("doneTitle").textContent="Your agreement needs attention";
-      document.getElementById("doneBody").textContent=(d.adminNote||"STACS has returned your agreement. Please contact support for the details, then sign again.");
-      document.getElementById("doneLink").innerHTML='<button class="ghost" onclick="allowResign()">Sign again</button>';
-    } else {
-      document.getElementById("doneTitle").textContent="Thank you, your agreement is with STACS";
-      document.getElementById("doneBody").textContent="We have received your signed agreement and it is now being reviewed and stamped. You will get a signed copy by email once it is approved.";
-    }
+
+function routeByStatus(d){
+  const low=String(d.status||"").toLowerCase();
+  // treat a blank status or "Not signed" as not yet signed (note: "not signed" contains "sign")
+  if(low==="" || low.indexOf("not sign")>=0){ startClauses(); return; }
+  if(low.indexOf("declin")>=0){ showDeclined(d); return; }
+  showDone(d);   // Signed / acknowledgement pending / received / verified / approved / submitted
+}
+function showSection(id){ ["stepArea","signArea","doneArea"].forEach(x=>{document.getElementById(x).style.display = (x===id)?"block":"none";}); }
+
+/* ---------- clause stepper ---------- */
+function startClauses(){
+  if(!CLAUSES.length){ showSection("signArea"); setupPad(); return; }
+  step=0; showSection("stepArea"); renderClause();
+}
+function renderClause(){
+  const c=CLAUSES[step]||{h:"",p:[]};
+  document.getElementById("clauseH").textContent=c.h||"";
+  document.getElementById("clauseBody").innerHTML=(c.p||[]).map(t=>'<p class="clauseP">'+esc(t)+'</p>').join("");
+  document.getElementById("stepCount").textContent="Point "+(step+1)+" of "+CLAUSES.length;
+  document.getElementById("pfill").style.width=Math.round((step)/CLAUSES.length*100)+"%";
+  document.getElementById("clauseChk").checked=!!CLAUSES[step]._ok;
+  document.getElementById("nextBtn").disabled=!CLAUSES[step]._ok;
+  document.getElementById("nextBtn").textContent=(step===CLAUSES.length-1)?"Continue to sign":"Next";
+  document.getElementById("backBtn").style.visibility=(step===0)?"hidden":"visible";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.addEventListener("change",function(e){ if(e.target&&e.target.id==="clauseChk"){ CLAUSES[step]._ok=e.target.checked; document.getElementById("nextBtn").disabled=!e.target.checked; }});
+function nextClause(){
+  if(!CLAUSES[step]._ok) return;
+  if(step<CLAUSES.length-1){ step++; renderClause(); }
+  else { document.getElementById("pfill").style.width="100%"; showSection("signArea"); setupPad(); window.scrollTo({top:0,behavior:"smooth"}); }
+}
+function prevClause(){ if(step>0){ step--; renderClause(); } }
+function backToClauses(){ showSection("stepArea"); renderClause(); }
+
+/* ---------- declined / done ---------- */
+function showDeclined(d){
+  showSection("doneArea");
+  document.getElementById("doneTitle").textContent="Your agreement needs attention";
+  document.getElementById("doneBody").textContent=(d.adminNote||"STACS has returned your agreement. Please review and sign again.");
+  document.getElementById("doneLink").innerHTML='<button class="ghost" onclick="startClauses()">Start again</button>';
+}
+function showDone(d){
+  showSection("doneArea");
+  const ack=d.ack||null;
+  const low=String(d.status||"").toLowerCase();
+  if(low.indexOf("verif")>=0 || low.indexOf("approv")>=0){
+    document.getElementById("doneTitle").textContent="Your agreement is verified";
+    document.getElementById("doneBody").textContent="STACS has reviewed and verified your signed agreement. A signed, stamped copy is in your email and kept safely on file.";
+  } else {
+    document.getElementById("doneTitle").textContent="Your STACS User Agreement is signed";
+    document.getElementById("doneBody").textContent="Thank you. Your signed, stamped agreement has been emailed to you and kept on file. You can keep using STACS.";
+  }
+  if(d.pdfUrl) document.getElementById("doneLink").innerHTML='<a class="ghost" style="text-decoration:none" href="'+d.pdfUrl+'" target="_blank" rel="noopener">View your agreement</a>';
+  // acknowledgement upload for candidates who still owe their hand-signed copy
+  if(ack && ack.required && !ack.uploaded){
+    document.getElementById("ackCard").style.display="block";
+    if(ack.deadline) document.getElementById("ackHint").textContent="Print the Acknowledgement we emailed you, sign it by hand in all three places, scan every page, and upload it here by "+ack.deadline+". You can keep using STACS in the meantime.";
+  } else if(ack && ack.uploaded){
+    document.getElementById("ackCard").style.display="block";
+    document.getElementById("ackCard").innerHTML='<div style="font-weight:700;margin-bottom:4px">Signed Acknowledgement received <span class="tickdone">✓</span></div><div class="note">Thank you, we have your hand-signed copy on file.</div>';
   }
 }
-function allowResign(){ document.getElementById("doneArea").style.display="none"; document.getElementById("signArea").style.display="block"; sigDrawn=false; setupPad(); }
 
-/* pop-forward view-only agreement */
-function openAgreement(){ document.getElementById("agBack").classList.add("show"); }
-function closeAgreement(){ document.getElementById("agBack").classList.remove("show"); }
-
-/* signature pad */
+/* ---------- signature pad ---------- */
 let ctx,cv,padWired=false;
 function sizePad(){
   cv=document.getElementById("sigPad"); if(!cv) return;
   const ratio=window.devicePixelRatio||1;
-  const rect=cv.getBoundingClientRect(); if(!rect.width) return;   // not visible yet
+  const rect=cv.getBoundingClientRect(); if(!rect.width) return;
   cv.width=rect.width*ratio; cv.height=rect.height*ratio;
   ctx=cv.getContext("2d"); ctx.setTransform(1,0,0,1,0,0); ctx.scale(ratio,ratio);
   ctx.lineWidth=2.4; ctx.lineCap="round"; ctx.lineJoin="round";
@@ -192,8 +236,7 @@ function sizePad(){
 function setupPad(){
   sizePad();
   if(padWired) return; padWired=true;
-  const el=document.getElementById("sigPad");
-  let drawing=false,last=null;
+  const el=document.getElementById("sigPad"); let drawing=false,last=null;
   function pos(e){ const r=el.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; }
   function start(e){ drawing=true; last=pos(e); e.preventDefault(); }
   function move(e){ if(!drawing)return; const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; if(!sigDrawn){sigDrawn=true; onFirstStroke();} e.preventDefault(); }
@@ -208,34 +251,56 @@ function onFirstStroke(){
 }
 function eraseSig(){ if(ctx&&cv){ ctx.clearRect(0,0,cv.width,cv.height); } sigDrawn=false; signedAt=""; document.getElementById("sigHint").style.display="block"; document.getElementById("sigStamp").textContent=""; }
 
-/* passport */
-function onPassport(){
-  const f=document.getElementById("passport").files[0]; const chip=document.getElementById("passportChip");
-  if(!f){ passportData=null; chip.innerHTML=""; return; }
-  if(f.size>8*1024*1024){ passportData=null; chip.innerHTML='<div class="msg" style="color:var(--rd)">That file is larger than 8MB. Please upload a smaller image or PDF.</div>'; document.getElementById("passport").value=""; return; }
+/* ---------- passport + ack file ---------- */
+function readFileTo(inputId, chipId, cb){
+  const f=document.getElementById(inputId).files[0]; const chip=document.getElementById(chipId);
+  if(!f){ cb(null); chip.innerHTML=""; return; }
+  if(f.size>8*1024*1024){ cb(null); chip.innerHTML='<div class="msg" style="color:var(--rd)">That file is larger than 8MB. Please upload a smaller image or PDF.</div>'; document.getElementById(inputId).value=""; return; }
   const reader=new FileReader();
-  reader.onload=function(){ passportData={base64:reader.result, mime:f.type||"application/octet-stream", name:f.name}; chip.innerHTML='<div class="filechip">📎 '+f.name+'</div>'; };
+  reader.onload=function(){ cb({base64:reader.result, mime:f.type||"application/octet-stream", name:f.name}); chip.innerHTML='<div class="filechip">📎 '+esc(f.name)+'</div>'; };
   reader.readAsDataURL(f);
 }
+function onPassport(){ readFileTo("passport","passportChip",function(d){ passportData=d; }); }
+function onAckFile(){ readFileTo("ackFile","ackChip",function(d){ ackData=d; document.getElementById("ackBtn").disabled=!d; }); }
 
+/* ---------- submit ---------- */
 function sendForProcessing(){
   const m=document.getElementById("sendMsg"); m.style.color="var(--rd)";
-  if(!document.getElementById("chkRead").checked){ m.textContent="Please confirm you have read and agree to the terms."; return; }
   if(!sigDrawn){ m.textContent="Please draw your signature before sending."; return; }
   if((AGREEMENT&&AGREEMENT.needPassport!==false) && !passportData){ m.textContent="Please upload your identity document before sending."; return; }
   const sig=cv.toDataURL("image/png");
-  const btn=document.getElementById("sendBtn"); btn.disabled=true; m.style.color="var(--tx3)"; m.textContent="Sending for processing…";
+  const btn=document.getElementById("sendBtn"); btn.disabled=true; m.style.color="var(--tx3)"; m.textContent="Signing and preparing your documents…";
   var purposeEl=document.getElementById("agPurpose"), providerEl=document.getElementById("agProviderId");
   fetch(CONF.url,{method:"POST",body:JSON.stringify({
     action:"agreement-submit", type:TYPE, token:SESSION.token,
-    signature:sig, signedAt:signedAt,
-    passport:passportData, agreementVersion:(AGREEMENT&&AGREEMENT.version)||"",
+    signature:sig, signedAt:signedAt, passport:passportData,
+    agreementVersion:(AGREEMENT&&AGREEMENT.version)||"",
     purpose:purposeEl?purposeEl.value.trim():"", providerId:providerEl?providerEl.value.trim():""
   })}).then(r=>r.json()).then(d=>{
     if(!d||!d.ok){ btn.disabled=false; m.style.color="var(--rd)"; m.textContent=(d&&d.error)||"Could not send. Please try again."; return; }
-    renderState("Submitted, pending STACS review", {});
-    window.scrollTo({top:0,behavior:"smooth"});
+    // refetch to pick up the acknowledgement state; candidates always owe a hand-signed copy
+    const fallbackAck = (TYPE==="candidate") ? {required:true,uploaded:false} : null;
+    fetch(CONF.url+"?action=agreement-get&type="+encodeURIComponent(TYPE)+"&token="+encodeURIComponent(SESSION.token))
+      .then(r=>r.json()).then(dd=>{
+        const o = (dd&&dd.ok) ? dd : {status:"Signed"};
+        if(!o.ack && fallbackAck) o.ack=fallbackAck;
+        if(!o.status) o.status="Signed";
+        showDone(o); window.scrollTo({top:0,behavior:"smooth"});
+      })
+      .catch(()=>{ showDone({status:"Signed",ack:fallbackAck}); });
   }).catch(()=>{ btn.disabled=false; m.style.color="var(--rd)"; m.textContent="Could not reach the server. Please try again shortly."; });
+}
+
+/* ---------- acknowledgement upload ---------- */
+function uploadAck(){
+  const m=document.getElementById("ackMsg"); m.style.color="var(--rd)";
+  if(!ackData){ m.textContent="Please choose your signed acknowledgement file."; return; }
+  const btn=document.getElementById("ackBtn"); btn.disabled=true; m.style.color="var(--tx3)"; m.textContent="Uploading…";
+  fetch(CONF.url,{method:"POST",body:JSON.stringify({ action:"agreement-ack-upload", type:TYPE, token:SESSION.token, file:ackData })})
+    .then(r=>r.json()).then(d=>{
+      if(!d||!d.ok){ btn.disabled=false; m.style.color="var(--rd)"; m.textContent=(d&&d.error)||"Could not upload. Please try again."; return; }
+      document.getElementById("ackCard").innerHTML='<div style="font-weight:700;margin-bottom:4px">Signed Acknowledgement received <span class="tickdone">✓</span></div><div class="note">Thank you, we have your hand-signed copy on file.</div>';
+    }).catch(()=>{ btn.disabled=false; m.style.color="var(--rd)"; m.textContent="Could not reach the server. Please try again shortly."; });
 }
 
 window.addEventListener("load",init);
