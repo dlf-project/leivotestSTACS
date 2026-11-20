@@ -59,7 +59,7 @@ label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var
     <div id="signArea">
       <div class="card">
         <div style="font-weight:700;margin-bottom:4px">1. Confirm you have read it</div>
-        <label class="chk"><input type="checkbox" id="chkRead"> I have read the full agreement above and I agree to its terms on behalf of my organization.</label>
+        <label class="chk"><input type="checkbox" id="chkRead"> <span id="chkText">I have read the full agreement above, including the indemnity, release and limitation of liability, and I agree to its terms.</span></label>
       </div>
 
       <div class="card">
@@ -72,11 +72,18 @@ label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var
         </div>
       </div>
 
-      <div class="card">
-        <div style="font-weight:700;margin-bottom:4px">3. Upload your passport data page</div>
-        <div class="note" style="margin-bottom:10px">A clear photo or scan of the registering agent's international passport data page (image or PDF).</div>
+      <div class="card" id="passportCard">
+        <div style="font-weight:700;margin-bottom:4px">3. Upload your identity document</div>
+        <div class="note" style="margin-bottom:10px">A clear photo or scan of your international passport or government ID data page (image preferred, so it can be attached to your signed agreement; PDF also accepted).</div>
         <input type="file" id="passport" accept="image/*,application/pdf" onchange="onPassport()">
         <div id="passportChip"></div>
+      </div>
+
+      <div class="card" id="purposeCard" style="display:none">
+        <div style="font-weight:700;margin-bottom:4px">4. What is this for? <span class="note" style="font-weight:400">(optional)</span></div>
+        <div class="note" style="margin-bottom:10px">If you are pursuing a specific service, tell us briefly — it goes on your personal consent form. Example: “Travel &amp; Work in Georgia package”. You can leave this blank for a general agreement.</div>
+        <input type="text" id="agPurpose" placeholder="e.g. Travel &amp; Work in Georgia package" style="width:100%;background:var(--card2,#0F4423);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:14px;margin-bottom:8px">
+        <input type="text" id="agProviderId" placeholder="Service provider STACS ID (optional, e.g. TA-xxxx)" style="width:100%;background:var(--card2,#0F4423);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;color:var(--tx);font-size:14px">
       </div>
 
       <div class="card">
@@ -107,9 +114,12 @@ label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var
 <script>
 const SKILLED_URL="https://script.google.com/macros/s/AKfycbwtUYMty_LLT2MohBVwnMoCNRsm-r2b1A4rJRcU6q9B8x-1eOHJgzctiagmKrybo5alqg/exec";
 const TRAVEL_URL ="https://script.google.com/macros/s/AKfycbzv4v5pktq9j3fIzwaB5zCpySYJO9DjfMzV78lftWjZoFoKMVIpN1_zRb3OVzdOv5FQjg/exec";
+const EMPLOYER_URL="https://script.google.com/macros/s/AKfycbwPlLG5bdp5MsTFUU6RYLdz6g5zWJLRkmjmkkenqqWBz4Xy9PoSIZVRDA4iZSRBHRBq/exec";
 const TYPES={
-  travel:   {url:TRAVEL_URL,  home:"travel-agency-dashboard.html", label:"Travel Agency"},
-  candidate:{url:SKILLED_URL, home:"candidate-dashboard.html",     label:"Candidate"}
+  travel:   {url:TRAVEL_URL,   home:"travel-agency-dashboard.html", label:"Travel Agency"},
+  candidate:{url:SKILLED_URL,  home:"candidate-dashboard.html",     label:"Candidate"},
+  recruiter:{url:EMPLOYER_URL, home:"employer-dashboard.html",      label:"Recruiter"},
+  employer: {url:EMPLOYER_URL, home:"employer-dashboard.html",      label:"Employer"}
 };
 function qp(k){return new URLSearchParams(location.search).get(k);}
 const TYPE=(qp("type")||"travel").toLowerCase();
@@ -135,6 +145,8 @@ function init(){
       document.getElementById("agTitle").textContent=d.title||"STACS SafeAgreement";
       document.getElementById("agVer").textContent=(d.version?("Version "+d.version):"")+(d.party?(" · "+d.party):"");
       document.getElementById("mBody").innerHTML=d.bodyHtml||"<p>Agreement text is being prepared.</p>";
+      // candidates also complete a short purpose for their personal consent form
+      if(TYPE==="candidate"){ var pu=document.getElementById("purposeCard"); if(pu) pu.style.display="block"; }
       renderState(d.status, d);
       if(document.getElementById("signArea").style.display!=="none") setupPad();
     }).catch(()=>{ document.getElementById("loading").textContent="Could not reach the server. Please try again shortly."; });
@@ -210,13 +222,15 @@ function sendForProcessing(){
   const m=document.getElementById("sendMsg"); m.style.color="var(--rd)";
   if(!document.getElementById("chkRead").checked){ m.textContent="Please confirm you have read and agree to the terms."; return; }
   if(!sigDrawn){ m.textContent="Please draw your signature before sending."; return; }
-  if(!passportData){ m.textContent="Please upload your passport data page before sending."; return; }
+  if((AGREEMENT&&AGREEMENT.needPassport!==false) && !passportData){ m.textContent="Please upload your identity document before sending."; return; }
   const sig=cv.toDataURL("image/png");
   const btn=document.getElementById("sendBtn"); btn.disabled=true; m.style.color="var(--tx3)"; m.textContent="Sending for processing…";
+  var purposeEl=document.getElementById("agPurpose"), providerEl=document.getElementById("agProviderId");
   fetch(CONF.url,{method:"POST",body:JSON.stringify({
     action:"agreement-submit", type:TYPE, token:SESSION.token,
     signature:sig, signedAt:signedAt,
-    passport:passportData, agreementVersion:(AGREEMENT&&AGREEMENT.version)||""
+    passport:passportData, agreementVersion:(AGREEMENT&&AGREEMENT.version)||"",
+    purpose:purposeEl?purposeEl.value.trim():"", providerId:providerEl?providerEl.value.trim():""
   })}).then(r=>r.json()).then(d=>{
     if(!d||!d.ok){ btn.disabled=false; m.style.color="var(--rd)"; m.textContent=(d&&d.error)||"Could not send. Please try again."; return; }
     renderState("Submitted, pending STACS review", {});
