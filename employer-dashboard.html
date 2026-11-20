@@ -197,6 +197,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
        <button data-tab="cart" onclick="openCart()">Hire Cart</button>
        <button data-tab="jobs" onclick="emNavClick('jobs',this)">Job Requests</button>
        <button data-tab="messages" onclick="emNavClick('messages',this);loadEmpMsgThreads()">Messages<span id="emMsgDot" style="display:none;width:8px;height:8px;border-radius:50%;background:#E86A6A;margin-left:7px"></span></button>
+       <button type="button" onclick="window.open('safe-agreement.html?type=employer','_blank')">SafeAgreement</button>
      </div>
      <button class="acc-parent" data-parent="organization" onclick="accToggle('organization');emNavClick('organization',this)"><span class="i">🏢</span>Organization<span class="caret">▸</span></button>
      <div class="acc-children" data-acc="organization">
