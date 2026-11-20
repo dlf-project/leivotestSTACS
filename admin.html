@@ -102,6 +102,7 @@ body.modal-open{overflow:hidden}
     <button data-panel="fees" onclick="showPanel('fees',this)"><span class="i">💰</span>Promotion fees</button>
     <button data-panel="resumes" onclick="showPanel('resumes',this)"><span class="i">📝</span>Resume Requests</button>
     <button data-panel="agreements" onclick="showPanel('agreements',this)" style="display:none"><span class="i">✍️</span>Agreements</button>
+    <button data-panel="travelpkgs" onclick="showPanel('travelpkgs',this)"><span class="i">🧳</span>Travel Packages</button>
     <button data-panel="teamadmins" onclick="showPanel('teamadmins',this)" style="display:none"><span class="i">👥</span>Team Admins</button>
     <button data-panel="messages" onclick="showPanel('messages',this)"><span class="i">💬</span>Messages</button>
     <button data-panel="marketers" onclick="showPanel('marketers',this)"><span class="i">🤝</span>Marketers</button>
@@ -123,6 +124,22 @@ body.modal-open{overflow:hidden}
        <button class="ghost" onclick="loadAgreements()" style="border-radius:0">Refresh</button>
      </div>
      <div id="agrList">Loading…</div>
+   </div>
+
+   <div class="apanel" id="panel-travelpkgs">
+     <h2 style="margin-bottom:4px">Travel Packages</h2>
+     <div class="sub">Packages travel agencies have submitted. Review the Processing &amp; Execution Note, then approve (which locks the package) or return it with a note. Approved packages that were reopened keep a private Previous-Edition PDF for comparison.</div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+       <select id="pkgFilter" onchange="loadTravelPkgs()" style="background:var(--card2);border:1px solid var(--bdr);border-radius:0;padding:9px 12px;color:var(--tx);font-size:13px">
+         <option value="Pending STACS review">Awaiting review</option>
+         <option value="Approved">Approved</option>
+         <option value="Unlocked for edit">Reopened</option>
+         <option value="Returned for changes">Returned</option>
+         <option value="">All</option>
+       </select>
+       <button class="ghost" onclick="loadTravelPkgs()" style="border-radius:0">Refresh</button>
+     </div>
+     <div id="pkgAdminList">Loading…</div>
    </div>
 
    <div class="apanel" id="panel-messages">
@@ -446,7 +463,7 @@ async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEn
 let AS={token:'',perms:[],owner:false,kh:'',name:'',role:''};
 const ALL_PERMS=['members','payouts','packages','messaging','fees','verification','resume','agreements','manage_admins'];
 const PERM_LABELS={members:'Members',payouts:'Payouts',packages:'Packages / Services',messaging:'Messaging',fees:'Fees',verification:'Verification',resume:'Resume requests',agreements:'Agreements',manage_admins:'Manage admins'};
-const PANEL_PERM={stats:null,skilled:'members',verifiers:'verification',translators:'verification',employers:'members',qa:'verification',payouts:'payouts',reports:'members',email:'messaging',fees:'fees',resumes:'packages',agreements:'agreements',teamadmins:'manage_admins',messages:'messaging',marketers:'payouts',reftokens:'payouts'};
+const PANEL_PERM={stats:null,skilled:'members',verifiers:'verification',translators:'verification',employers:'members',qa:'verification',payouts:'payouts',reports:'members',email:'messaging',fees:'fees',resumes:'packages',agreements:'agreements',teamadmins:'manage_admins',messages:'messaging',marketers:'payouts',reftokens:'payouts',travelpkgs:'packages'};
 const TRAVEL_URL="https://script.google.com/macros/s/AKfycbzv4v5pktq9j3fIzwaB5zCpySYJO9DjfMzV78lftWjZoFoKMVIpN1_zRb3OVzdOv5FQjg/exec";
 function can(p){ return !!AS && (AS.owner || (AS.perms && AS.perms.indexOf(p)>=0)); }
 
@@ -1275,10 +1292,64 @@ function showPanel(name, btn){
   else if(name==='fees') loadFees();
   else if(name==='resumes') loadResumeAdmin();
   else if(name==='agreements') loadAgreements();
+  else if(name==='travelpkgs') loadTravelPkgs();
   else if(name==='teamadmins'){ loadTeamAdmins(); loadAdminLog(); }
   else if(name==='messages'){ loadAdminMsgThreads(); loadAdminMsgBlocks(); }
   else if(name==='marketers'){ loadBanksForMarketer(); loadMarketers(); }
   else if(name==='reftokens'){ loadRefTokens(); }
+}
+/* ===== Travel Packages review + Previous-Edition PDF ===== */
+function loadTravelPkgs(){
+  var el=document.getElementById('pkgAdminList'); if(!el) return;
+  if(!TOK.ta){ el.innerHTML='<div class="empty">Travel hub not reachable, or its ADMIN_KEY does not match.</div>'; return; }
+  var status=(document.getElementById('pkgFilter')||{}).value||'';
+  el.innerHTML='<div class="empty">Loading…</div>';
+  fetch(TRAVEL_URL+'?action=admin-packages&token='+encodeURIComponent(TOK.ta)+'&status='+encodeURIComponent(status))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ el.innerHTML='<div class="empty">Could not load packages.</div>'; return; }
+      var ps=d.packages||[];
+      if(!ps.length){ el.innerHTML='<div class="empty">No packages'+(status?(' with status “'+esc(status)+'”'):'')+'.</div>'; return; }
+      el.innerHTML=ps.map(function(p){
+        var cat=(p.data&&p.data.category)||'';
+        var eds=(p.data&&p.data.previousEditions)||[];
+        var qa=(p.data&&p.data.compliance&&p.data.compliance.qa)||[];
+        var qaHtml=qa.length? qa.map(function(x){ return '<div style="margin-bottom:6px"><div style="font-weight:700;font-size:12px">'+esc(x.q)+'</div><div style="font-size:12.5px;color:var(--tx2)">'+esc(x.a||'—')+'</div></div>'; }).join('')
+          : '<div style="font-size:12.5px;color:var(--tx3)">'+esc((p.data&&p.data.compliance&&p.data.compliance.steps)||'No note recorded.')+'</div>';
+        var edBtns=eds.length? ('<div style="margin-top:8px;font-size:11px;color:var(--tx3)">Previous editions: '+eds.map(function(e){ return '<button class="ghost" style="padding:4px 9px;font-size:11px;border-radius:0;margin:2px" onclick="openPrevEdition(\''+esc(e.fileId)+'\')">📄 '+esc(String(e.created).slice(0,16))+'</button>'; }).join('')+'</div>') : '';
+        var decl=(p.data&&p.data.compliance&&p.data.compliance.declaration)?'<span style="color:var(--grn);font-size:11px">✓ Declared</span>':'<span style="color:var(--rd);font-size:11px">No declaration</span>';
+        var act='';
+        if(p.status==='Pending STACS review'||p.status==='Unlocked for edit'){
+          act='<button class="ap" onclick="approveTravelPkg(\''+esc(p.packageId)+'\')">Approve &amp; lock</button> <button class="ghost" style="border-radius:0" onclick="declineTravelPkg(\''+esc(p.packageId)+'\')">Return…</button>';
+        }
+        return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+          +'<div><span style="font-weight:800;font-size:14px">'+esc(p.title||'Package')+'</span> <span style="font-size:11.5px;color:var(--tx3)">'+esc(p.destination||'')+(cat?(' · '+esc(cat)):'')+'</span></div>'
+          +'<span style="font-size:10px;font-weight:800;padding:2px 9px;border-radius:100px;background:rgba(255,255,255,.08)">'+esc(p.status)+'</span></div>'
+          +'<div style="font-size:12px;color:var(--tx3);margin-top:4px">'+esc(p.agencyName||'')+' · '+esc(p.packageId)+' · Candidate total ₦'+Number(p.candidateTotal).toLocaleString()+' · STACS fee ₦'+Number(p.stacsFee).toLocaleString()+'</div>'
+          +'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:var(--gold2)">Processing &amp; Execution Note '+decl+'</summary><div style="margin-top:8px;background:var(--card2);border-radius:8px;padding:10px">'+qaHtml+'</div></details>'
+          +edBtns
+          +(p.adminNote?('<div style="font-size:12px;color:var(--tx3);margin-top:6px">Note: '+esc(p.adminNote)+'</div>'):'')
+          +(act?('<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'+act+'</div>'):'')
+          +'</div>';
+      }).join('');
+    }).catch(function(){ el.innerHTML='<div class="empty">Could not reach the server.</div>'; });
+}
+function approveTravelPkg(packageId){
+  fetch(TRAVEL_URL,{method:'POST',body:JSON.stringify({action:'package-approve',token:TOK.ta,packageId:packageId})})
+    .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok){ loadTravelPkgs(); } else { alert((d&&d.error)||'Could not approve.'); } }).catch(function(){ alert('Network error.'); });
+}
+function declineTravelPkg(packageId){
+  var note=prompt('Return this package with a note for the agency:'); if(note===null) return;
+  fetch(TRAVEL_URL,{method:'POST',body:JSON.stringify({action:'package-decline',token:TOK.ta,packageId:packageId,note:note})})
+    .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok){ loadTravelPkgs(); } else { alert((d&&d.error)||'Could not return.'); } }).catch(function(){ alert('Network error.'); });
+}
+function openPrevEdition(fileId){
+  fetch(TRAVEL_URL+'?action=package-edition-file&token='+encodeURIComponent(TOK.ta)+'&fileId='+encodeURIComponent(fileId))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ alert((d&&d.error)||'Could not open edition.'); return; }
+      var bin=atob(d.base64),a=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);
+      window.open(URL.createObjectURL(new Blob([a],{type:'application/pdf'})),'_blank');
+    }).catch(function(){ alert('Could not reach the server.'); });
 }
 /* ===== Marketers ===== */
 function mkAgePreview(){
