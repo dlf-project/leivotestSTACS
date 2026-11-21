@@ -1326,7 +1326,7 @@ function loadTravelPkgs(){
           +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
           +'<div><span style="font-weight:800;font-size:14px">'+esc(p.title||'Package')+'</span> <span style="font-size:11.5px;color:var(--tx3)">'+esc(p.destination||'')+(cat?(' · '+esc(cat)):'')+'</span></div>'
           +'<span style="font-size:10px;font-weight:800;padding:2px 9px;border-radius:100px;background:rgba(255,255,255,.08)">'+esc(p.status)+'</span></div>'
-          +'<div style="font-size:12px;color:var(--tx3);margin-top:4px">'+esc(p.agencyName||'')+' · '+esc(p.packageId)+' · Candidate total ₦'+Number(p.candidateTotal).toLocaleString()+' · STACS fee ₦'+Number(p.stacsFee).toLocaleString()+'</div>'
+          +(function(){var pc=(p.data&&p.data.currency)||'NGN';var sym={NGN:'₦',USD:'$',EUR:'€',GBP:'£'}[pc]||'';var dep=(p.data&&p.data.pricing&&p.data.pricing.perDependentCandidate)||0;return '<div style="font-size:12px;color:var(--tx3);margin-top:4px">'+esc(p.agencyName||'')+' · '+esc(p.packageId)+' · Candidate total '+sym+Number(p.candidateTotal).toLocaleString()+' '+pc+' · STACS fee '+sym+Number(p.stacsFee).toLocaleString()+' '+pc+(dep>0?(' · Per dependent '+sym+Number(dep).toLocaleString()+' '+pc):'')+'</div>';})()
           +'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:var(--gold2)">Processing &amp; Execution Note '+decl+'</summary><div style="margin-top:8px;background:var(--card2);border-radius:8px;padding:10px">'+qaHtml+'</div></details>'
           +edBtns
           +(p.adminNote?('<div style="font-size:12px;color:var(--tx3);margin-top:6px">Note: '+esc(p.adminNote)+'</div>'):'')
@@ -1337,12 +1337,18 @@ function loadTravelPkgs(){
 }
 function approveTravelPkg(packageId){
   fetch(TRAVEL_URL,{method:'POST',body:JSON.stringify({action:'package-approve',token:TOK.ta,packageId:packageId})})
-    .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok){ loadTravelPkgs(); } else { alert((d&&d.error)||'Could not approve.'); } }).catch(function(){ alert('Network error.'); });
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ var f=document.getElementById('pkgFilter'); if(f) f.value='Approved'; loadTravelPkgs(); alert('Approved and locked. It now lives under the “Approved” view.'); }
+      else { alert((d&&d.error)||'Could not approve.'); }
+    }).catch(function(){ alert('Network error.'); });
 }
 function declineTravelPkg(packageId){
   var note=prompt('Return this package with a note for the agency:'); if(note===null) return;
   fetch(TRAVEL_URL,{method:'POST',body:JSON.stringify({action:'package-decline',token:TOK.ta,packageId:packageId,note:note})})
-    .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok){ loadTravelPkgs(); } else { alert((d&&d.error)||'Could not return.'); } }).catch(function(){ alert('Network error.'); });
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ var f=document.getElementById('pkgFilter'); if(f) f.value='Returned for changes'; loadTravelPkgs(); }
+      else { alert((d&&d.error)||'Could not return.'); }
+    }).catch(function(){ alert('Network error.'); });
 }
 function openPrevEdition(fileId){
   fetch(TRAVEL_URL+'?action=package-edition-file&token='+encodeURIComponent(TOK.ta)+'&fileId='+encodeURIComponent(fileId))
@@ -1694,14 +1700,19 @@ function resendUnverified(hub, fid, oldEmail){
       else { m.style.color='var(--rd,#E86A6A)'; m.textContent=(d&&d.error)||'Could not resend.'; }
     }).catch(function(){ m.style.color='var(--rd,#E86A6A)'; m.textContent='Could not reach the hub.'; });
 }
-function forceVerify(hub, fid, email){
-  if(!confirm('Mark '+email+' as verified without them clicking the link? Only do this if you have separately confirmed this is genuinely their email.')) return;
-  var m=document.getElementById(fid+'-msg'); m.style.display='block'; m.style.color='var(--tx2)'; m.textContent='Verifying…';
+function forceVerify(hub, fid, oldEmail){
+  var newEmail=((document.getElementById(fid)||{}).value||oldEmail).trim();
+  var changed=(newEmail.toLowerCase()!==String(oldEmail).toLowerCase());
+  var ask = changed
+    ? ('Save the corrected email “'+newEmail+'” and mark this candidate Approved and Email-verified now? Their STACS ID will be issued. Only do this if you have confirmed this email with them.')
+    : ('Mark '+oldEmail+' as verified without them clicking the link? Only do this if you have confirmed this is genuinely their email.');
+  if(!confirm(ask)) return;
+  var m=document.getElementById(fid+'-msg'); m.style.display='block'; m.style.color='var(--tx2)'; m.textContent=changed?'Saving the corrected email and verifying…':'Verifying…';
   var cfg=hubCfg(hub);
   fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify({action:'admin-force-verify', token:cfg.tok(), email:email})})
+    body:JSON.stringify({action:'admin-force-verify', token:cfg.tok(), oldEmail:oldEmail, newEmail:newEmail})})
     .then(function(r){return r.json();}).then(function(d){
-      if(d&&d.ok){ m.style.color='var(--grn)'; m.textContent=d.already?'Already verified.':'Verified.'; setTimeout(function(){loadUnverified(hub);},1200); }
+      if(d&&d.ok){ m.style.color='var(--grn)'; m.textContent=d.already?'Already verified.':('Done. Approved, verified'+(d.id?(', ID '+d.id):'')+(changed?(', email set to '+newEmail):'')+'.'); setTimeout(function(){loadUnverified(hub);},1400); }
       else { m.style.color='var(--rd,#E86A6A)'; m.textContent=(d&&d.error)||'Could not verify.'; }
     }).catch(function(){ m.style.color='var(--rd,#E86A6A)'; m.textContent='Could not reach the hub.'; });
 }
