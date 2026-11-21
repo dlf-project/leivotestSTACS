@@ -324,7 +324,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
      <div id="msgTurnNote" style="display:none;font-size:12px;border-radius:9px;padding:9px 11px;margin-bottom:10px"></div>
      <div id="msgBlockNote" style="display:none;font-size:12px;color:#ffb4b4;background:rgba(255,80,80,.09);border:1px solid rgba(255,80,80,.25);border-radius:9px;padding:9px 11px;margin-bottom:10px"></div>
      <div style="display:flex;gap:8px;align-items:flex-end">
-       <textarea id="msgInput" rows="2" placeholder="Write a message… (no phone numbers, emails or outside links)" style="flex:1;resize:vertical;min-height:42px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--tx);font-family:inherit;font-size:13.5px"></textarea>
+       <textarea id="msgInput" rows="2" oninput="msgScreenLive()" placeholder="Write a message… (no phone numbers, emails or outside links)" style="flex:1;resize:vertical;min-height:42px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--tx);font-family:inherit;font-size:13.5px"></textarea>
        <button class="btn" id="msgSendBtn" style="padding:10px 16px" onclick="msgSendCurrent()">Send</button>
      </div>
    </div>
@@ -1449,11 +1449,12 @@ function loadPackages(){
     var out=[];
     var t=res[0]; if(t&&t.ok&&t.packages){ t.packages.forEach(function(p){
       // Providers stay anonymous to candidates: show the unique STACS provider ID, never the agency name.
-      var cur=p.currency||'NGN';
+      var totals=p.candidateTotalsByCurrency||{};
+      if(!Object.keys(totals).length && p.candidateTotal){ totals[p.currency||'NGN']=Number(p.candidateTotal)||0; }
       out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:(p.taId?('STACS Provider '+p.taId):'STACS Provider'),
         title:p.title||'Package', sub:(p.destination||'')+(p.category?(' · '+p.category):''), summary:p.summary||'',
-        cur:cur, baseTotal:Number(p.candidateTotal)||0, perDep:Number(p.perDependentCandidate)||0,
-        price:p.candidateTotal?cmoney(p.candidateTotal,cur):'Price on enquiry', poster:p.poster||'' });
+        totals:totals, perSpouse:p.perSpouse||null, perChild:p.perDependentChild||null, perAdult:p.perDependentAdult||null,
+        price:Object.keys(totals).length?cfmtTotals(totals):'Price on enquiry', poster:p.poster||'' });
     }); }
     var j=res[1]; if(j&&j.ok&&j.jobs){ j.jobs.forEach(function(p){
       out.push({ kind:'job', id:p.jobId, providerRole:'employer', providerId:p.emId, provider:(p.emId?('STACS Provider '+p.emId):'STACS Provider'),
@@ -1474,12 +1475,17 @@ function renderPkgs(){
       : '<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;background:rgba(224,176,0,.16);color:#d9c178;padding:2px 8px;border-radius:100px">TRAVEL</span>';
     var poster=p.poster?('<img src="'+esc(p.poster)+'" alt="" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto" onerror="this.style.display=\'none\'">'):'';
     var interest=(p.kind==='job')?('<button class="btn ghost" style="padding:7px 13px;font-size:12.5px" onclick="pkgInterest(\''+esc(p.id)+'\',this)">⭐ Express interest</button>'):'';
-    var fam=(p.kind==='travel'&&p.perDep>0)?(
-      '<div style="margin-top:8px;font-size:12px;color:var(--tx2);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px 10px">'
-      +'Travelling together (including you): '
-      +'<input type="number" min="1" value="1" style="width:56px;padding:4px 6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:var(--tx);font-size:12px" oninput="famCalc(this,\''+esc(p.id)+'\')">'
-      +' <span id="fam-'+esc(p.id)+'" style="font-weight:700;color:var(--gold2,#e0b000)">Total for 1 traveller: '+cmoney(p.baseTotal,p.cur)+'</span>'
-      +'<div style="color:var(--tx3);font-size:11px;margin-top:3px">Adds '+cmoney(p.perDep,p.cur)+' for each extra traveller.</div></div>'):'';
+    var hasDeps=(p.perSpouse&&p.perSpouse.candidate>0)||(p.perChild&&p.perChild.candidate>0)||(p.perAdult&&p.perAdult.candidate>0);
+    var numIn=function(sfx,label){ return '<label style="font-size:11.5px;color:var(--tx2);display:inline-flex;align-items:center;gap:5px">'+label+' <input type="number" min="0" value="0" id="'+sfx+'-'+esc(p.id)+'" style="width:46px;padding:3px 5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:var(--tx);font-size:12px" oninput="famCalc(\''+esc(p.id)+'\')"></label>'; };
+    var fam=(p.kind==='travel'&&hasDeps)?(
+      '<div style="margin-top:8px;font-size:12px;color:var(--tx2);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:9px 11px">'
+      +'<div style="margin-bottom:6px;color:var(--tx3)">Travelling with family? Add them to see your total (you are already counted):</div>'
+      +'<div style="display:flex;gap:14px;flex-wrap:wrap">'
+      +((p.perSpouse&&p.perSpouse.candidate>0)?numIn('fspouse','Spouse'):'')
+      +((p.perChild&&p.perChild.candidate>0)?numIn('fchild','Dependent children'):'')
+      +((p.perAdult&&p.perAdult.candidate>0)?numIn('fadult','Dependent adults'):'')
+      +'</div>'
+      +'<div id="fam-'+esc(p.id)+'" style="font-weight:700;color:var(--gold2,#e0b000);margin-top:7px">Total for 1 traveller: '+cfmtTotals(p.totals||{})+'</div></div>'):'';
     return '<div style="display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">'
       +poster
       +'<div style="flex:1;min-width:0">'
@@ -1623,12 +1629,39 @@ function msgRenderMessages(msgs){
   body.scrollTop=body.scrollHeight;
 }
 function msgCloseThread(){ MSG_CUR=null; msgShowList(); loadMessages(); }
+// Live client-side screen: mirrors the server so the Send button locks the moment blocked content appears.
+function clientMsgScreen(t){
+  t=String(t||'');
+  if(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(t)) return 'That looks like an email address. Keep contact details off the chat.';
+  if(/(?:https?:\/\/|www\.)/i.test(t) || /\b[a-z0-9-]+\.(com|net|org|ng|io|co|me|info|biz|app|xyz|link|site|online|live)\b/i.test(t)) return 'Links are not allowed in the chat.';
+  if(/\bdot\s*(com|net|org|ng|co|io|gmail|yahoo|hotmail|outlook|mail)\b/i.test(t) || /\b[a-z0-9]+\s+at\s+[a-z0-9]+\s+dot\s+[a-z]{2,}\b/i.test(t)) return 'That looks like contact details written to get around the filter.';
+  if(/@[A-Za-z0-9_]{3,}/.test(t)) return 'That looks like a username or handle. Keep the conversation on STACS.';
+  // spelt-out phone numbers
+  var words=t.toLowerCase().split(/[^a-z]+/), run=0, best=0, m={zero:1,oh:1,ooh:1,nought:1,one:1,two:1,three:1,four:1,five:1,six:1,seven:1,eight:1,nine:1,niner:1,double:0,triple:0,dash:0,hyphen:0,space:0};
+  for(var i=0;i<words.length;i++){ var w=words[i]; if(!w) continue; if(m.hasOwnProperty(w)){ run+=m[w]; if(run>best) best=run; } else run=0; }
+  if(best>=7) return 'That looks like a phone number written in words. Keep contact details off the chat.';
+  // digits that look like a phone number
+  var dr=(t.match(/[\d \-.()+]{3,}/g)||[]), md=0, plus=false;
+  dr.forEach(function(r){ var n=(r.match(/\d/g)||[]).length; if(n>md) md=n; if(/\+/.test(r)&&n>=7) plus=true; });
+  if(plus || md>=10) return 'That looks like a phone number. Keep contact details off the chat.';
+  if(/[가-힣぀-ヿ฀-๿ऀ-ॿঀ-৿]{5,}/.test(t)) return 'Please write in English, French, German, Spanish, Portuguese, Russian, Chinese or Arabic.';
+  return '';
+}
+function msgScreenLive(){
+  var input=document.getElementById('msgInput'), btn=document.getElementById('msgSendBtn'), bn=document.getElementById('msgBlockNote');
+  if(!input||!btn) return '';
+  var reason=clientMsgScreen(input.value||'');
+  if(reason){ btn.disabled=true; if(bn){ bn.style.display='block'; bn.textContent=reason; } }
+  else { btn.disabled=false; if(bn){ bn.style.display='none'; bn.textContent=''; } }
+  return reason;
+}
 function msgSendCurrent(){
   if(!MSG_CUR||!S||!S.token) return;
   var input=document.getElementById('msgInput'), txt=(input.value||'').trim();
   var bn=document.getElementById('msgBlockNote');
   if(bn){ bn.style.display='none'; bn.textContent=''; }
   if(!txt){ input.focus(); return; }
+  var pre=clientMsgScreen(txt); if(pre){ if(bn){ bn.style.display='block'; bn.textContent=pre; } document.getElementById('msgSendBtn').disabled=true; return; }   // double-check before sending
   var btn=document.getElementById('msgSendBtn'); btn.disabled=true; var old=btn.textContent; btn.textContent='Sending…';
   var done=function(){ btn.disabled=false; btn.textContent=old; };
   if(MSG_CUR.isNew){
@@ -3740,7 +3773,19 @@ function pfMsg(type,txt){
 function val2(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function cmoney(n,cur){ cur=cur||'NGN'; var s={NGN:'₦',USD:'$',EUR:'€',GBP:'£'}[cur]||''; return s+Number(n||0).toLocaleString()+' '+cur; }
-function famCalc(inp,id){ var p=pkgFind(id); if(!p) return; var n=Math.max(1,Number(inp.value)||1); var total=p.baseTotal+p.perDep*(n-1); var el=document.getElementById('fam-'+id); if(el) el.textContent='Total for '+n+(n>1?' travellers':' traveller')+': '+cmoney(total,p.cur); }
+function cfmtTotals(map){ var ks=Object.keys(map||{}); if(!ks.length) return cmoney(0,'NGN'); return ks.map(function(c){return cmoney(map[c],c);}).join('  +  '); }
+function famCalc(id){
+  var p=pkgFind(id); if(!p) return;
+  function val(sfx){ var el=document.getElementById(sfx+'-'+id); return el?Math.max(0,Number(el.value)||0):0; }
+  var spouse=val('fspouse'), children=val('fchild'), adults=val('fadult');
+  var tot={}; function add(cur,amt){ if(amt>0) tot[cur]=(tot[cur]||0)+amt; }
+  for(var c in (p.totals||{})) add(c, p.totals[c]);
+  if(p.perSpouse && p.perSpouse.candidate>0 && spouse>0) add(p.perSpouse.currency, p.perSpouse.candidate*spouse);
+  if(p.perChild && p.perChild.candidate>0 && children>0) add(p.perChild.currency, p.perChild.candidate*children);
+  if(p.perAdult && p.perAdult.candidate>0 && adults>0) add(p.perAdult.currency, p.perAdult.candidate*adults);
+  var people=1+spouse+children+adults;
+  var el=document.getElementById('fam-'+id); if(el) el.textContent='Total for '+people+(people>1?' travellers':' traveller')+': '+cfmtTotals(tot);
+}
 /* Trim an ISO timestamp (e.g. 1982-11-23T08:00:00.000Z) to a clean date string. */
 function fmtDate(v){
   var s=String(v||'').trim(); if(!s) return '';
