@@ -1448,12 +1448,15 @@ function loadPackages(){
   Promise.all([pTravel,pJobs]).then(function(res){
     var out=[];
     var t=res[0]; if(t&&t.ok&&t.packages){ t.packages.forEach(function(p){
-      out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:p.agencyName||'STACS Agency',
+      // Providers stay anonymous to candidates: show the unique STACS provider ID, never the agency name.
+      var cur=p.currency||'NGN';
+      out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:(p.taId?('STACS Provider '+p.taId):'STACS Provider'),
         title:p.title||'Package', sub:(p.destination||'')+(p.category?(' · '+p.category):''), summary:p.summary||'',
-        price:p.candidateTotal?('₦'+Number(p.candidateTotal).toLocaleString()):'Price on enquiry', poster:p.poster||'' });
+        cur:cur, baseTotal:Number(p.candidateTotal)||0, perDep:Number(p.perDependentCandidate)||0,
+        price:p.candidateTotal?cmoney(p.candidateTotal,cur):'Price on enquiry', poster:p.poster||'' });
     }); }
     var j=res[1]; if(j&&j.ok&&j.jobs){ j.jobs.forEach(function(p){
-      out.push({ kind:'job', id:p.jobId, providerRole:'employer', providerId:p.emId, provider:p.company||'Employer',
+      out.push({ kind:'job', id:p.jobId, providerRole:'employer', providerId:p.emId, provider:(p.emId?('STACS Provider '+p.emId):'STACS Provider'),
         title:p.title||'Role', sub:(p.country||'')+(p.sector?(' · '+p.sector):'')+(p.type?(' · '+p.type):''), summary:p.description||'',
         price:(p.positions?(p.positions+' position(s)'):''), poster:'' });
     }); }
@@ -1471,6 +1474,12 @@ function renderPkgs(){
       : '<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;background:rgba(224,176,0,.16);color:#d9c178;padding:2px 8px;border-radius:100px">TRAVEL</span>';
     var poster=p.poster?('<img src="'+esc(p.poster)+'" alt="" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto" onerror="this.style.display=\'none\'">'):'';
     var interest=(p.kind==='job')?('<button class="btn ghost" style="padding:7px 13px;font-size:12.5px" onclick="pkgInterest(\''+esc(p.id)+'\',this)">⭐ Express interest</button>'):'';
+    var fam=(p.kind==='travel'&&p.perDep>0)?(
+      '<div style="margin-top:8px;font-size:12px;color:var(--tx2);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px 10px">'
+      +'Travelling together (including you): '
+      +'<input type="number" min="1" value="1" style="width:56px;padding:4px 6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:var(--tx);font-size:12px" oninput="famCalc(this,\''+esc(p.id)+'\')">'
+      +' <span id="fam-'+esc(p.id)+'" style="font-weight:700;color:var(--gold2,#e0b000)">Total for 1 traveller: '+cmoney(p.baseTotal,p.cur)+'</span>'
+      +'<div style="color:var(--tx3);font-size:11px;margin-top:3px">Adds '+cmoney(p.perDep,p.cur)+' for each extra traveller.</div></div>'):'';
     return '<div style="display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">'
       +poster
       +'<div style="flex:1;min-width:0">'
@@ -1481,7 +1490,7 @@ function renderPkgs(){
       +'<span style="font-weight:800;font-size:13.5px;color:var(--gold2,#e0b000)">'+esc(p.price||'')+'</span>'
       +'<span style="display:flex;gap:8px;flex-wrap:wrap">'+interest
       +'<button class="btn" style="padding:7px 13px;font-size:12.5px" onclick="pkgAsk(\''+esc(p.id)+'\')">💬 Ask a question</button></span>'
-      +'</div></div></div>';
+      +'</div>'+fam+'</div></div>';
   }).join('');
 }
 function pkgFind(id){ for(var i=0;i<PKG_DATA.length;i++){ if(String(PKG_DATA[i].id)===String(id)) return PKG_DATA[i]; } return null; }
@@ -3730,6 +3739,8 @@ function pfMsg(type,txt){
 }
 function val2(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function cmoney(n,cur){ cur=cur||'NGN'; var s={NGN:'₦',USD:'$',EUR:'€',GBP:'£'}[cur]||''; return s+Number(n||0).toLocaleString()+' '+cur; }
+function famCalc(inp,id){ var p=pkgFind(id); if(!p) return; var n=Math.max(1,Number(inp.value)||1); var total=p.baseTotal+p.perDep*(n-1); var el=document.getElementById('fam-'+id); if(el) el.textContent='Total for '+n+(n>1?' travellers':' traveller')+': '+cmoney(total,p.cur); }
 /* Trim an ISO timestamp (e.g. 1982-11-23T08:00:00.000Z) to a clean date string. */
 function fmtDate(v){
   var s=String(v||'').trim(); if(!s) return '';
