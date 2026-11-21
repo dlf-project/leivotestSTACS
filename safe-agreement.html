@@ -278,8 +278,8 @@ function sendForProcessing(){
     purpose:purposeEl?purposeEl.value.trim():"", providerId:providerEl?providerEl.value.trim():""
   })}).then(r=>r.json()).then(d=>{
     if(!d||!d.ok){ btn.disabled=false; m.style.color="var(--rd)"; m.textContent=(d&&d.error)||"Could not send. Please try again."; return; }
-    // refetch to pick up the acknowledgement state; candidates always owe a hand-signed copy
-    const fallbackAck = (TYPE==="candidate") ? {required:true,uploaded:false} : null;
+    // refetch to pick up the acknowledgement state; every signer now owes a hand-signed copy
+    const fallbackAck = {required:true,uploaded:false};
     fetch(CONF.url+"?action=agreement-get&type="+encodeURIComponent(TYPE)+"&token="+encodeURIComponent(SESSION.token))
       .then(r=>r.json()).then(dd=>{
         const o = (dd&&dd.ok) ? dd : {status:"Signed"};
