@@ -923,7 +923,7 @@ function openEmpMsgThread(threadId){
       reply='<div style="border-top:2px solid #2ec47a;margin-top:10px;padding-top:10px">'
         +'<div style="font-size:11.5px;color:#2ec47a;font-weight:700;margin-bottom:6px">● Your reply window is open — answer everything in one message.</div>'
         +'<div id="empReplyNote" style="display:none;font-size:12px;color:#ffb4b4;margin-bottom:6px"></div>'
-        +'<textarea id="empReplyBox" rows="3" placeholder="Reply constructively (no phone numbers, emails or outside links)…" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--bdr,#223);background:var(--card2,#101826);color:var(--tx,#e8eaed);font:inherit;font-size:13px"></textarea>'
+        +'<textarea id="empReplyBox" rows="3" oninput="empScreenLive()" placeholder="Reply constructively (no phone numbers, emails or outside links)…" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--bdr,#223);background:var(--card2,#101826);color:var(--tx,#e8eaed);font:inherit;font-size:13px"></textarea>'
         +'<button class="add" id="empReplyBtn" onclick="sendEmpReply()" style="margin-top:8px">Send reply</button></div>';
     } else {
       reply='<div style="margin-top:10px;color:var(--tx3,#889);font-size:13px">It’s the candidate’s turn. You’ll be able to reply once they send their next message.</div>';
@@ -933,11 +933,35 @@ function openEmpMsgThread(threadId){
       +'<div style="max-height:340px;overflow-y:auto;margin-bottom:6px">'+msgs+'</div>'+reply;
   }).catch(function(){ box.innerHTML='<div style="color:var(--tx3,#889)">Couldn’t reach the server.</div>'; });
 }
+function clientMsgScreen(t){
+  t=String(t||'');
+  if(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(t)) return 'That looks like an email address. Keep contact details off the chat.';
+  if(/(?:https?:\/\/|www\.)/i.test(t) || /\b[a-z0-9-]+\.(com|net|org|ng|io|co|me|info|biz|app|xyz|link|site|online|live)\b/i.test(t)) return 'Links are not allowed in the chat.';
+  if(/\bdot\s*(com|net|org|ng|co|io|gmail|yahoo|hotmail|outlook|mail)\b/i.test(t) || /\b[a-z0-9]+\s+at\s+[a-z0-9]+\s+dot\s+[a-z]{2,}\b/i.test(t)) return 'That looks like contact details written to get around the filter.';
+  if(/@[A-Za-z0-9_]{3,}/.test(t)) return 'That looks like a username or handle. Keep the conversation on STACS.';
+  var words=t.toLowerCase().split(/[^a-z]+/), run=0, best=0, m={zero:1,oh:1,ooh:1,nought:1,one:1,two:1,three:1,four:1,five:1,six:1,seven:1,eight:1,nine:1,niner:1,double:0,triple:0,dash:0,hyphen:0,space:0};
+  for(var i=0;i<words.length;i++){ var w=words[i]; if(!w) continue; if(m.hasOwnProperty(w)){ run+=m[w]; if(run>best) best=run; } else run=0; }
+  if(best>=7) return 'That looks like a phone number written in words. Keep contact details off the chat.';
+  var dr=(t.match(/[\d \-.()+]{3,}/g)||[]), md=0, plus=false;
+  dr.forEach(function(r){ var n=(r.match(/\d/g)||[]).length; if(n>md) md=n; if(/\+/.test(r)&&n>=7) plus=true; });
+  if(plus || md>=10) return 'That looks like a phone number. Keep contact details off the chat.';
+  if(/[가-힣぀-ヿ฀-๿ऀ-ॿঀ-৿]{5,}/.test(t)) return 'Please write in English, French, German, Spanish, Portuguese, Russian, Chinese or Arabic.';
+  return '';
+}
+function empScreenLive(){
+  var ta=document.getElementById('empReplyBox'), btn=document.getElementById('empReplyBtn'), note=document.getElementById('empReplyNote');
+  if(!ta||!btn) return '';
+  var reason=clientMsgScreen(ta.value||'');
+  if(reason){ btn.disabled=true; if(note){ note.style.display='block'; note.textContent=reason; } }
+  else { btn.disabled=false; if(note){ note.style.display='none'; note.textContent=''; } }
+  return reason;
+}
 function sendEmpReply(){
   if(!EMP_MSG_CUR) return;
   var ta=document.getElementById('empReplyBox'), txt=(ta.value||'').trim(), note=document.getElementById('empReplyNote');
   if(note){ note.style.display='none'; note.textContent=''; }
   if(!txt){ ta.focus(); return; }
+  var pre=clientMsgScreen(txt); if(pre){ if(note){ note.style.display='block'; note.textContent=pre; } document.getElementById('empReplyBtn').disabled=true; return; }
   var btn=document.getElementById('empReplyBtn'); btn.disabled=true; var old=btn.textContent; btn.textContent='Sending…';
   fetch(EMPLOYER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'msg-reply',token:SESSION.token,threadId:EMP_MSG_CUR,body:txt})})
     .then(function(r){return r.json();}).then(function(d){
