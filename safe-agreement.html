@@ -20,10 +20,10 @@ h1{font-size:21px;margin:0 0 4px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .msg{font-size:13.5px;margin-top:10px}
 label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--tx2);cursor:pointer;margin:14px 0 0}
-.sigwrap{border:1px dashed var(--bdr2);border-radius:10px;background:var(--card2);position:relative}
-#sigPad{width:100%;height:190px;display:block;touch-action:none;cursor:crosshair}
-.sighint{position:absolute;left:14px;bottom:10px;color:var(--tx3);font-size:12px;pointer-events:none}
-.sigline{position:absolute;left:14px;right:14px;bottom:38px;border-top:1px solid var(--bdr2);pointer-events:none}
+.sigwrap{border:1px dashed var(--bdr2);border-radius:10px;background:#fff;position:relative}
+#sigPad{width:100%;height:190px;display:block;touch-action:none;cursor:crosshair;background:#fff;border-radius:10px}
+.sighint{position:absolute;left:14px;bottom:10px;color:#9aa0a6;font-size:12px;pointer-events:none}
+.sigline{position:absolute;left:14px;right:14px;bottom:38px;border-top:1px solid #c9ccd1;pointer-events:none}
 .filechip{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--bdr);padding:8px 12px;font-size:12.5px;margin-top:8px}
 .pill{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:0;border:1px solid var(--bdr2)}
 .note{font-size:12.5px;color:var(--tx3)}
@@ -55,13 +55,13 @@ label.chk{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var
       <div class="card">
         <div class="clauseH" id="clauseH">…</div>
         <div id="clauseBody"></div>
-        <label class="chk"><input type="checkbox" id="clauseChk"> <span>I have read and understood this point and I agree to it.</span></label>
+        <label class="chk"><input type="checkbox" id="clauseChk"> <span id="clauseChkLabel">I have read and understood this point and I agree to it.</span></label>
         <div class="row" style="margin-top:16px;justify-content:space-between">
           <button class="ghost" id="backBtn" onclick="prevClause()">Back</button>
           <button class="btn" id="nextBtn" onclick="nextClause()" disabled>Next</button>
         </div>
       </div>
-      <div class="note">This is the summarised agreement. Every point above carries the full indemnity, release and limitation of liability in favour of Leivotest and STACS.</div>
+      <div class="note">This is the summarised agreement. The full STACS <a href="legal.html" target="_blank" rel="noopener" style="color:var(--gold)">Terms and Conditions</a> apply to every point.</div>
     </div>
 
     <!-- SIGN -->
@@ -178,6 +178,10 @@ function renderClause(){
   document.getElementById("clauseBody").innerHTML=(c.p||[]).map(t=>'<p class="clauseP">'+esc(t)+'</p>').join("");
   document.getElementById("stepCount").textContent="Point "+(step+1)+" of "+CLAUSES.length;
   document.getElementById("pfill").style.width=Math.round((step)/CLAUSES.length*100)+"%";
+  var lbl=document.getElementById("clauseChkLabel");
+  if(lbl){ lbl.innerHTML = c.accept
+    ? 'I have read and understood the <a href="legal.html" target="_blank" rel="noopener" style="color:var(--gold)">Terms and Conditions</a> and I agree to them.'
+    : 'I have read and understood this point and I agree to it.'; }
   document.getElementById("clauseChk").checked=!!CLAUSES[step]._ok;
   document.getElementById("nextBtn").disabled=!CLAUSES[step]._ok;
   document.getElementById("nextBtn").textContent=(step===CLAUSES.length-1)?"Continue to sign":"Next";
@@ -230,8 +234,10 @@ function sizePad(){
   const rect=cv.getBoundingClientRect(); if(!rect.width) return;
   cv.width=rect.width*ratio; cv.height=rect.height*ratio;
   ctx=cv.getContext("2d"); ctx.setTransform(1,0,0,1,0,0); ctx.scale(ratio,ratio);
-  ctx.lineWidth=2.4; ctx.lineCap="round"; ctx.lineJoin="round";
-  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--tx").trim()||"#111";
+  ctx.lineWidth=2.6; ctx.lineCap="round"; ctx.lineJoin="round";
+  // Always solid black on a transparent canvas, so the saved PNG shows a clean black signature
+  // on the white agreement with no background following it.
+  ctx.strokeStyle="#000000";
 }
 function setupPad(){
   sizePad();
