@@ -191,14 +191,13 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
     <div class="note">Orientation: the STACS Global Mobility Orientation is mandatory for every candidate before advanced processing. This is built into every package.</div>
 
     <div class="sec">2. Financial breakdown (your fees)</div>
-    <div class="field" style="max-width:260px"><label>Currency for all fees below</label>
-      <select id="pk_currency" onchange="feeSum()"><option value="NGN">NGN — Naira</option><option value="USD">USD — US Dollar</option><option value="EUR">EUR — Euro</option><option value="GBP">GBP — Pound</option></select></div>
+    <div class="note" style="margin:-4px 0 10px">Enter each amount and pick its currency beside it. You can mix currencies; totals are shown per currency.</div>
     <div id="feesBox"></div>
-    <div class="feeline" style="margin-top:6px"><label>Per additional dependent (charged for <b>each</b> extra traveller, e.g. a family member)</label>
-      <input type="number" min="0" id="pk_perDependent" placeholder="0" oninput="feeSum()"></div>
-    <div class="total"><div class="statrow" style="border:none;padding:4px 0"><span>Your fees subtotal (main applicant)</span><strong id="feeSubtotal">₦0</strong></div>
-      <div class="statrow" style="border:none;padding:4px 0" id="depRow" style="display:none"><span>Plus, per extra dependent</span><strong id="depEcho">—</strong></div>
-      <div class="note">STACS platform fees are added on top of this and folded into the candidate price. Government and embassy fees pass through without markup by default. The per-dependent charge is added for each extra traveller, so a family total is worked out automatically from the family size.</div></div>
+    <div id="depBox"></div>
+    <div class="total"><div style="font-weight:700;margin-bottom:4px">Your fees subtotal (main applicant)</div>
+      <div id="feeSubtotal" style="font-size:15px;font-weight:800">₦0</div>
+      <div id="depEcho" class="note" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:8px">STACS platform fees are added on top of these and folded into the candidate price. Government and embassy fees pass through without markup by default. Each size-based charge (spouse, dependent child, dependent adult) is added per extra traveller, so a family total is worked out automatically from the family size.</div></div>
 
     <div class="sec">3. Payment structure</div>
     <div class="grid3">
@@ -375,8 +374,13 @@ var PICK={emp:[],med:[],dest:[],spdest:[]};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function ngn(n){return '₦'+Number(n||0).toLocaleString('en-NG');}
 var CURSYM={NGN:'₦',USD:'$',EUR:'€',GBP:'£'};
-function curCode(){var el=document.getElementById('pk_currency');return (el&&el.value)||'NGN';}
-function money(n,cur){cur=cur||curCode();return (CURSYM[cur]||'')+Number(n||0).toLocaleString()+' '+cur;}
+function money(n,cur){cur=cur||'NGN';return (CURSYM[cur]||'')+Number(n||0).toLocaleString()+' '+cur;}
+function curOpts(sel){sel=sel||'NGN';return ['NGN','USD','EUR','GBP'].map(function(c){return '<option value="'+c+'"'+(c===sel?' selected':'')+'>'+c+'</option>';}).join('');}
+function feeRowHtml(k,label,cls){return '<div style="display:grid;grid-template-columns:1fr 130px 92px;gap:8px;align-items:center;margin-bottom:8px">'
+  +'<label style="margin:0;font-size:13px">'+label+'</label>'
+  +'<input type="number" min="0" class="'+cls+'" data-k="'+k+'" placeholder="0" oninput="feeSum()">'
+  +'<select class="'+cls+'cur" data-k="'+k+'" onchange="feeSum()">'+curOpts('NGN')+'</select></div>';}
+function fmtByCur(byCur){var ks=Object.keys(byCur);if(!ks.length)return money(0,'NGN');return ks.map(function(c){return money(byCur[c],c);}).join('  +  ');}
 function go(p,btn){document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('on');});document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.nav button').forEach(function(b){b.classList.remove('on');});if(btn)btn.classList.add('on');if(p==='packages')loadPackages();if(p==='messages')loadTvMsgThreads();window.scrollTo({top:0,behavior:'smooth'});}
 /* ===== Agency inbox (turn-based, relayed through the member hub) ===== */
 function tvMsgDot(on){ var d=document.getElementById('msgNavDot'); if(d) d.style.display=on?'inline-block':'none'; }
@@ -417,7 +421,7 @@ function openTvMsgThread(threadId){
       reply='<div style="border-top:2px solid #2ec47a;margin-top:10px;padding-top:10px">'
         +'<div style="font-size:11.5px;color:#2ec47a;font-weight:700;margin-bottom:6px">● Your reply window is open — answer everything in one message.</div>'
         +'<div id="tvReplyNote" class="note" style="display:none"></div>'
-        +'<textarea id="tvReplyBox" rows="3" placeholder="Reply constructively (no phone numbers, emails or outside links)…" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--tx,#e8eaed);font:inherit;font-size:13px"></textarea>'
+        +'<textarea id="tvReplyBox" rows="3" oninput="tvScreenLive()" placeholder="Reply constructively (no phone numbers, emails or outside links)…" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--tx,#e8eaed);font:inherit;font-size:13px"></textarea>'
         +'<button class="btn" id="tvReplyBtn" onclick="sendTvReply()" style="margin-top:8px">Send reply</button></div>';
     } else {
       reply='<div class="note" style="margin-top:10px">It’s the candidate’s turn. You’ll be able to reply once they send their next message.</div>';
@@ -427,11 +431,35 @@ function openTvMsgThread(threadId){
       +'<div style="max-height:340px;overflow-y:auto;margin-bottom:6px">'+msgs+'</div>'+reply;
   }).catch(function(){ box.innerHTML='<div class="note">Couldn’t reach the server.</div>'; });
 }
+function clientMsgScreen(t){
+  t=String(t||'');
+  if(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(t)) return 'That looks like an email address. Keep contact details off the chat.';
+  if(/(?:https?:\/\/|www\.)/i.test(t) || /\b[a-z0-9-]+\.(com|net|org|ng|io|co|me|info|biz|app|xyz|link|site|online|live)\b/i.test(t)) return 'Links are not allowed in the chat.';
+  if(/\bdot\s*(com|net|org|ng|co|io|gmail|yahoo|hotmail|outlook|mail)\b/i.test(t) || /\b[a-z0-9]+\s+at\s+[a-z0-9]+\s+dot\s+[a-z]{2,}\b/i.test(t)) return 'That looks like contact details written to get around the filter.';
+  if(/@[A-Za-z0-9_]{3,}/.test(t)) return 'That looks like a username or handle. Keep the conversation on STACS.';
+  var words=t.toLowerCase().split(/[^a-z]+/), run=0, best=0, m={zero:1,oh:1,ooh:1,nought:1,one:1,two:1,three:1,four:1,five:1,six:1,seven:1,eight:1,nine:1,niner:1,double:0,triple:0,dash:0,hyphen:0,space:0};
+  for(var i=0;i<words.length;i++){ var w=words[i]; if(!w) continue; if(m.hasOwnProperty(w)){ run+=m[w]; if(run>best) best=run; } else run=0; }
+  if(best>=7) return 'That looks like a phone number written in words. Keep contact details off the chat.';
+  var dr=(t.match(/[\d \-.()+]{3,}/g)||[]), md=0, plus=false;
+  dr.forEach(function(r){ var n=(r.match(/\d/g)||[]).length; if(n>md) md=n; if(/\+/.test(r)&&n>=7) plus=true; });
+  if(plus || md>=10) return 'That looks like a phone number. Keep contact details off the chat.';
+  if(/[가-힣぀-ヿ฀-๿ऀ-ॿঀ-৿]{5,}/.test(t)) return 'Please write in English, French, German, Spanish, Portuguese, Russian, Chinese or Arabic.';
+  return '';
+}
+function tvScreenLive(){
+  var ta=document.getElementById('tvReplyBox'), btn=document.getElementById('tvReplyBtn'), note=document.getElementById('tvReplyNote');
+  if(!ta||!btn) return '';
+  var reason=clientMsgScreen(ta.value||'');
+  if(reason){ btn.disabled=true; if(note){ note.style.display='block'; note.textContent=reason; } }
+  else { btn.disabled=false; if(note){ note.style.display='none'; note.textContent=''; } }
+  return reason;
+}
 function sendTvReply(){
   if(!TV_MSG_CUR) return;
   var ta=document.getElementById('tvReplyBox'), txt=(ta.value||'').trim(), note=document.getElementById('tvReplyNote');
   if(note){ note.style.display='none'; note.textContent=''; }
   if(!txt){ ta.focus(); return; }
+  var pre=clientMsgScreen(txt); if(pre){ if(note){ note.style.display='block'; note.textContent=pre; } document.getElementById('tvReplyBtn').disabled=true; return; }
   var btn=document.getElementById('tvReplyBtn'); btn.disabled=true; var old=btn.textContent; btn.textContent='Sending…';
   fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'msg-reply',token:S.token,threadId:TV_MSG_CUR,body:txt})})
     .then(function(r){return r.json();}).then(function(d){
@@ -455,16 +483,24 @@ function renderChips(kind){var box=document.getElementById('chips_'+kind);box.in
  var ds=document.getElementById('ov_destination');COUNTRIES.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;ds.appendChild(o);});
  fillSelect('sel_emp',EMPLOYMENT);fillSelect('sel_med',MEDICAL);fillSelect('sel_dest',COUNTRIES);fillSelect('sel_spdest',COUNTRIES);fillSelect('ov_processingTime',PROCESSING);
  var sb=document.getElementById('servicesBox');SERVICES.forEach(function(s){sb.insertAdjacentHTML('beforeend','<label class="chk"><input type="checkbox" class="svc" value="'+esc(s)+'"> '+esc(s)+'</label>');});
- var fb=document.getElementById('feesBox');FEEKEYS.forEach(function(f){fb.insertAdjacentHTML('beforeend','<div class="feeline"><label>'+esc(f[1])+'</label><input type="number" min="0" class="fee" data-k="'+f[0]+'" placeholder="0" oninput="feeSum()"></div>');});
+ var fb=document.getElementById('feesBox');FEEKEYS.forEach(function(f){fb.insertAdjacentHTML('beforeend',feeRowHtml(f[0],esc(f[1]),'fee'));});
+ var db=document.getElementById('depBox');if(db){db.insertAdjacentHTML('beforeend',feeRowHtml('perSpouse','Travelling with additional spouse (charged per spouse)','dep'));
+   db.insertAdjacentHTML('beforeend',feeRowHtml('perDependentChild','Per additional dependent child (each extra child traveller)','dep'));
+   db.insertAdjacentHTML('beforeend',feeRowHtml('perDependentAdult','Per additional dependent adult (each extra adult family member)','dep'));}
  addOS();
  renderCmpQA();
  document.getElementById('taid').textContent=S.id||'';
  document.getElementById('themeBtn').innerHTML=(document.documentElement.getAttribute('data-theme')==='light')?'&#9728;&#65039;':'&#127769;';
 })();
 
-function feeSum(){var t=0;document.querySelectorAll('.fee').forEach(function(i){t+=Number(i.value)||0;});document.getElementById('feeSubtotal').textContent=money(t);
-  var dep=Number((document.getElementById('pk_perDependent')||{}).value)||0; var dr=document.getElementById('depRow'), de=document.getElementById('depEcho');
-  if(dr&&de){ if(dep>0){ dr.style.display='flex'; de.textContent=money(dep)+' each'; } else { dr.style.display='none'; } }
+function feeSum(){
+  var byCur={};
+  document.querySelectorAll('.fee').forEach(function(i){ var v=Number(i.value)||0; if(v<=0) return;
+    var cs=document.querySelector('.feecur[data-k="'+i.getAttribute('data-k')+'"]'); var cur=(cs&&cs.value)||'NGN'; byCur[cur]=(byCur[cur]||0)+v; });
+  document.getElementById('feeSubtotal').textContent=fmtByCur(byCur);
+  var deps=[['perSpouse','Spouse'],['perDependentChild','Dependent child'],['perDependentAdult','Dependent adult']], parts=[];
+  deps.forEach(function(d){ var inp=document.querySelector('.dep[data-k="'+d[0]+'"]'); var v=inp?Number(inp.value)||0:0; if(v>0){ var cs=document.querySelector('.depcur[data-k="'+d[0]+'"]'); var cur=(cs&&cs.value)||'NGN'; parts.push(d[1]+' '+money(v,cur)+' each'); } });
+  var de=document.getElementById('depEcho'); if(de) de.textContent=parts.length?('Plus — '+parts.join('  ·  ')):'';
 }
 function addOS(name,desc,fee,mand){var box=document.getElementById('osBox');var div=document.createElement('div');div.className='osrow';div.innerHTML='<input class="os-name" placeholder="Service" value="'+esc(name||'')+'"><input class="os-desc" placeholder="Description" value="'+esc(desc||'')+'"><input class="os-fee" type="number" placeholder="Fee ₦" value="'+(fee!=null?esc(fee):'')+'"><label class="chk" style="margin:0"><input type="checkbox" class="os-mand" '+(mand?'checked':'')+'> Mandatory</label><button class="btn ghost sm" onclick="this.parentNode.remove()">×</button>';box.appendChild(div);}
 function collectOS(){var out=[];document.querySelectorAll('#osBox .osrow').forEach(function(r){var n=r.querySelector('.os-name').value.trim();if(!n)return;out.push({name:n,desc:r.querySelector('.os-desc').value.trim(),fee:Number(r.querySelector('.os-fee').value)||0,mandatory:r.querySelector('.os-mand').checked});});return out;}
@@ -607,9 +643,10 @@ function reopenPkg(id){
   .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok){ loadPackages(); } else { alert((d&&d.error)||'Could not reopen.'); } }).catch(function(){ alert('Network error.'); });
 }
 function gatherPkg(){
- var fees={};document.querySelectorAll('.fee').forEach(function(i){fees[i.getAttribute('data-k')]=Number(i.value)||0;});
- fees.perDependent=Number((document.getElementById('pk_perDependent')||{}).value)||0;
- return {mode:document.getElementById('pk_mode').value,category:document.getElementById('pk_category').value,currency:curCode(),
+ var fees={};
+ document.querySelectorAll('.fee').forEach(function(i){ var k=i.getAttribute('data-k'); var cs=document.querySelector('.feecur[data-k="'+k+'"]'); fees[k]={amount:Number(i.value)||0, currency:(cs&&cs.value)||'NGN'}; });
+ document.querySelectorAll('.dep').forEach(function(i){ var k=i.getAttribute('data-k'); var cs=document.querySelector('.depcur[data-k="'+k+'"]'); fees[k]={amount:Number(i.value)||0, currency:(cs&&cs.value)||'NGN'}; });
+ return {mode:document.getElementById('pk_mode').value,category:document.getElementById('pk_category').value,
   simple:{title:document.getElementById('sp_title').value.trim(),destinations:PICK.spdest.slice(),note:document.getElementById('sp_note').value.trim()},
   overview:{title:document.getElementById('ov_title').value.trim(),destination:document.getElementById('ov_destination').value,
     employmentTypes:PICK.emp.slice(),visaCategory:document.getElementById('ov_visaCategory').value.trim(),
@@ -641,11 +678,11 @@ function savePackage(){
  msg('buildMsg','warn','Submitting your package…');
  fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})
   .then(function(r){return r.json();}).then(function(d){
-    if(d&&d.ok){var pr=d.pricing||{};var pcur=pr.currency||'NGN';var depTxt=(pr.perDependentCandidate>0)?(' Each extra dependent adds '+money(pr.perDependentCandidate,pcur)+'.'):'';msg('buildMsg','ok','Package '+d.packageId+' submitted for review. Your fees: '+money(pr.agencySubtotal,pcur)+'. Candidate price (STACS fees included): '+money(pr.candidateTotal,pcur)+'.'+depTxt);EDIT_ID='';document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';loadPackages();}
+    if(d&&d.ok){var pr=d.pricing||{};var cBy=pr.candidateTotalsByCurrency||{};var aBy=pr.agencyTotalsByCurrency||{};msg('buildMsg','ok','Package '+d.packageId+' submitted for review. Your fees: '+fmtByCur(aBy)+'. Candidate price (STACS fees included): '+fmtByCur(cBy)+'.');EDIT_ID='';document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';loadPackages();}
     else{msg('buildMsg','err',(d&&d.error)||'Could not submit the package.');}
   }).catch(function(){msg('buildMsg','err','Network error. Please try again.');});
 }
-function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes','sp_title','sp_note','cmp_steps','src_name','src_address','src_contact','src_website'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';document.getElementById('pk_category').value='';document.getElementById('pk_mode').value='full';setPkgMode('full');applyCategory('');PICK.emp=[];PICK.med=[];PICK.spdest=[];renderChips('emp');renderChips('med');renderChips('spdest');countChars('sp_note','sp_count',500);CMP_QUESTIONS.forEach(function(q,i){var el=document.getElementById('cmp_a'+i);if(el)el.value='';});var _dc=document.getElementById('cmp_declaration');if(_dc)_dc.checked=false;window._posterData=null;var pf=document.getElementById('posterFile');if(pf)pf.value='';document.getElementById('posterPreview').innerHTML='';document.querySelectorAll('.fee').forEach(function(i){i.value='';});var _pd=document.getElementById('pk_perDependent');if(_pd)_pd.value='';var _cc=document.getElementById('pk_currency');if(_cc)_cc.value='NGN';document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
+function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes','sp_title','sp_note','cmp_steps','src_name','src_address','src_contact','src_website'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';document.getElementById('pk_category').value='';document.getElementById('pk_mode').value='full';setPkgMode('full');applyCategory('');PICK.emp=[];PICK.med=[];PICK.spdest=[];renderChips('emp');renderChips('med');renderChips('spdest');countChars('sp_note','sp_count',500);CMP_QUESTIONS.forEach(function(q,i){var el=document.getElementById('cmp_a'+i);if(el)el.value='';});var _dc=document.getElementById('cmp_declaration');if(_dc)_dc.checked=false;window._posterData=null;var pf=document.getElementById('posterFile');if(pf)pf.value='';document.getElementById('posterPreview').innerHTML='';document.querySelectorAll('.fee,.dep').forEach(function(i){i.value='';});document.querySelectorAll('.feecur,.depcur').forEach(function(s){s.value='NGN';});document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
 
 function loadPackages(){
  var el=document.getElementById('pkgList');el.innerHTML='Loading…';
@@ -653,10 +690,10 @@ function loadPackages(){
    if(!d||!d.ok){el.innerHTML='Could not load packages.';return;}
    if(!d.packages.length){el.innerHTML='<div class="note">No packages yet. Use Create Package to build your first one.</div>';return;}
    el.innerHTML=d.packages.map(function(p){var cls=p.status==='Approved'?'ok':(/return/i.test(p.status)?'ret':'rev');
-     var pc=(p.data&&p.data.currency)||'NGN';var fmt=function(x){return money(x,pc);};
-     var depC=(p.data&&p.data.pricing&&p.data.pricing.perDependentCandidate)||0;
-     var depLine=depC>0?('<div class="statrow"><span>Per extra dependent (candidate price)</span><strong>'+fmt(depC)+'</strong></div>'):'';
-     return '<div class="card" style="margin:0 0 12px;padding:14px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong style="font-size:14px">'+esc(p.title)+'</strong><div class="note">'+esc(p.destination)+' · '+esc(p.packageId)+'</div></div><span class="pill '+cls+'">'+esc(p.status)+'</span></div><div class="statrow" style="margin-top:8px"><span>Your fees</span><strong>'+fmt(p.agencySubtotal)+'</strong></div><div class="statrow"><span>Candidate price (STACS fees included)</span><strong>'+fmt(p.candidateTotal)+'</strong></div>'+depLine+(p.adminNote?('<div class="msg warn" style="display:block;margin-top:8px">Reviewer note: '+esc(p.adminNote)+'</div>'):'')+'<div style="margin-top:10px">'+(p.status==='Approved'?('<button class="btn ghost sm" onclick="reopenPkg(\''+p.packageId+'\')">🔓 Request to edit</button> <span class="note" style="display:inline-block;margin-left:6px">Approved &amp; locked</span>'):('<button class="btn ghost sm" onclick="editPkg(\''+p.packageId+'\')">Edit</button>'))+'</div></div>';}).join('');
+     var pr=(p.data&&p.data.pricing)||{};var aBy=pr.agencyTotalsByCurrency||{};var cBy=pr.candidateTotalsByCurrency||{};
+     var depDefs=[['perSpouse','Spouse'],['perDependentChild','Dependent child'],['perDependentAdult','Dependent adult']];
+     var depLine=depDefs.map(function(d){var o=pr[d[0]];return (o&&o.candidate>0)?('<div class="statrow"><span>'+d[1]+' (candidate price, each)</span><strong>'+money(o.candidate,o.currency)+'</strong></div>'):'';}).join('');
+     return '<div class="card" style="margin:0 0 12px;padding:14px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong style="font-size:14px">'+esc(p.title)+'</strong><div class="note">'+esc(p.destination)+' · '+esc(p.packageId)+'</div></div><span class="pill '+cls+'">'+esc(p.status)+'</span></div><div class="statrow" style="margin-top:8px"><span>Your fees</span><strong>'+fmtByCur(aBy)+'</strong></div><div class="statrow"><span>Candidate price (STACS fees included)</span><strong>'+fmtByCur(cBy)+'</strong></div>'+depLine+(p.adminNote?('<div class="msg warn" style="display:block;margin-top:8px">Reviewer note: '+esc(p.adminNote)+'</div>'):'')+'<div style="margin-top:10px">'+(p.status==='Approved'?('<button class="btn ghost sm" onclick="reopenPkg(\''+p.packageId+'\')">🔓 Request to edit</button> <span class="note" style="display:inline-block;margin-left:6px">Approved &amp; locked</span>'):('<button class="btn ghost sm" onclick="editPkg(\''+p.packageId+'\')">Edit</button>'))+'</div></div>';}).join('');
    window._PKGS=d.packages;
  }).catch(function(){el.innerHTML='Network error.';});
 }
@@ -669,9 +706,10 @@ function editPkg(id){var p=(window._PKGS||[]).filter(function(x){return x.packag
  document.getElementById('ov_pickup').value=o.pickup||'No';document.getElementById('ov_insurance').value=o.insurance||'No';document.getElementById('ov_language').value=o.language||'';
  PICK.emp=Array.isArray(o.employmentTypes)?o.employmentTypes.slice():(o.employmentType?[o.employmentType]:[]);renderChips('emp');
  PICK.med=Array.isArray(o.medical)?o.medical.slice():(o.medical?[o.medical]:[]);renderChips('med');
- var curEl=document.getElementById('pk_currency'); if(curEl) curEl.value=(p.data&&p.data.currency)||'NGN';
- var depEl=document.getElementById('pk_perDependent'); if(depEl) depEl.value=(f.perDependent!=null?f.perDependent:'');
- document.querySelectorAll('.fee').forEach(function(i){i.value=f[i.getAttribute('data-k')]||'';});feeSum();
+ function restoreRow(sel,curSelCls){ document.querySelectorAll(sel).forEach(function(i){ var k=i.getAttribute('data-k'); var v=f[k];
+   var amt=(v&&typeof v==='object')?v.amount:(v||''); var cur=(v&&typeof v==='object')?(v.currency||'NGN'):'NGN';
+   i.value=(amt||amt===0)?amt:''; var cs=document.querySelector('.'+curSelCls+'[data-k="'+k+'"]'); if(cs) cs.value=cur; }); }
+ restoreRow('.fee','feecur'); restoreRow('.dep','depcur'); feeSum();
  document.getElementById('pay_deposit').value=pay.deposit||'';document.getElementById('pay_working').value=pay.workingDeposit||'';document.getElementById('pay_balance').value=pay.balanceNote||'Payable after visa approval';
  document.getElementById('refund_notes').value=rf.notes||'';
  document.getElementById('osBox').innerHTML='';if(os.length)os.forEach(function(s){addOS(s.name,s.desc,s.fee,s.mandatory);});else addOS();
