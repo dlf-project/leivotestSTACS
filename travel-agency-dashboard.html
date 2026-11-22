@@ -201,8 +201,8 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
 
     <div class="sec">3. Payment structure</div>
     <div class="grid3">
-     <div class="field"><label>Initial deposit (NGN)</label><input id="pay_deposit" type="number" placeholder="Starts documentation"></div>
-     <div class="field"><label>Working documentation deposit (NGN)</label><input id="pay_working" type="number" placeholder="Held by LEIVOTEST"></div>
+     <div class="field"><label>Initial deposit</label><div style="display:grid;grid-template-columns:1fr 92px;gap:8px"><input id="pay_deposit" type="number" placeholder="Starts documentation"><select id="pay_depositCur"><option>NGN</option><option>USD</option><option>EUR</option><option>GBP</option></select></div></div>
+     <div class="field"><label>Working documentation deposit</label><div style="display:grid;grid-template-columns:1fr 92px;gap:8px"><input id="pay_working" type="number" placeholder="Held by LEIVOTEST"><select id="pay_workingCur"><option>NGN</option><option>USD</option><option>EUR</option><option>GBP</option></select></div></div>
      <div class="field"><label>Balance</label><input id="pay_balance" value="Payable after visa approval"></div>
     </div>
 
@@ -409,13 +409,20 @@ function openTvMsgThread(threadId){
   var box=document.getElementById('tvMsgThread'); box.className=''; box.innerHTML='<div class="note">Loading…</div>';
   fetch(TRAVEL_URL+'?action=msg-thread&token='+encodeURIComponent(S.token)+'&threadId='+encodeURIComponent(threadId)).then(function(r){return r.json();}).then(function(d){
     if(!d||!d.ok){ box.innerHTML='<div class="note">Couldn’t open this conversation.</div>'; return; }
-    var msgs=(d.messages||[]).map(function(m){
+    window.TV_MSGS=d.messages||[];
+    var msgs=(d.messages||[]).map(function(m,ix){
       var mine=!!m.mine; var who=mine?'You':esc(m.fromName||'Candidate');
+      var extra='';
+      if(!mine){ var lang=detectLangLabel(m.body||'');
+        extra='<div style="font-size:10px;color:var(--tx3,#8a8f98);margin-top:3px">'+(lang?('Sender writes in '+lang+' · '):'')
+          +'<a href="javascript:void(0)" onclick="tvTranslate('+ix+')" style="color:#e0b000;text-decoration:none">Translate</a></div>'
+          +'<div id="tvxl8-'+ix+'" style="display:none;font-size:12px;color:var(--tx2,#c7ccd3);background:rgba(255,255,255,.04);border-radius:8px;padding:6px 9px;margin-top:4px;max-width:85%">x</div>'; }
       return '<div style="margin-bottom:10px;text-align:'+(mine?'right':'left')+'">'
         +'<div style="font-size:10.5px;color:var(--tx3,#8a8f98);margin-bottom:3px">'+who+(m.at?(' · '+esc(m.at)):'')+'</div>'
         +'<div style="display:inline-block;max-width:85%;text-align:left;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;'
-        +(mine?'background:#2ec47a;color:#05230f':'background:rgba(255,255,255,.06);color:var(--tx,#e8eaed);border:1px solid rgba(255,255,255,.12)')+'">'+esc(m.body||'').replace(/\n/g,'<br>')+'</div></div>';
+        +(mine?'background:#2ec47a;color:#05230f':'background:rgba(255,255,255,.06);color:var(--tx,#e8eaed);border:1px solid rgba(255,255,255,.12)')+'">'+esc(m.body||'').replace(/\n/g,'<br>')+'</div>'+extra+'</div>';
     }).join('') || '<div class="note">No messages yet.</div>';
+    msgs='<div style="margin-bottom:8px;font-size:11px;color:var(--tx3,#8a8f98)">Show translations in <select id="tvMsgLang" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:var(--tx,#e8eaed);font-size:11px;padding:3px 6px"><option value="en">English</option><option value="fr">French</option><option value="de">German</option><option value="es">Spanish</option><option value="pt">Portuguese</option><option value="ru">Russian</option><option value="zh">Chinese</option><option value="ar">Arabic</option><option value="it">Italian</option><option value="tr">Turkish</option><option value="sw">Swahili</option><option value="ha">Hausa</option><option value="yo">Yoruba</option><option value="ig">Igbo</option></select></div>'+msgs;
     var reply;
     if(d.myTurn){
       reply='<div style="border-top:2px solid #2ec47a;margin-top:10px;padding-top:10px">'
@@ -445,6 +452,30 @@ function clientMsgScreen(t){
   if(plus || md>=10) return 'That looks like a phone number. Keep contact details off the chat.';
   if(/[가-힣぀-ヿ฀-๿ऀ-ॿঀ-৿]{5,}/.test(t)) return 'Please write in English, French, German, Spanish, Portuguese, Russian, Chinese or Arabic.';
   return '';
+}
+function detectLangLabel(t){
+  t=String(t||'');
+  if(/[؀-ۿ]/.test(t)) return 'Arabic';
+  if(/[Ѐ-ӿ]/.test(t)) return 'Russian';
+  if(/[一-鿿]/.test(t)) return 'Chinese';
+  if(/[가-힣]/.test(t)) return 'Korean';
+  if(/[぀-ヿ]/.test(t)) return 'Japanese';
+  var s=' '+t.toLowerCase()+' ';
+  if(/ (le|la|les|une?|vous|bonjour|merci|pour|avec) /.test(s)) return 'French';
+  if(/ (der|die|das|und|ich|sie|mit|guten|danke|bitte|nicht) /.test(s)) return 'German';
+  if(/ (el|los|las|usted|hola|gracias|con|para|una) /.test(s)) return 'Spanish';
+  if(/ (voce|ola|obrigad[oa]|com|nao|uma) /.test(s)) return 'Portuguese';
+  if(/[a-z]/.test(t)) return 'English';
+  return '';
+}
+function tvTranslate(ix){
+  var m=(window.TV_MSGS||[])[ix]; if(!m) return;
+  var out=document.getElementById('tvxl8-'+ix); if(!out) return;
+  var target=(document.getElementById('tvMsgLang')||{}).value||'en';
+  out.style.display='inline-block'; out.textContent='Translating…';
+  fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'msg-translate',token:S.token,text:m.body||'',target:target})})
+    .then(function(r){return r.json();}).then(function(d){ out.textContent=(d&&d.ok)?('“'+d.text+'”'):((d&&d.error)||'Could not translate.'); })
+    .catch(function(){ out.textContent='Could not translate.'; });
 }
 function tvScreenLive(){
   var ta=document.getElementById('tvReplyBox'), btn=document.getElementById('tvReplyBtn'), note=document.getElementById('tvReplyNote');
@@ -655,7 +686,7 @@ function gatherPkg(){
     accommodation:document.getElementById('ov_accommodation').value,pickup:document.getElementById('ov_pickup').value,
     insurance:document.getElementById('ov_insurance').value,orientation:'Mandatory',
     language:document.getElementById('ov_language').value.trim(),medical:PICK.med.slice()},
-  fees:fees,payment:{deposit:Number(document.getElementById('pay_deposit').value)||0,workingDeposit:Number(document.getElementById('pay_working').value)||0,balanceNote:document.getElementById('pay_balance').value.trim()},
+  fees:fees,payment:{deposit:Number(document.getElementById('pay_deposit').value)||0,depositCur:(document.getElementById('pay_depositCur')||{}).value||'NGN',workingDeposit:Number(document.getElementById('pay_working').value)||0,workingDepositCur:(document.getElementById('pay_workingCur')||{}).value||'NGN',balanceNote:document.getElementById('pay_balance').value.trim()},
   refund:{notes:document.getElementById('refund_notes').value.trim()},optionalServices:collectOS(),
   compliance:{qa:gatherCmpQA(),steps:gatherCmpQA().filter(function(x){return x.a;}).map(function(x){return 'Q: '+x.q+'\nA: '+x.a;}).join('\n\n'),declaration:!!(document.getElementById('cmp_declaration')&&document.getElementById('cmp_declaration').checked),source:{type:document.getElementById('src_type').value,name:document.getElementById('src_name').value.trim(),address:document.getElementById('src_address').value.trim(),contact:document.getElementById('src_contact').value.trim(),website:document.getElementById('src_website').value.trim()}},
   poster:window._posterData||''};
@@ -682,7 +713,7 @@ function savePackage(){
     else{msg('buildMsg','err',(d&&d.error)||'Could not submit the package.');}
   }).catch(function(){msg('buildMsg','err','Network error. Please try again.');});
 }
-function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes','sp_title','sp_note','cmp_steps','src_name','src_address','src_contact','src_website'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';document.getElementById('pk_category').value='';document.getElementById('pk_mode').value='full';setPkgMode('full');applyCategory('');PICK.emp=[];PICK.med=[];PICK.spdest=[];renderChips('emp');renderChips('med');renderChips('spdest');countChars('sp_note','sp_count',500);CMP_QUESTIONS.forEach(function(q,i){var el=document.getElementById('cmp_a'+i);if(el)el.value='';});var _dc=document.getElementById('cmp_declaration');if(_dc)_dc.checked=false;window._posterData=null;var pf=document.getElementById('posterFile');if(pf)pf.value='';document.getElementById('posterPreview').innerHTML='';document.querySelectorAll('.fee,.dep').forEach(function(i){i.value='';});document.querySelectorAll('.feecur,.depcur').forEach(function(s){s.value='NGN';});document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
+function resetBuilder(){EDIT_ID='';['ov_title','ov_visaCategory','ov_validUntil','ov_slots','ov_language','pay_deposit','pay_working','refund_notes','sp_title','sp_note','cmp_steps','src_name','src_address','src_contact','src_website'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('ov_destination').value='';document.getElementById('ov_processingTime').value='';document.getElementById('pk_category').value='';document.getElementById('pk_mode').value='full';setPkgMode('full');applyCategory('');PICK.emp=[];PICK.med=[];PICK.spdest=[];renderChips('emp');renderChips('med');renderChips('spdest');countChars('sp_note','sp_count',500);CMP_QUESTIONS.forEach(function(q,i){var el=document.getElementById('cmp_a'+i);if(el)el.value='';});var _dc=document.getElementById('cmp_declaration');if(_dc)_dc.checked=false;window._posterData=null;var pf=document.getElementById('posterFile');if(pf)pf.value='';document.getElementById('posterPreview').innerHTML='';document.querySelectorAll('.fee,.dep').forEach(function(i){i.value='';});document.querySelectorAll('.feecur,.depcur').forEach(function(s){s.value='NGN';});['pay_depositCur','pay_workingCur'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='NGN';});document.getElementById('osBox').innerHTML='';addOS();feeSum();document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';document.getElementById('buildMsg').style.display='none';}
 
 function loadPackages(){
  var el=document.getElementById('pkgList');el.innerHTML='Loading…';
@@ -711,6 +742,7 @@ function editPkg(id){var p=(window._PKGS||[]).filter(function(x){return x.packag
    i.value=(amt||amt===0)?amt:''; var cs=document.querySelector('.'+curSelCls+'[data-k="'+k+'"]'); if(cs) cs.value=cur; }); }
  restoreRow('.fee','feecur'); restoreRow('.dep','depcur'); feeSum();
  document.getElementById('pay_deposit').value=pay.deposit||'';document.getElementById('pay_working').value=pay.workingDeposit||'';document.getElementById('pay_balance').value=pay.balanceNote||'Payable after visa approval';
+ var _dc=document.getElementById('pay_depositCur');if(_dc)_dc.value=pay.depositCur||'NGN';var _wc=document.getElementById('pay_workingCur');if(_wc)_wc.value=pay.workingDepositCur||'NGN';
  document.getElementById('refund_notes').value=rf.notes||'';
  document.getElementById('osBox').innerHTML='';if(os.length)os.forEach(function(s){addOS(s.name,s.desc,s.fee,s.mandatory);});else addOS();
  var md=p.data||{};
