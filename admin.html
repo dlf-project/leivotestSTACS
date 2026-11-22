@@ -628,6 +628,7 @@ function loadAgreements(){
                  +' <button class="ghost" onclick="agrDecline(\''+a.id+'\')" style="border-radius:0;color:#E86A6A">Return</button>';
         }
         if(a.pdfUrl){ actions+=' <a class="ghost" style="text-decoration:none;border-radius:0" href="'+a.pdfUrl+'" target="_blank" rel="noopener">View PDF</a>'; }
+        actions+=' <button class="ghost" onclick="agrGenerate(\''+a.id+'\')" style="border-radius:0" title="Generate the Summary + Acknowledgement + full copy, email them, and file the links">Generate &amp; email docs</button>';
         return '<div class="row" style="align-items:flex-start"><div class="info" style="flex:1">'
           +'<div style="font-weight:700">'+esc(a.partyName||a.signer||a.partyId)+' <span style="font-size:11px;color:'+col+';font-weight:700">● '+esc(a.status)+'</span></div>'
           +'<div style="font-size:12.5px;color:var(--tx2)">'+esc(a.type)+' agreement v'+esc(a.version||'')+' · '+esc(a.partyId)+' · signed '+esc(a.signedAt||'')+'</div>'
@@ -662,6 +663,15 @@ function agrPassport(id,btn){
       if(!d||!d.ok||!d.dataUri){ alert((d&&d.error)||'Could not load the passport.'); return; }
       fetch(d.dataUri).then(function(r){return r.blob();}).then(function(blob){ window.open(URL.createObjectURL(blob),'_blank'); });
     }).catch(function(){ if(btn){ btn.disabled=false; btn.textContent='Open passport'; } alert('Could not reach the server.'); });
+}
+function agrGenerate(id){
+  if(!confirm('Generate the Summary, Acknowledgement and full copy for this agreement now, email them to the signer, and file the links? Use this for older agreements that have no documents yet.')) return;
+  fetch(TRAVEL_URL,{method:'POST',body:JSON.stringify({action:'agreement-generate',id:id,token:TOK.ta})})
+    .then(r=>r.json()).then(function(d){
+      if(!d||!d.ok){ alert((d&&d.error)||'Could not generate.'); return; }
+      alert('Documents generated and emailed. The signer now also owes a hand-signed Acknowledgement upload.');
+      loadAgreements();
+    }).catch(function(){ alert('Could not reach the Travel hub.'); });
 }
 function agrApprove(id){
   if(!confirm('Mark this agreement as verified? The signed, stamped copy was already generated and emailed at signing. The signer will be told STACS has verified it.')) return;
