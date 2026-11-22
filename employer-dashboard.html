@@ -911,13 +911,20 @@ function openEmpMsgThread(threadId){
   var box=document.getElementById('empMsgThread'); box.innerHTML='<div style="color:var(--tx3,#889)">Loading…</div>';
   fetch(EMPLOYER_URL+'?action=msg-thread&token='+encodeURIComponent(SESSION.token)+'&threadId='+encodeURIComponent(threadId)).then(function(r){return r.json();}).then(function(d){
     if(!d||!d.ok){ box.innerHTML='<div style="color:var(--tx3,#889)">Couldn’t open this conversation.</div>'; return; }
-    var msgs=(d.messages||[]).map(function(m){
+    window.EMP_MSGS=d.messages||[];
+    var msgs=(d.messages||[]).map(function(m,ix){
       var mine=!!m.mine, who=mine?'You':esc(m.fromName||'Candidate');
+      var extra='';
+      if(!mine){ var lang=detectLangLabel(m.body||'');
+        extra='<div style="font-size:10px;color:var(--tx3,#889);margin-top:3px">'+(lang?('Sender writes in '+lang+' · '):'')
+          +'<a href="javascript:void(0)" onclick="empTranslate('+ix+')" style="color:#e0b000;text-decoration:none">Translate</a></div>'
+          +'<div id="empxl8-'+ix+'" style="display:none;font-size:12px;color:var(--tx2,#c7ccd3);background:rgba(255,255,255,.04);border-radius:8px;padding:6px 9px;margin-top:4px;max-width:85%"></div>'; }
       return '<div style="margin-bottom:10px;text-align:'+(mine?'right':'left')+'">'
         +'<div style="font-size:10.5px;color:var(--tx3,#889);margin-bottom:3px">'+who+(m.at?(' · '+esc(m.at)):'')+'</div>'
         +'<div style="display:inline-block;max-width:85%;text-align:left;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;'
-        +(mine?'background:#2ec47a;color:#05230f':'background:rgba(255,255,255,.06);color:var(--tx,#e8eaed);border:1px solid var(--bdr,#223)')+'">'+esc(m.body||'').replace(/\n/g,'<br>')+'</div></div>';
+        +(mine?'background:#2ec47a;color:#05230f':'background:rgba(255,255,255,.06);color:var(--tx,#e8eaed);border:1px solid var(--bdr,#223)')+'">'+esc(m.body||'').replace(/\n/g,'<br>')+'</div>'+extra+'</div>';
     }).join('') || '<div style="color:var(--tx3,#889);font-size:13px">No messages yet.</div>';
+    msgs='<div style="margin-bottom:8px;font-size:11px;color:var(--tx3,#889)">Show translations in <select id="empMsgLang" style="background:rgba(255,255,255,.05);border:1px solid var(--bdr,#223);border-radius:6px;color:var(--tx,#e8eaed);font-size:11px;padding:3px 6px"><option value="en">English</option><option value="fr">French</option><option value="de">German</option><option value="es">Spanish</option><option value="pt">Portuguese</option><option value="ru">Russian</option><option value="zh">Chinese</option><option value="ar">Arabic</option><option value="it">Italian</option><option value="tr">Turkish</option><option value="sw">Swahili</option><option value="ha">Hausa</option><option value="yo">Yoruba</option><option value="ig">Igbo</option></select></div>'+msgs;
     var reply;
     if(d.myTurn){
       reply='<div style="border-top:2px solid #2ec47a;margin-top:10px;padding-top:10px">'
@@ -947,6 +954,30 @@ function clientMsgScreen(t){
   if(plus || md>=10) return 'That looks like a phone number. Keep contact details off the chat.';
   if(/[가-힣぀-ヿ฀-๿ऀ-ॿঀ-৿]{5,}/.test(t)) return 'Please write in English, French, German, Spanish, Portuguese, Russian, Chinese or Arabic.';
   return '';
+}
+function detectLangLabel(t){
+  t=String(t||'');
+  if(/[؀-ۿ]/.test(t)) return 'Arabic';
+  if(/[Ѐ-ӿ]/.test(t)) return 'Russian';
+  if(/[一-鿿]/.test(t)) return 'Chinese';
+  if(/[가-힣]/.test(t)) return 'Korean';
+  if(/[぀-ヿ]/.test(t)) return 'Japanese';
+  var s=' '+t.toLowerCase()+' ';
+  if(/ (le|la|les|une?|vous|bonjour|merci|pour|avec) /.test(s)) return 'French';
+  if(/ (der|die|das|und|ich|sie|mit|guten|danke|bitte|nicht) /.test(s)) return 'German';
+  if(/ (el|los|las|usted|hola|gracias|con|para|una) /.test(s)) return 'Spanish';
+  if(/ (voce|ola|obrigad[oa]|com|nao|uma) /.test(s)) return 'Portuguese';
+  if(/[a-z]/.test(t)) return 'English';
+  return '';
+}
+function empTranslate(ix){
+  var m=(window.EMP_MSGS||[])[ix]; if(!m) return;
+  var out=document.getElementById('empxl8-'+ix); if(!out) return;
+  var target=(document.getElementById('empMsgLang')||{}).value||'en';
+  out.style.display='inline-block'; out.textContent='Translating…';
+  fetch(EMPLOYER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'msg-translate',token:SESSION.token,text:m.body||'',target:target})})
+    .then(function(r){return r.json();}).then(function(d){ out.textContent=(d&&d.ok)?('“'+d.text+'”'):((d&&d.error)||'Could not translate.'); })
+    .catch(function(){ out.textContent='Could not translate.'; });
 }
 function empScreenLive(){
   var ta=document.getElementById('empReplyBox'), btn=document.getElementById('empReplyBtn'), note=document.getElementById('empReplyNote');
