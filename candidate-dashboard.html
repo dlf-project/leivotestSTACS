@@ -1272,6 +1272,48 @@ function saveSlot(){
 }
 
 function logout(){localStorage.removeItem('stacs_session');location.href='sign-in.html';}
+/* ---- Connect Telegram (candidate) ---- */
+function openTgConnect(){ var m=document.getElementById('tgModal'); if(m){ m.style.display='flex'; loadCandTgStatus(true); } }
+function closeTgModal(){ var m=document.getElementById('tgModal'); if(m) m.style.display='none'; }
+function setTgNav(connected){
+  var btn=document.getElementById('tgNavBtn'), label=document.getElementById('tgNavLabel'), off=document.getElementById('tgOffBtn');
+  if(!btn) return;
+  if(connected){ btn.style.background='#229ED9'; btn.style.color='#fff'; if(label) label.textContent='Telegram (On)'; if(off) off.style.display='inline-block'; }
+  else { btn.style.background='#5a6b61'; btn.style.color='#fff'; if(label) label.textContent='Connect Telegram'; if(off) off.style.display='none'; }
+}
+function loadCandTgStatus(fill){
+  if(!S||!S.token) return;
+  var body=document.getElementById('tgModalBody'); if(fill&&body) body.innerHTML='Checking…';
+  fetch(SKILLED_URL+'?action=candidate-telegram-status&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ if(fill&&body) body.innerHTML=tgJoinForm(); return; }
+    setTgNav(d.connected);
+    if(!fill||!body) return;
+    if(d.connected){
+      body.innerHTML='<div style="font-size:14px;color:#0B3B21;margin-bottom:6px"><b>Connected</b></div>'+
+        '<p style="font-size:12.5px;color:#444;line-height:1.5">Your Telegram is linked to the STACS community. You will get helpful STACS updates and reminders. You can turn this off any time.</p>'+
+        '<button onclick="tgCandDisconnect()" style="margin-top:12px;background:#b11e2f;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer">Turn off</button>';
+    } else if(d.hasChat && d.optedOut){
+      body.innerHTML='<p style="font-size:12.5px;color:#444;line-height:1.5">Telegram updates are currently <b>off</b> for your account. Turn them back on to receive STACS updates and reminders again.</p>'+
+        '<button onclick="tgCandReconnect()" style="margin-top:12px;background:#229ED9;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer">Turn back on</button>';
+    } else {
+      body.innerHTML=tgJoinForm();
+    }
+  }).catch(function(){ if(fill&&body) body.innerHTML=tgJoinForm(); });
+}
+function tgJoinForm(){
+  return '<p style="font-size:12.5px;color:#444;line-height:1.5">Join the STACS community on Telegram to get verified updates, reminders and support. You confirm it is really you through the STACS Telegram page.</p>'+
+    '<a href="telegram.html" style="display:inline-block;margin-top:10px;background:#229ED9;color:#fff;text-decoration:none;border-radius:8px;padding:11px 18px;font-weight:600">Open the STACS Telegram page</a>'+
+    '<button onclick="loadCandTgStatus(true)" style="margin-left:10px;background:#0B3B21;color:#fff;border:none;border-radius:8px;padding:11px 16px;font-weight:600;cursor:pointer">I have joined</button>';
+}
+function tgCandDisconnect(){
+  if(!confirm('Turn off Telegram updates? You can turn them back on any time.')) return;
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'candidate-telegram-disconnect',token:S.token})})
+    .then(function(r){return r.json();}).then(function(){ setTgNav(false); loadCandTgStatus(true); }).catch(function(){ setTgNav(false); });
+}
+function tgCandReconnect(){
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'candidate-telegram-reconnect',token:S.token})})
+    .then(function(r){return r.json();}).then(function(){ loadCandTgStatus(true); }).catch(function(){ loadCandTgStatus(true); });
+}
 
 /* ===== Academics & Education ===== */
 var AC_LIST=[], AC_CV=null;
@@ -1420,7 +1462,13 @@ function buildSideNav(){
     if(!document.getElementById(s.id)) return;
     html+='<button class="snlink" data-target="'+s.id+'" onclick="navTo(\''+s.id+'\')"><span class="snico">'+s.icon+'</span>'+esc(s.label)+'</button>';
   });
-  nav.innerHTML=html;
+  nav.innerHTML=html +
+    '<div class="snhead" style="margin-top:6px">Telegram</div>' +
+    '<button id="tgNavBtn" class="snlink" onclick="openTgConnect()" style="background:#5a6b61;color:#fff">'+
+      '<span class="snico">&#9993;&#65039;</span><span id="tgNavLabel">Connect Telegram</span>'+
+      '<span id="tgOffBtn" onclick="event.stopPropagation();tgCandDisconnect();return false;" title="Turn off Telegram" style="display:none;margin-left:8px;background:rgba(0,0,0,.28);color:#fff;border-radius:5px;padding:2px 8px;font-size:10px;cursor:pointer">Off</span>'+
+    '</button>';
+  try{ loadCandTgStatus(); }catch(e){}
   // highlight the section currently in view
   if('IntersectionObserver' in window){
     var obs=new IntersectionObserver(function(entries){
@@ -4117,4 +4165,14 @@ function resumeToggleReplace(reqId, checked){
 </script>
 <script src="data/session.js"></script>
 <script>(function(){function go(){if(window.STACSSession)STACSSession.init();}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go();})();</script>
+<!-- Connect Telegram pop-forward (candidate) -->
+<div id="tgModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(5,20,12,.55);align-items:center;justify-content:center;padding:18px">
+  <div style="background:#fff;max-width:440px;width:100%;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#0B3B21,#12502A)">
+      <b style="color:#fff;font-size:15px">Connect Telegram</b>
+      <button onclick="closeTgModal()" aria-label="Close" style="background:none;border:none;color:#fff;font-size:24px;line-height:1;cursor:pointer">&times;</button>
+    </div>
+    <div id="tgModalBody" style="padding:20px">Loading…</div>
+  </div>
+</div>
 </body></html>
