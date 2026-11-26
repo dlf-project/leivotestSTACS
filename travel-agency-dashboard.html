@@ -94,7 +94,7 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
   <button data-p="progress" onclick="go('progress',this)"><span class="ic">&#128506;</span>Progress &amp; Status</button>
   <button data-p="payouts" onclick="go('payouts',this)"><span class="ic">&#128179;</span>My Payouts</button>
   <button data-p="messages" onclick="go('messages',this)"><span class="ic">&#128172;</span>Messages<span id="msgNavDot" style="display:none;width:8px;height:8px;border-radius:50%;background:#E86A6A;margin-left:7px"></span></button>
-  <button onclick="openTgConnect()"><span class="ic">&#9993;&#65039;</span>Connect Telegram<span id="tgNavState" style="display:block;font-size:8px;opacity:.75;margin:2px 0 0 24px;letter-spacing:.04em">Not connected</span></button>
+  <button id="tgNavBtn" onclick="openTgConnect()" style="background:#5a6b61;color:#fff"><span class="ic">&#9993;&#65039;</span><span id="tgNavLabel">Connect Telegram</span><span id="tgOffBtn" onclick="event.stopPropagation();tgDisconnect();return false;" title="Turn off Telegram" style="display:none;margin-left:8px;background:rgba(0,0,0,.28);color:#fff;border-radius:5px;padding:2px 8px;font-size:10px;cursor:pointer">Off</span></button>
  </div>
  <div class="main">
 
@@ -710,7 +710,7 @@ function savePackage(){
  msg('buildMsg','warn','Submitting your package…');
  fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})
   .then(function(r){return r.json();}).then(function(d){
-    if(d&&d.ok){var pr=d.pricing||{};var cBy=pr.candidateTotalsByCurrency||{};var aBy=pr.agencyTotalsByCurrency||{};msg('buildMsg','ok','Package '+d.packageId+' submitted for review. Your fees: '+fmtByCur(aBy)+'. Candidate price (STACS fees included): '+fmtByCur(cBy)+'.');EDIT_ID='';document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';loadPackages();}
+    if(d&&d.ok){var pr=d.pricing||{};var aBy=pr.agencyTotalsByCurrency||{};msg('buildMsg','ok','Package '+d.packageId+' submitted for review. Your fees: '+fmtByCur(aBy)+'.');EDIT_ID='';document.getElementById('buildTitle').textContent='Create a Managed Destination Mobility Package';loadPackages();}
     else{msg('buildMsg','err',(d&&d.error)||'Could not submit the package.');}
   }).catch(function(){msg('buildMsg','err','Network error. Please try again.');});
 }
@@ -725,7 +725,7 @@ function loadPackages(){
      var pr=(p.data&&p.data.pricing)||{};var aBy=pr.agencyTotalsByCurrency||{};var cBy=pr.candidateTotalsByCurrency||{};
      var depDefs=[['perSpouse','Spouse'],['perDependentChild','Dependent child'],['perDependentAdult','Dependent adult']];
      var depLine=depDefs.map(function(d){var o=pr[d[0]];return (o&&o.candidate>0)?('<div class="statrow"><span>'+d[1]+' (candidate price, each)</span><strong>'+money(o.candidate,o.currency)+'</strong></div>'):'';}).join('');
-     return '<div class="card" style="margin:0 0 12px;padding:14px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong style="font-size:14px">'+esc(p.title)+'</strong><div class="note">'+esc(p.destination)+' · '+esc(p.packageId)+'</div></div><span class="pill '+cls+'">'+esc(p.status)+'</span></div><div class="statrow" style="margin-top:8px"><span>Your fees</span><strong>'+fmtByCur(aBy)+'</strong></div><div class="statrow"><span>Candidate price (STACS fees included)</span><strong>'+fmtByCur(cBy)+'</strong></div>'+depLine+(p.adminNote?('<div class="msg warn" style="display:block;margin-top:8px">Reviewer note: '+esc(p.adminNote)+'</div>'):'')+'<div style="margin-top:10px">'+(p.status==='Approved'?('<button class="btn ghost sm" onclick="reopenPkg(\''+p.packageId+'\')">🔓 Request to edit</button> <span class="note" style="display:inline-block;margin-left:6px">Approved &amp; locked</span>'):('<button class="btn ghost sm" onclick="editPkg(\''+p.packageId+'\')">Edit</button>'))+'</div></div>';}).join('');
+     return '<div class="card" style="margin:0 0 12px;padding:14px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong style="font-size:14px">'+esc(p.title)+'</strong><div class="note">'+esc(p.destination)+' · '+esc(p.packageId)+'</div></div><span class="pill '+cls+'">'+esc(p.status)+'</span></div><div class="statrow" style="margin-top:8px"><span>Your fees</span><strong>'+fmtByCur(aBy)+'</strong></div>'+depLine+(p.adminNote?('<div class="msg warn" style="display:block;margin-top:8px">Reviewer note: '+esc(p.adminNote)+'</div>'):'')+'<div style="margin-top:10px">'+(p.status==='Approved'?('<button class="btn ghost sm" onclick="reopenPkg(\''+p.packageId+'\')">🔓 Request to edit</button> <span class="note" style="display:inline-block;margin-left:6px">Approved &amp; locked</span>'):('<button class="btn ghost sm" onclick="editPkg(\''+p.packageId+'\')">Edit</button>'))+'</div></div>';}).join('');
    window._PKGS=d.packages;
  }).catch(function(){el.innerHTML='Network error.';});
 }
@@ -771,31 +771,41 @@ function editPkg(id){var p=(window._PKGS||[]).filter(function(x){return x.packag
   </div>
 </div>
 <script>
+var TG_BOT='stacscommunity1_bot';
+function tgFallbackLink(){ return 'https://t.me/'+TG_BOT+'?start=ta'+String(S.id||'').replace(/[^0-9]/g,''); }
 function openTgConnect(){ document.getElementById('tgModal').style.display='flex'; loadTgStatus(); }
 function closeTgModal(){ document.getElementById('tgModal').style.display='none'; }
-function setTgNav(c){ var el=document.getElementById('tgNavState'); if(el){ el.textContent=c?'Connected':'Not connected'; el.style.color=c?'#8fe0a8':''; } }
+function setTgNav(c){
+  var btn=document.getElementById('tgNavBtn'), label=document.getElementById('tgNavLabel'), off=document.getElementById('tgOffBtn');
+  if(!btn) return;
+  if(c){ btn.style.background='#229ED9'; btn.style.color='#fff'; if(label) label.textContent='Telegram (On)'; if(off) off.style.display='inline-block'; }
+  else { btn.style.background='#5a6b61'; btn.style.color='#fff'; if(label) label.textContent='Connect Telegram'; if(off) off.style.display='none'; }
+}
+function tgConnectForm(link){
+  return '<p style="font-size:12.5px;color:#444;line-height:1.5">Link your Telegram so STACS can message you the moment a client contacts you. The STACS bot messages you <b>privately</b> — you are <b>not</b> added to any group.</p>'+
+    '<ol style="font-size:12.5px;color:#444;line-height:1.6;padding-left:18px;margin:10px 0">'+
+    '<li>Tap the button to open the STACS bot in Telegram.</li><li>Press <b>Start</b> in Telegram.</li><li>Come back and tap <b>I have connected</b>.</li></ol>'+
+    '<a href="'+link+'" target="_blank" rel="noopener" style="display:inline-block;background:#229ED9;color:#fff;text-decoration:none;border-radius:8px;padding:11px 18px;font-weight:600">Open Telegram to connect</a>'+
+    '<button onclick="loadTgStatus()" style="margin-left:10px;background:#0B3B21;color:#fff;border:none;border-radius:8px;padding:11px 16px;font-weight:600;cursor:pointer">I have connected</button>';
+}
 function loadTgStatus(){
   var body=document.getElementById('tgModalBody'); if(body) body.innerHTML='Checking…';
   fetch(TRAVEL_URL+'?action=agent-telegram-status&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
-    if(!d||!d.ok){ if(body) body.innerHTML='Could not load status. Please try again.'; return; }
+    if(!d||!d.ok){ if(body) body.innerHTML=tgConnectForm(tgFallbackLink()); return; }   // status failed: still let them connect
     setTgNav(d.connected);
     if(d.connected){
       body.innerHTML='<div style="font-size:14px;color:#0B3B21;margin-bottom:6px"><b>Connected</b>'+(d.username?(' as @'+d.username.replace(/[<>]/g,'')):'')+'</div>'+
         '<p style="font-size:12.5px;color:#444;line-height:1.5">Your Telegram is linked. STACS will message you privately here whenever a client sends you a new message, so you can log in and reply quickly.</p>'+
         '<button onclick="tgDisconnect()" style="margin-top:12px;background:#b11e2f;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer">Turn off</button>';
     } else {
-      body.innerHTML='<p style="font-size:12.5px;color:#444;line-height:1.5">Link your Telegram so STACS can message you the moment a client contacts you. The STACS bot messages you <b>privately</b> — you are <b>not</b> added to any group.</p>'+
-        '<ol style="font-size:12.5px;color:#444;line-height:1.6;padding-left:18px;margin:10px 0">'+
-        '<li>Tap the button to open the STACS bot in Telegram.</li><li>Press <b>Start</b> in Telegram.</li><li>Come back and tap <b>I have connected</b>.</li></ol>'+
-        '<a href="'+d.link+'" target="_blank" rel="noopener" style="display:inline-block;background:#229ED9;color:#fff;text-decoration:none;border-radius:8px;padding:11px 18px;font-weight:600">Open Telegram to connect</a>'+
-        '<button onclick="loadTgStatus()" style="margin-left:10px;background:#0B3B21;color:#fff;border:none;border-radius:8px;padding:11px 16px;font-weight:600;cursor:pointer">I have connected</button>';
+      body.innerHTML=tgConnectForm(d.link||tgFallbackLink());
     }
-  }).catch(function(){ if(body) body.innerHTML='Could not load status. Please try again.'; });
+  }).catch(function(){ if(body) body.innerHTML=tgConnectForm(tgFallbackLink()); });
 }
 function tgDisconnect(){
   if(!confirm('Turn off Telegram messages? You can reconnect any time.')) return;
   fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'agent-telegram-disconnect',token:S.token})})
-    .then(function(r){return r.json();}).then(function(){ loadTgStatus(); }).catch(function(){ loadTgStatus(); });
+    .then(function(r){return r.json();}).then(function(){ setTgNav(false); if(document.getElementById('tgModal').style.display==='flex') loadTgStatus(); }).catch(function(){ setTgNav(false); });
 }
 try{ fetch(TRAVEL_URL+'?action=agent-telegram-status&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){ if(d&&d.ok) setTgNav(d.connected); }).catch(function(){}); }catch(e){}
 </script>
