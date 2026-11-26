@@ -1332,7 +1332,7 @@ function loadTravelPkgs(){
         if(p.status==='Pending STACS review'||p.status==='Unlocked for edit'){
           act='<button class="ap" onclick="approveTravelPkg(\''+esc(p.packageId)+'\')">Approve &amp; lock</button> <button class="ghost" style="border-radius:0" onclick="declineTravelPkg(\''+esc(p.packageId)+'\')">Return…</button>';
         } else if(p.status==='Approved'){
-          act='<button class="ap" style="background:#229ED9;border-color:#229ED9" onclick="postPkgTg(\''+esc(p.packageId)+'\',this)">&#128226; Post in TG</button>';
+          act='<button class="ap" style="background:#229ED9;border-color:#229ED9" onclick="postPkgTg(\''+esc(p.packageId)+'\',this)">&#128226; Post in TG</button> <button class="ghost" style="border-radius:0" onclick="copyPkgAnnouncement(\''+esc(p.packageId)+'\',this)">&#128203; Copy announcement</button>';
         }
         return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px">'
           +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
@@ -1354,6 +1354,19 @@ function approveTravelPkg(packageId){
       else { alert((d&&d.error)||'Could not approve.'); }
     }).catch(function(){ alert('Network error.'); });
 }
+function copyPkgAnnouncement(packageId, btn){
+  if(btn){ btn.disabled=true; var old=btn.innerHTML; btn.textContent='Preparing…'; btn.setAttribute('data-old',old); }
+  fetch(TRAVEL_URL+'?action=package-announcement&token='+encodeURIComponent(TOK.ta)+'&packageId='+encodeURIComponent(packageId))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ resetCopyBtn(btn); alert((d&&d.error)||'Could not build the announcement.'); return; }
+      function done(){ if(btn){ btn.disabled=false; btn.textContent='✓ Copied'; setTimeout(function(){ btn.innerHTML=btn.getAttribute('data-old')||'📋 Copy announcement'; },1800); } }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(d.text).then(done).catch(function(){ fallbackCopy(d.text); done(); });
+      } else { fallbackCopy(d.text); done(); }
+    }).catch(function(){ resetCopyBtn(btn); alert('Network error.'); });
+}
+function resetCopyBtn(btn){ if(btn){ btn.disabled=false; btn.innerHTML=btn.getAttribute('data-old')||'📋 Copy announcement'; } }
+function fallbackCopy(text){ try{ var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }catch(e){ alert(text); } }
 function postPkgTg(packageId, btn){
   if(btn){ btn.disabled=true; btn.textContent='Posting…'; }
   fetch(TRAVEL_URL,{method:'POST',body:JSON.stringify({action:'package-post-tg',token:TOK.ta,packageId:packageId})})
