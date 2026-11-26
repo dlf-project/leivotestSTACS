@@ -94,6 +94,7 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
   <button data-p="progress" onclick="go('progress',this)"><span class="ic">&#128506;</span>Progress &amp; Status</button>
   <button data-p="payouts" onclick="go('payouts',this)"><span class="ic">&#128179;</span>My Payouts</button>
   <button data-p="messages" onclick="go('messages',this)"><span class="ic">&#128172;</span>Messages<span id="msgNavDot" style="display:none;width:8px;height:8px;border-radius:50%;background:#E86A6A;margin-left:7px"></span></button>
+  <button onclick="openTgConnect()"><span class="ic">&#9993;&#65039;</span>Connect Telegram<span id="tgNavState" style="display:block;font-size:8px;opacity:.75;margin:2px 0 0 24px;letter-spacing:.04em">Not connected</span></button>
  </div>
  <div class="main">
 
@@ -758,5 +759,44 @@ function editPkg(id){var p=(window._PKGS||[]).filter(function(x){return x.packag
  document.getElementById('posterPreview').innerHTML=md.posterUrl?('<img src="'+md.posterUrl+'" style="max-width:220px;border:1px solid var(--bdr);border-radius:8px"><div class="note">Current poster. Upload a new one to replace it.</div>'):'';
  go('build',document.querySelector('[data-p=build]'));
 }
+</script>
+<!-- Connect Telegram pop-forward -->
+<div id="tgModal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(5,20,12,.55);align-items:center;justify-content:center;padding:18px">
+  <div style="background:#fff;max-width:440px;width:100%;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#0B3B21,#12502A)">
+      <b style="color:#fff;font-size:15px">Connect Telegram</b>
+      <button onclick="closeTgModal()" aria-label="Close" style="background:none;border:none;color:#fff;font-size:24px;line-height:1;cursor:pointer">&times;</button>
+    </div>
+    <div id="tgModalBody" style="padding:20px">Loading…</div>
+  </div>
+</div>
+<script>
+function openTgConnect(){ document.getElementById('tgModal').style.display='flex'; loadTgStatus(); }
+function closeTgModal(){ document.getElementById('tgModal').style.display='none'; }
+function setTgNav(c){ var el=document.getElementById('tgNavState'); if(el){ el.textContent=c?'Connected':'Not connected'; el.style.color=c?'#8fe0a8':''; } }
+function loadTgStatus(){
+  var body=document.getElementById('tgModalBody'); if(body) body.innerHTML='Checking…';
+  fetch(TRAVEL_URL+'?action=agent-telegram-status&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ if(body) body.innerHTML='Could not load status. Please try again.'; return; }
+    setTgNav(d.connected);
+    if(d.connected){
+      body.innerHTML='<div style="font-size:14px;color:#0B3B21;margin-bottom:6px"><b>Connected</b>'+(d.username?(' as @'+d.username.replace(/[<>]/g,'')):'')+'</div>'+
+        '<p style="font-size:12.5px;color:#444;line-height:1.5">Your Telegram is linked. STACS will message you privately here whenever a client sends you a new message, so you can log in and reply quickly.</p>'+
+        '<button onclick="tgDisconnect()" style="margin-top:12px;background:#b11e2f;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer">Turn off</button>';
+    } else {
+      body.innerHTML='<p style="font-size:12.5px;color:#444;line-height:1.5">Link your Telegram so STACS can message you the moment a client contacts you. The STACS bot messages you <b>privately</b> — you are <b>not</b> added to any group.</p>'+
+        '<ol style="font-size:12.5px;color:#444;line-height:1.6;padding-left:18px;margin:10px 0">'+
+        '<li>Tap the button to open the STACS bot in Telegram.</li><li>Press <b>Start</b> in Telegram.</li><li>Come back and tap <b>I have connected</b>.</li></ol>'+
+        '<a href="'+d.link+'" target="_blank" rel="noopener" style="display:inline-block;background:#229ED9;color:#fff;text-decoration:none;border-radius:8px;padding:11px 18px;font-weight:600">Open Telegram to connect</a>'+
+        '<button onclick="loadTgStatus()" style="margin-left:10px;background:#0B3B21;color:#fff;border:none;border-radius:8px;padding:11px 16px;font-weight:600;cursor:pointer">I have connected</button>';
+    }
+  }).catch(function(){ if(body) body.innerHTML='Could not load status. Please try again.'; });
+}
+function tgDisconnect(){
+  if(!confirm('Turn off Telegram messages? You can reconnect any time.')) return;
+  fetch(TRAVEL_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'agent-telegram-disconnect',token:S.token})})
+    .then(function(r){return r.json();}).then(function(){ loadTgStatus(); }).catch(function(){ loadTgStatus(); });
+}
+try{ fetch(TRAVEL_URL+'?action=agent-telegram-status&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){ if(d&&d.ok) setTgNav(d.connected); }).catch(function(){}); }catch(e){}
 </script>
 </body></html>
