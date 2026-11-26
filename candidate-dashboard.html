@@ -295,7 +295,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
      <h3 style="margin:0">Browse packages &amp; services</h3>
    </div>
    <div style="font-size:12.5px;color:var(--tx2);margin-bottom:12px">Verified travel and mobility packages published by STACS agencies. Tap “Ask a question” on any package to speak with the provider here on STACS — safely, before you commit to anything.</div>
-   <input id="pkgSearch" oninput="renderPkgs()" placeholder="Search destination, title or type…" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--tx);font-size:13.5px;margin-bottom:12px">
+   <input id="pkgSearch" oninput="renderPkgs()" placeholder="Search destination, title or type…" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--tx);font-size:13.5px;margin-bottom:10px">
+   <div id="pkgCats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
    <div id="pkgList" style="display:grid;gap:10px">Loading…</div>
  </div>
 
@@ -1503,7 +1504,7 @@ function loadPackages(){
       // Providers stay anonymous to candidates: show the unique STACS provider ID, never the agency name.
       var totals=p.candidateTotalsByCurrency||{};
       if(!Object.keys(totals).length && p.candidateTotal){ totals[p.currency||'NGN']=Number(p.candidateTotal)||0; }
-      out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:(p.taId?('STACS Provider '+p.taId):'STACS Provider'),
+      out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:(p.taId?('STACS Provider '+p.taId):'STACS Provider'), category:(p.category||''),
         title:p.title||'Package', sub:(p.destination||'')+(p.category?(' · '+p.category):''), summary:p.summary||'',
         totals:totals, perSpouse:p.perSpouse||null, perChild:p.perDependentChild||null, perAdult:p.perDependentAdult||null,
         price:Object.keys(totals).length?cfmtTotals(totals):'Price on enquiry', poster:p.poster||'' });
@@ -1516,10 +1517,19 @@ function loadPackages(){
     PKG_DATA=out; PKG_LOADED=true; renderPkgs();
   });
 }
+var PKG_CATS=['Employer Sponsored','Recruiter/Agency-Sponsored','Self-Sponsored','Government-Sponsored','Scholarship/Training-Sponsored','Family-Sponsored','Investor/Business-Sponsored','Third-Party Sponsored','Contract/Project-Sponsored'];
+var PKG_CAT='';
+function pkgCatPick(c){ PKG_CAT=(PKG_CAT===c)?'':c; buildCatChips(); renderPkgs(); }
+function buildCatChips(){
+  var box=document.getElementById('pkgCats'); if(!box) return;
+  function chip(label,val){ var on=(PKG_CAT===val); return '<button onclick="pkgCatPick(\''+val.replace(/'/g,"\\'")+'\')" style="font-size:11px;font-weight:600;padding:5px 11px;border-radius:100px;cursor:pointer;border:1px solid '+(on?'#e0b000':'rgba(255,255,255,.14)')+';background:'+(on?'rgba(224,176,0,.18)':'rgba(255,255,255,.04)')+';color:'+(on?'#e8c74a':'var(--tx2)')+'">'+label+'</button>'; }
+  box.innerHTML=chip('All','')+PKG_CATS.map(function(c){ return chip(c,c); }).join('');
+}
 function renderPkgs(){
   var el=document.getElementById('pkgList'); if(!el) return;
+  try{ buildCatChips(); }catch(e){}
   var q=((document.getElementById('pkgSearch')||{}).value||'').toLowerCase();
-  var list=PKG_DATA.filter(function(p){ return !q || (p.title+' '+p.sub+' '+p.provider).toLowerCase().indexOf(q)>=0; });
+  var list=PKG_DATA.filter(function(p){ return (!q || (p.title+' '+p.sub+' '+p.provider).toLowerCase().indexOf(q)>=0) && (!PKG_CAT || String(p.category||'')===PKG_CAT); });
   if(!list.length){ el.innerHTML='<div style="color:var(--tx3);padding:6px 0">'+(PKG_DATA.length?'No results match your search.':'Nothing published yet. Check back soon.')+'</div>'; return; }
   el.innerHTML=list.map(function(p){
     var tag=(p.kind==='job')
