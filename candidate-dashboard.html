@@ -1505,6 +1505,9 @@ function loadPackages(){
       var totals=p.candidateTotalsByCurrency||{};
       if(!Object.keys(totals).length && p.candidateTotal){ totals[p.currency||'NGN']=Number(p.candidateTotal)||0; }
       out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:(p.taId?('STACS Provider '+p.taId):'STACS Provider'), category:(p.category||''),
+        subCategory:p.subCategory||'', destination:p.destination||'', continent:p.continent||'', allocatedSlots:p.allocatedSlots||'',
+        startDate:p.startDate||'', closingDate:p.closingDate||'', employmentTypes:p.employmentTypes||[], visaCategory:p.visaCategory||'', processingTime:p.processingTime||'',
+        payment:p.payment||{}, refund:p.refund||{},
         title:p.title||'Package', sub:(p.destination||'')+(p.category?(' · '+p.category):''), summary:p.summary||'',
         totals:totals, perSpouse:p.perSpouse||null, perChild:p.perDependentChild||null, perAdult:p.perDependentAdult||null,
         price:Object.keys(totals).length?cfmtTotals(totals):'Price on enquiry', poster:p.poster||'' });
@@ -1535,31 +1538,93 @@ function renderPkgs(){
     var tag=(p.kind==='job')
       ? '<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;background:rgba(120,160,220,.16);color:#9fb8d8;padding:2px 8px;border-radius:100px">JOB</span>'
       : '<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;background:rgba(224,176,0,.16);color:#d9c178;padding:2px 8px;border-radius:100px">TRAVEL</span>';
-    var poster=p.poster?('<img src="'+esc(p.poster)+'" alt="" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto" onerror="this.style.display=\'none\'">'):'';
+    var poster=p.poster?('<img src="'+esc(p.poster)+'" alt="" onclick="openPkgView(\''+esc(p.id)+'\')" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;cursor:pointer" onerror="this.style.display=\'none\'">'):'';
     var interest=(p.kind==='job')?('<button class="btn ghost" style="padding:7px 13px;font-size:12.5px" onclick="pkgInterest(\''+esc(p.id)+'\',this)">⭐ Express interest</button>'):'';
-    var hasDeps=(p.perSpouse&&p.perSpouse.candidate>0)||(p.perChild&&p.perChild.candidate>0)||(p.perAdult&&p.perAdult.candidate>0);
+    return '<div style="display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">'
+      +poster
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center;gap:8px"><span onclick="openPkgView(\''+esc(p.id)+'\')" style="font-weight:800;font-size:14px;cursor:pointer">'+esc(p.title)+'</span>'+tag+'</div>'
+      +'<div style="font-size:12px;color:var(--tx3);margin-top:2px">'+esc(p.sub)+' · '+esc(p.provider)+'</div>'
+      +(p.summary?'<div style="font-size:12.5px;color:var(--tx2);margin-top:6px;line-height:1.5">'+esc(p.summary)+'</div>':'')
+      +'<div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">'
+      +'<button class="btn" style="padding:7px 13px;font-size:12.5px" onclick="openPkgView(\''+esc(p.id)+'\')">View details</button>'
+      +interest
+      +'<button class="btn ghost" style="padding:7px 13px;font-size:12.5px" onclick="pkgAsk(\''+esc(p.id)+'\')">💬 Ask a question</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+/* ===== Package detail pop-forward (Overview + Summary + Apply + Report) ===== */
+function openPkgView(id){
+  var p=pkgFind(id); if(!p) return;
+  var m=document.getElementById('pkgViewModal'), body=document.getElementById('pkgViewBody');
+  if(m) m.style.display='flex';
+  var ov=''; function row(k,v){ if(!v){return '';} return '<div style="display:flex;gap:10px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="min-width:150px;color:var(--tx3);font-size:12px">'+esc(k)+'</div><div style="flex:1;font-size:13px">'+esc(String(v))+'</div></div>'; }
+  var emp=(p.employmentTypes&&p.employmentTypes.join)?p.employmentTypes.join(', '):'';
+  var poster=p.poster?('<img src="'+esc(p.poster)+'" alt="" style="max-width:100%;border-radius:10px;margin:6px 0" onerror="this.style.display=\'none\'">'):'';
+  ov+='<div style="font-weight:800;font-size:16px;margin-bottom:2px">'+esc(p.title)+'</div>';
+  ov+='<div style="font-size:12px;color:var(--tx3);margin-bottom:8px">'+esc(p.provider||'')+'</div>';
+  ov+=poster;
+  ov+=sec('Overview');
+  ov+=row('Category', p.category)+row('Sub-Category', p.subCategory);
+  ov+=row('Destination', (p.destination||'')+(p.continent?(', '+p.continent):''));
+  ov+=row('Employment types', emp)+row('Allocated slots', p.allocatedSlots);
+  ov+=row('Visa category', p.visaCategory)+row('Processing time', p.processingTime);
+  ov+=row('Start date', p.startDate)+row('Closing date', p.closingDate);
+  if(p.summary) ov+='<div style="font-size:13px;color:var(--tx2);margin-top:8px;line-height:1.55">'+esc(p.summary)+'</div>';
+  ov+=sec('Summary (pricing)');
+  ov+=row('Your price', (p.totals&&Object.keys(p.totals).length)?cfmtTotals(p.totals):'Price on enquiry');
+  var pay=p.payment||{};
+  if(pay.deposit) ov+=row('Initial deposit', Number(pay.deposit).toLocaleString()+' '+(pay.depositCur||''));
+  if(pay.workingDeposit) ov+=row('Working documentation deposit', Number(pay.workingDeposit).toLocaleString()+' '+(pay.workingDepositCur||''));
+  if(pay.balanceNote) ov+=row('Balance', pay.balanceNote);
+  if(p.refund&&(p.refund.note||p.refund.refundable)) ov+=row('Refund', p.refund.note||p.refund.refundable);
+  if(p.closingDate) ov+=row('Application deadline', p.closingDate);
+  // family calculator inside Summary
+  var hasDeps=(p.perSpouse&&p.perSpouse.candidate>0)||(p.perChild&&p.perChild.candidate>0)||(p.perAdult&&p.perAdult.candidate>0);
+  if(p.kind==='travel'&&hasDeps){
     var numIn=function(sfx,label){ return '<label style="font-size:11.5px;color:var(--tx2);display:inline-flex;align-items:center;gap:5px">'+label+' <input type="number" min="0" value="0" id="'+sfx+'-'+esc(p.id)+'" style="width:46px;padding:3px 5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:var(--tx);font-size:12px" oninput="famCalc(\''+esc(p.id)+'\')"></label>'; };
-    var fam=(p.kind==='travel'&&hasDeps)?(
-      '<div style="margin-top:8px;font-size:12px;color:var(--tx2);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:9px 11px">'
+    ov+='<div style="margin-top:8px;font-size:12px;color:var(--tx2);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:9px 11px">'
       +'<div style="margin-bottom:6px;color:var(--tx3)">Travelling with family? Add them to see your total (you are already counted):</div>'
       +'<div style="display:flex;gap:14px;flex-wrap:wrap">'
       +((p.perSpouse&&p.perSpouse.candidate>0)?numIn('fspouse','Spouse'):'')
       +((p.perChild&&p.perChild.candidate>0)?numIn('fchild','Dependent children'):'')
       +((p.perAdult&&p.perAdult.candidate>0)?numIn('fadult','Dependent adults'):'')
-      +'</div>'
-      +'<div id="fam-'+esc(p.id)+'" style="font-weight:700;color:var(--gold2,#e0b000);margin-top:7px">Total for 1 traveller: '+cfmtTotals(p.totals||{})+'</div></div>'):'';
-    return '<div style="display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">'
-      +poster
-      +'<div style="flex:1;min-width:0">'
-      +'<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:800;font-size:14px">'+esc(p.title)+'</span>'+tag+'</div>'
-      +'<div style="font-size:12px;color:var(--tx3);margin-top:2px">'+esc(p.sub)+' · '+esc(p.provider)+'</div>'
-      +(p.summary?'<div style="font-size:12.5px;color:var(--tx2);margin-top:6px;line-height:1.5">'+esc(p.summary)+'</div>':'')
-      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap">'
-      +'<span style="font-weight:800;font-size:13.5px;color:var(--gold2,#e0b000)">'+esc(p.price||'')+'</span>'
-      +'<span style="display:flex;gap:8px;flex-wrap:wrap">'+interest
-      +'<button class="btn" style="padding:7px 13px;font-size:12.5px" onclick="pkgAsk(\''+esc(p.id)+'\')">💬 Ask a question</button></span>'
-      +'</div>'+fam+'</div></div>';
-  }).join('');
+      +'</div><div id="fam-'+esc(p.id)+'" style="font-weight:700;color:var(--gold2,#e0b000);margin-top:7px">Total for 1 traveller: '+cfmtTotals(p.totals||{})+'</div></div>';
+  }
+  ov+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'
+    +'<button class="btn" style="padding:9px 16px" onclick="closePkgView();pkgApply(\''+esc(p.id)+'\')">Apply</button>'
+    +'<button class="btn ghost" style="padding:9px 16px" onclick="closePkgView();pkgAsk(\''+esc(p.id)+'\')">💬 Ask a question</button>'
+    +'<button onclick="openPkgReport(\''+esc(p.id)+'\')" style="padding:9px 16px;background:rgba(200,40,40,.14);color:#f08a8a;border:1px solid rgba(200,40,40,.4);border-radius:10px;font-weight:600;cursor:pointer;font-size:12.5px">Report</button>'
+    +'</div>';
+  if(body) body.innerHTML=ov;
+  function sec(t){ return '<div style="margin:14px 0 6px;font-weight:800;font-size:12px;letter-spacing:.4px;color:var(--gold2,#e0b000);text-transform:uppercase">'+t+'</div>'; }
+}
+function closePkgView(){ var m=document.getElementById('pkgViewModal'); if(m) m.style.display='none'; }
+function pkgApply(id){ var p=pkgFind(id); if(!p) return; pkgAsk(id); setTimeout(function(){ var el=document.getElementById('msgInput'); if(el){ el.value="I'm interested in this '"+String(p.title).replace(/'/g,'’')+"' only.\n\nAre the slots still available?"; } },220); }
+/* ---- Report ---- */
+function openPkgReport(id){
+  var p=pkgFind(id); if(!p) return;
+  var m=document.getElementById('pkgReportModal'), body=document.getElementById('pkgReportBody');
+  if(m) m.style.display='flex';
+  body.innerHTML='<div style="font-size:12.5px;color:var(--tx2);margin-bottom:10px">Tell us what is wrong. Our team will look into it and email you a reference number.</div>'
+    +'<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:7px 0"><input type="checkbox" id="rep_pkg" checked> Report this package / service</label>'
+    +'<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:7px 0"><input type="checkbox" id="rep_prov"> Report this service provider</label>'
+    +'<textarea id="rep_details" placeholder="Describe your concern…" style="width:100%;box-sizing:border-box;min-height:90px;margin-top:8px;padding:9px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--tx);font-size:13px"></textarea>'
+    +'<div id="rep_msg" style="font-size:12.5px;margin-top:8px"></div>'
+    +'<button id="rep_send" onclick="submitPkgReport(\''+esc(p.id)+'\',\''+esc(p.providerId||'')+'\')" style="margin-top:10px;background:#b11e2f;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer">Submit report</button>';
+}
+function closePkgReport(){ var m=document.getElementById('pkgReportModal'); if(m) m.style.display='none'; }
+function submitPkgReport(packageId, providerId){
+  var rp=document.getElementById('rep_pkg').checked, rv=document.getElementById('rep_prov').checked;
+  var det=(document.getElementById('rep_details')||{}).value||'';
+  var ms=document.getElementById('rep_msg'), btn=document.getElementById('rep_send');
+  if(!rp&&!rv){ ms.style.color='#f08a8a'; ms.textContent='Please tick at least one option.'; return; }
+  if(btn){ btn.disabled=true; btn.textContent='Submitting…'; }
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'package-report',token:S.token,packageId:packageId,providerId:providerId,reportPackage:rp,reportProvider:rv,details:det})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){ ms.style.color='#2ec47a'; ms.innerHTML='Thank you. Your reference number is <b>'+esc(d.ticket)+'</b>. We have emailed you a copy.'; if(btn) btn.style.display='none'; }
+      else { ms.style.color='#f08a8a'; ms.textContent=(d&&d.error)||'Could not submit. Please try again.'; if(btn){ btn.disabled=false; btn.textContent='Submit report'; } }
+    }).catch(function(){ ms.style.color='#f08a8a'; ms.textContent='Network error.'; if(btn){ btn.disabled=false; btn.textContent='Submit report'; } });
 }
 function pkgFind(id){ for(var i=0;i<PKG_DATA.length;i++){ if(String(PKG_DATA[i].id)===String(id)) return PKG_DATA[i]; } return null; }
 function pkgAsk(id){
@@ -4175,6 +4240,26 @@ function resumeToggleReplace(reqId, checked){
 </script>
 <script src="data/session.js"></script>
 <script>(function(){function go(){if(window.STACSSession)STACSSession.init();}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go();})();</script>
+<!-- Package detail pop-forward -->
+<div id="pkgViewModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(5,20,12,.6);align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto">
+  <div style="background:#0e1a14;max-width:560px;width:100%;border:1px solid rgba(255,255,255,.1);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:linear-gradient(135deg,#0B3B21,#12502A);border-radius:14px 14px 0 0;position:sticky;top:0">
+      <b style="color:#fff;font-size:15px">Package</b>
+      <button onclick="closePkgView()" aria-label="Close" style="background:none;border:none;color:#fff;font-size:24px;line-height:1;cursor:pointer">&times;</button>
+    </div>
+    <div id="pkgViewBody" style="padding:18px 20px 24px">Loading…</div>
+  </div>
+</div>
+<!-- Report pop-forward -->
+<div id="pkgReportModal" style="display:none;position:fixed;inset:0;z-index:1001;background:rgba(5,20,12,.62);align-items:center;justify-content:center;padding:18px">
+  <div style="background:#0e1a14;max-width:440px;width:100%;border:1px solid rgba(255,255,255,.1);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:#6e1620;border-radius:14px 14px 0 0">
+      <b style="color:#fff;font-size:15px">Report</b>
+      <button onclick="closePkgReport()" aria-label="Close" style="background:none;border:none;color:#fff;font-size:24px;line-height:1;cursor:pointer">&times;</button>
+    </div>
+    <div id="pkgReportBody" style="padding:18px 20px 22px"></div>
+  </div>
+</div>
 <!-- Connect Telegram pop-forward (candidate) -->
 <div id="tgModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(5,20,12,.55);align-items:center;justify-content:center;padding:18px">
   <div style="background:#fff;max-width:440px;width:100%;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
