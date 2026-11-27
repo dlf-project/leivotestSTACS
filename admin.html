@@ -1336,7 +1336,7 @@ function loadTravelPkgs(){
         }
         return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px">'
           +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
-          +'<div><span style="font-weight:800;font-size:14px">'+esc(p.title||'Package')+'</span> <span style="font-size:11.5px;color:var(--tx3)">'+esc(p.destination||'')+(cat?(' · '+esc(cat)):'')+'</span></div>'
+          +'<div><span onclick="openPkgDetail(\''+esc(p.packageId)+'\')" style="font-weight:800;font-size:14px;color:#9fd0ff;cursor:pointer;text-decoration:underline" title="View full details">'+esc(p.title||'Package')+'</span> <span style="font-size:11.5px;color:var(--tx3)">'+esc(p.destination||'')+(cat?(' · '+esc(cat)):'')+'</span></div>'
           +'<span style="font-size:10px;font-weight:800;padding:2px 9px;border-radius:100px;background:rgba(255,255,255,.08)">'+esc(p.status)+'</span></div>'
           +(function(){var SY={NGN:'₦',USD:'$',EUR:'€',GBP:'£'};function f(m){m=m||{};var ks=Object.keys(m);if(!ks.length)return '—';return ks.map(function(c){return (SY[c]||'')+Number(m[c]).toLocaleString()+' '+c;}).join(' + ');}var pr=(p.data&&p.data.pricing)||{};var deps=[['perSpouse','Spouse'],['perDependentChild','Dep. child'],['perDependentAdult','Dep. adult']];var depStr=deps.map(function(d){var o=pr[d[0]];return (o&&o.candidate>0)?(d[1]+' '+(SY[o.currency]||'')+Number(o.candidate).toLocaleString()+' '+o.currency):'';}).filter(Boolean).join(' · ');return '<div style="font-size:12px;color:var(--tx3);margin-top:4px">'+esc(p.agencyName||'')+' · '+esc(p.packageId)+' · Candidate total '+f(pr.candidateTotalsByCurrency)+(depStr?(' · '+depStr):'')+'</div>';})()
           +'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:var(--gold2)">Processing &amp; Execution Note '+decl+'</summary><div style="margin-top:8px;background:var(--card2);border-radius:8px;padding:10px">'+qaHtml+'</div></details>'
@@ -1353,6 +1353,53 @@ function approveTravelPkg(packageId){
       if(d&&d.ok){ var f=document.getElementById('pkgFilter'); if(f) f.value='Approved'; loadTravelPkgs(); alert('Approved and locked. It now lives under the “Approved” view.'); }
       else { alert((d&&d.error)||'Could not approve.'); }
     }).catch(function(){ alert('Network error.'); });
+}
+function openPkgDetail(packageId){
+  var m=document.getElementById('pkgDetailModal'), body=document.getElementById('pkgDetailBody');
+  if(m){ m.style.display='flex'; } if(body){ body.innerHTML='Loading…'; }
+  fetch(TRAVEL_URL+'?action=package-admin-detail&token='+encodeURIComponent(TOK.ta)+'&packageId='+encodeURIComponent(packageId))
+    .then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.ok){ if(body) body.innerHTML='Could not load this package. '+((d&&d.error)||''); return; }
+      body.innerHTML=renderPkgDetail(d['package']||{}, d.provider||{});
+    }).catch(function(){ if(body) body.innerHTML='Network error.'; });
+}
+function closePkgDetail(){ var m=document.getElementById('pkgDetailModal'); if(m) m.style.display='none'; }
+function pd_row(k,v){ if(v===undefined||v===null||v===''){ v='—'; } return '<div style="display:flex;gap:10px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="min-width:160px;color:#9aa;font-size:12px">'+esc(k)+'</div><div style="flex:1;font-size:13px;color:#eee">'+esc(String(v))+'</div></div>'; }
+function pd_sec(t){ return '<div style="margin:14px 0 6px;font-weight:800;font-size:12.5px;letter-spacing:.4px;color:#9fd0ff;text-transform:uppercase">'+esc(t)+'</div>'; }
+function renderPkgDetail(p, prov){
+  var dt=p.data||{}, ov=dt.overview||{}, sp=dt.simple||{}, pay=dt.payment||{}, comp=dt.compliance||{}, pr=dt.pricing||{};
+  var emp=(ov.employmentTypes&&ov.employmentTypes.join)?ov.employmentTypes.join(', '):'';
+  var dests=(sp.destinations&&sp.destinations.join)?sp.destinations.join(', '):'';
+  var cands=pr.candidateTotalsByCurrency||{}, ags=pr.agencyTotalsByCurrency||{};
+  function money(m){ var a=[]; for(var k in m){ a.push((Number(m[k])||0).toLocaleString()+' '+k); } return a.length?a.join('  /  '):'—'; }
+  var h='';
+  h+=pd_sec('Service Provider');
+  h+=pd_row('Provider ID', p.taId);
+  h+=pd_row('Organization', prov.orgName);
+  h+=pd_row('Contact person', prov.agent)+pd_row('Position', prov.position);
+  h+=pd_row('Phone', [prov.phone1,prov.phone2].filter(Boolean).join('  /  '));
+  h+=pd_row('Email', prov.email)+pd_row('Website', prov.website)+pd_row('Country', prov.country);
+  h+=pd_sec('Package');
+  h+=pd_row('Package ID', p.packageId)+pd_row('Status', p.status);
+  h+=pd_row('Title', p.title);
+  h+=pd_row('Category', dt.category)+pd_row('Sub-Category', dt.subCategory);
+  h+=pd_row('Destination', (p.destination||'')+(dt.continent?(', '+dt.continent):''));
+  h+=pd_row('Employment types', emp)+pd_row('Allocated slots', dt.allocatedSlots);
+  h+=pd_row('Visa category', ov.visaCategory)+pd_row('Processing time', ov.processingTime);
+  h+=pd_row('Start date', dt.startDate)+pd_row('Closing date', dt.closingDate);
+  if(dests) h+=pd_row('Destinations', dests);
+  if(sp.note) h+=pd_row('Note', sp.note);
+  h+=pd_sec('Pricing');
+  h+=pd_row('Agency fees', money(ags))+pd_row('Candidate price (incl. STACS)', money(cands));
+  h+=pd_row('Initial deposit', (pay.deposit?(Number(pay.deposit).toLocaleString()+' '+(pay.depositCur||'')):'—'));
+  h+=pd_row('Working documentation deposit', (pay.workingDeposit?(Number(pay.workingDeposit).toLocaleString()+' '+(pay.workingDepositCur||'')):'—'));
+  h+=pd_row('Balance', pay.balanceNote);
+  if(comp.steps||((comp.qa&&comp.qa.length))){ h+=pd_sec('Processing & Execution Note');
+    if(comp.steps) h+='<div style="font-size:12.5px;color:#ddd;white-space:pre-wrap;line-height:1.5">'+esc(comp.steps)+'</div>';
+    if(comp.qa&&comp.qa.length){ comp.qa.forEach(function(x){ if(x&&(x.q||x.a)) h+=pd_row(x.q||'', x.a||''); }); } }
+  if(dt.posterUrl){ h+=pd_sec('Poster'); h+='<img src="'+esc(dt.posterUrl)+'" alt="poster" style="max-width:100%;border-radius:10px;margin-top:4px" onerror="this.style.display=\'none\'">'; }
+  if(p.adminNote){ h+=pd_sec('Admin note'); h+='<div style="font-size:12.5px;color:#ddd">'+esc(p.adminNote)+'</div>'; }
+  return h;
 }
 function copyPkgAnnouncement(packageId, btn){
   if(btn){ btn.disabled=true; var old=btn.innerHTML; btn.textContent='Preparing…'; btn.setAttribute('data-old',old); }
@@ -2175,4 +2222,14 @@ function approve(which,email,btn){
   reset();
 })();
 </script>
+<!-- Package detail review pop-forward (Super Admin) -->
+<div id="pkgDetailModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.62);align-items:flex-start;justify-content:center;padding:28px 14px;overflow:auto">
+  <div style="background:#13181d;max-width:620px;width:100%;border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#0f4c81;border-radius:14px 14px 0 0;position:sticky;top:0">
+      <b style="color:#fff;font-size:15px">Package details</b>
+      <button onclick="closePkgDetail()" aria-label="Close" style="background:none;border:none;color:#fff;font-size:24px;line-height:1;cursor:pointer">&times;</button>
+    </div>
+    <div id="pkgDetailBody" style="padding:18px 20px 24px">Loading…</div>
+  </div>
+</div>
 </body></html>
