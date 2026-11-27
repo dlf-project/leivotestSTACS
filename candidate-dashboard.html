@@ -1297,14 +1297,20 @@ function loadCandTgStatus(fill){
       body.innerHTML='<p style="font-size:12.5px;color:#444;line-height:1.5">Telegram updates are currently <b>off</b> for your account. Turn them back on to receive STACS updates and reminders again.</p>'+
         '<button onclick="tgCandReconnect()" style="margin-top:12px;background:#229ED9;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer">Turn back on</button>';
     } else {
-      body.innerHTML=tgJoinForm();
+      tgRenderJoin();
     }
-  }).catch(function(){ if(fill&&body) body.innerHTML=tgJoinForm(); });
+  }).catch(function(){ if(fill&&body) tgRenderJoin(); });
 }
-function tgJoinForm(){
-  return '<p style="font-size:12.5px;color:#444;line-height:1.5">Join the STACS community on Telegram to get verified updates, reminders and support. You confirm it is really you through the STACS Telegram page.</p>'+
-    '<a href="telegram.html" style="display:inline-block;margin-top:10px;background:#229ED9;color:#fff;text-decoration:none;border-radius:8px;padding:11px 18px;font-weight:600">Open the STACS Telegram page</a>'+
-    '<button onclick="loadCandTgStatus(true)" style="margin-left:10px;background:#0B3B21;color:#fff;border:none;border-radius:8px;padding:11px 16px;font-weight:600;cursor:pointer">I have joined</button>';
+function tgRenderJoin(){
+  var body=document.getElementById('tgModalBody'); if(!body) return;
+  body.innerHTML='<p style="font-size:12.5px;color:#444;line-height:1.5">Link your Telegram so STACS can message you privately with verified updates, reminders and alerts. Tap the button, press <b>Start</b> in Telegram, then come back and tap "I have connected".</p><div id="tgLinkArea" style="margin-top:10px">Preparing your secure link…</div>';
+  fetch(SKILLED_URL+'?action=candidate-telegram-link&token='+encodeURIComponent(S.token)).then(function(r){return r.json();}).then(function(d){
+    var area=document.getElementById('tgLinkArea'); if(!area) return;
+    if(d&&d.ok&&d.deepLink){
+      area.innerHTML='<a href="'+d.deepLink+'" target="_blank" rel="noopener" style="display:inline-block;background:#229ED9;color:#fff;text-decoration:none;border-radius:8px;padding:11px 18px;font-weight:600">Open Telegram to connect</a>'+
+        '<button onclick="loadCandTgStatus(true)" style="margin-left:10px;background:#0B3B21;color:#fff;border:none;border-radius:8px;padding:11px 16px;font-weight:600;cursor:pointer">I have connected</button>';
+    } else { area.innerHTML='<span style="color:#c0392b">Could not prepare the link right now.</span> <button onclick="tgRenderJoin()" style="margin-left:8px;background:#0B3B21;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer">Retry</button>'; }
+  }).catch(function(){ var area=document.getElementById('tgLinkArea'); if(area) area.innerHTML='<button onclick="tgRenderJoin()" style="background:#0B3B21;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer">Retry</button>'; });
 }
 function tgCandDisconnect(){
   if(!confirm('Turn off Telegram updates? You can turn them back on any time.')) return;
@@ -1504,7 +1510,7 @@ function loadPackages(){
       // Providers stay anonymous to candidates: show the unique STACS provider ID, never the agency name.
       var totals=p.candidateTotalsByCurrency||{};
       if(!Object.keys(totals).length && p.candidateTotal){ totals[p.currency||'NGN']=Number(p.candidateTotal)||0; }
-      out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:(p.taId?('STACS Provider '+p.taId):'STACS Provider'), category:(p.category||''),
+      out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:(p.taId?('STACS Provider '+p.taId):'STACS Provider'), category:(p.category||''), underReview:(p.underReview||false),
         subCategory:p.subCategory||'', destination:p.destination||'', continent:p.continent||'', allocatedSlots:p.allocatedSlots||'',
         startDate:p.startDate||'', closingDate:p.closingDate||'', employmentTypes:p.employmentTypes||[], visaCategory:p.visaCategory||'', processingTime:p.processingTime||'',
         payment:p.payment||{}, refund:p.refund||{},
@@ -1522,11 +1528,14 @@ function loadPackages(){
 }
 var PKG_CATS=['Employer Sponsored','Recruiter/Agency-Sponsored','Self-Sponsored','Government-Sponsored','Scholarship/Training-Sponsored','Family-Sponsored','Investor/Business-Sponsored','Third-Party Sponsored','Contract/Project-Sponsored'];
 var PKG_CAT='';
-function pkgCatPick(c){ PKG_CAT=(PKG_CAT===c)?'':c; buildCatChips(); renderPkgs(); }
+function pkgCatSelect(v){ PKG_CAT=v||''; renderPkgs(); }
 function buildCatChips(){
   var box=document.getElementById('pkgCats'); if(!box) return;
-  function chip(label,val){ var on=(PKG_CAT===val); return '<button onclick="pkgCatPick(\''+val.replace(/'/g,"\\'")+'\')" style="font-size:11px;font-weight:600;padding:5px 11px;border-radius:100px;cursor:pointer;border:1px solid '+(on?'#e0b000':'rgba(255,255,255,.14)')+';background:'+(on?'rgba(224,176,0,.18)':'rgba(255,255,255,.04)')+';color:'+(on?'#e8c74a':'var(--tx2)')+'">'+label+'</button>'; }
-  box.innerHTML=chip('All','')+PKG_CATS.map(function(c){ return chip(c,c); }).join('');
+  if(!document.getElementById('pkgCatSel')){
+    box.innerHTML='<select id="pkgCatSel" onchange="pkgCatSelect(this.value)" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--tx);font-size:13.5px">'
+      +'<option value="">All categories</option>'+PKG_CATS.map(function(c){ return '<option value="'+c.replace(/"/g,'&quot;')+'">'+c+'</option>'; }).join('')+'</select>';
+  }
+  var sel=document.getElementById('pkgCatSel'); if(sel && sel.value!==PKG_CAT) sel.value=PKG_CAT;
 }
 function renderPkgs(){
   var el=document.getElementById('pkgList'); if(!el) return;
@@ -1538,6 +1547,19 @@ function renderPkgs(){
     var tag=(p.kind==='job')
       ? '<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;background:rgba(120,160,220,.16);color:#9fb8d8;padding:2px 8px;border-radius:100px">JOB</span>'
       : '<span style="font-size:9.5px;font-weight:800;letter-spacing:.4px;background:rgba(224,176,0,.16);color:#d9c178;padding:2px 8px;border-radius:100px">TRAVEL</span>';
+    if(p.underReview){
+      var locked=false; try{ locked=(localStorage.getItem('notify_'+p.id)==='1'); }catch(e){}
+      var posterR=p.poster?('<img src="'+esc(p.poster)+'" alt="" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto" onerror="this.style.display=\'none\'">'):'';
+      return '<div style="display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(224,176,0,.25);border-radius:12px;padding:12px">'
+        +posterR
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:800;font-size:14px">'+esc(p.title)+'</span>'+tag+'</div>'
+        +'<div style="font-size:12px;color:var(--tx3);margin-top:2px">'+esc(p.sub)+'</div>'
+        +(p.summary?'<div style="font-size:12.5px;color:var(--tx2);margin-top:6px;line-height:1.5">'+esc(p.summary)+'</div>':'')
+        +'<div style="margin-top:8px;font-size:12px;font-weight:700;color:#e8c74a;background:rgba(224,176,0,.1);border:1px solid rgba(224,176,0,.25);border-radius:8px;padding:7px 10px">Currently under review. This service / package will be available soon.</div>'
+        +'<div style="margin-top:8px"><button id="notify-'+esc(p.id)+'" onclick="pkgNotify(\''+esc(p.id)+'\',this)" '+(locked?'disabled':'')+' style="padding:8px 14px;font-size:12.5px;border-radius:8px;border:1px solid '+(locked?'rgba(46,196,122,.5)':'rgba(255,255,255,.18)')+';background:'+(locked?'rgba(46,196,122,.14)':'rgba(255,255,255,.05)')+';color:'+(locked?'#7fe0a8':'var(--tx)')+';cursor:'+(locked?'default':'pointer')+';font-weight:600">'+(locked?'✓ We’ll notify you':'🔔 Notify when Active')+'</button></div>'
+        +'</div></div>';
+    }
     var poster=p.poster?('<img src="'+esc(p.poster)+'" alt="" onclick="openPkgView(\''+esc(p.id)+'\')" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;cursor:pointer" onerror="this.style.display=\'none\'">'):'';
     var interest=(p.kind==='job')?('<button class="btn ghost" style="padding:7px 13px;font-size:12.5px" onclick="pkgInterest(\''+esc(p.id)+'\',this)">⭐ Express interest</button>'):'';
     return '<div style="display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">'
@@ -1601,6 +1623,13 @@ function openPkgView(id){
 }
 function closePkgView(){ var m=document.getElementById('pkgViewModal'); if(m) m.style.display='none'; }
 function pkgApply(id){ var p=pkgFind(id); if(!p) return; pkgAsk(id); setTimeout(function(){ var el=document.getElementById('msgInput'); if(el){ el.value="I'm interested in this '"+String(p.title).replace(/'/g,'’')+"' only.\n\nAre the slots still available?"; } },220); }
+function pkgNotify(id, btn){
+  if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+  try{ localStorage.setItem('notify_'+id,'1'); }catch(e){}
+  function lock(){ if(btn){ btn.disabled=true; btn.innerHTML='✓ We’ll notify you'; btn.style.borderColor='rgba(46,196,122,.5)'; btn.style.background='rgba(46,196,122,.14)'; btn.style.color='#7fe0a8'; btn.style.cursor='default'; } }
+  fetch(SKILLED_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'package-notify-me',token:S.token,packageId:id})})
+    .then(function(r){return r.json();}).then(function(){ lock(); }).catch(function(){ lock(); });
+}
 /* ---- Report ---- */
 function openPkgReport(id){
   var p=pkgFind(id); if(!p) return;
