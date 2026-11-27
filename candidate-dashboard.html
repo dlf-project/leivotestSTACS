@@ -294,7 +294,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
      <h3 style="margin:0">Browse packages &amp; services</h3>
    </div>
-   <div style="font-size:12.5px;color:var(--tx2);margin-bottom:12px">Verified travel and mobility packages published by STACS agencies. Tap “Ask a question” on any package to speak with the provider here on STACS — safely, before you commit to anything.</div>
+   <div style="font-size:12.5px;color:var(--tx2);margin-bottom:12px">Verified travel and mobility packages published by STACS agencies. Tap “Ask me” on any package to speak with the provider here on STACS, safely, before you commit to anything.</div>
    <input id="pkgSearch" oninput="renderPkgs()" placeholder="Search destination, title or type…" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--tx);font-size:13.5px;margin-bottom:10px">
    <div id="pkgCats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
    <div id="pkgList" style="display:grid;gap:10px">Loading…</div>
@@ -1513,7 +1513,7 @@ function loadPackages(){
       out.push({ kind:'travel', id:p.packageId, providerRole:'travel', providerId:p.taId, provider:(p.taId?('STACS Provider '+p.taId):'STACS Provider'), category:(p.category||''), underReview:(p.underReview||false),
         subCategory:p.subCategory||'', destination:p.destination||'', continent:p.continent||'', allocatedSlots:p.allocatedSlots||'',
         startDate:p.startDate||'', closingDate:p.closingDate||'', employmentTypes:p.employmentTypes||[], visaCategory:p.visaCategory||'', processingTime:p.processingTime||'',
-        payment:p.payment||{}, refund:p.refund||{},
+        requiredDocuments:p.requiredDocuments||[], payment:p.payment||{}, refund:p.refund||{},
         title:p.title||'Package', sub:(p.destination||'')+(p.category?(' · '+p.category):''), summary:p.summary||'',
         totals:totals, perSpouse:p.perSpouse||null, perChild:p.perDependentChild||null, perAdult:p.perDependentAdult||null,
         price:Object.keys(totals).length?cfmtTotals(totals):'Price on enquiry', poster:p.poster||'' });
@@ -1571,7 +1571,7 @@ function renderPkgs(){
       +'<div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">'
       +'<button class="btn" style="padding:7px 13px;font-size:12.5px" onclick="openPkgView(\''+esc(p.id)+'\')">View details</button>'
       +interest
-      +'<button class="btn ghost" style="padding:7px 13px;font-size:12.5px" onclick="pkgAsk(\''+esc(p.id)+'\')">💬 Ask a question</button>'
+      +'<button class="btn ghost" style="padding:7px 13px;font-size:12.5px" onclick="pkgAsk(\''+esc(p.id)+'\')">💬 Ask me</button>'
       +'</div></div></div>';
   }).join('');
 }
@@ -1593,7 +1593,32 @@ function openPkgView(id){
   ov+=row('Visa category', p.visaCategory)+row('Processing time', p.processingTime);
   ov+=row('Start date', p.startDate)+row('Closing date', p.closingDate);
   if(p.summary) ov+='<div style="font-size:13px;color:var(--tx2);margin-top:8px;line-height:1.55">'+esc(p.summary)+'</div>';
-  ov+=sec('Summary (pricing)');
+  // Required documents the provider expects for this process
+  var reqd=(p.requiredDocuments&&p.requiredDocuments.join)?p.requiredDocuments.filter(function(x){return x;}):[];
+  if(reqd.length){
+    ov+=sec('Required documents');
+    ov+='<div style="font-size:12.5px;color:var(--tx2);line-height:1.7">'+reqd.map(function(d){return '• '+esc(d);}).join('<br>')+'</div>';
+    ov+='<div style="font-size:11px;color:var(--tx3);margin-top:5px">These are the documents the service provider expects for this process. Have them ready before you apply.</div>';
+  }
+  // Payment / outcome disclaimer inside the package block
+  ov+='<div style="margin-top:13px;font-size:11.5px;color:var(--tx3);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:9px 11px;line-height:1.55">STACS coordinates payment for the service shown here. It does not guarantee any job, admission, visa or other decision made by an employer, institution, embassy or authority. Those decisions, and the reasons given for them, rest with the authority involved.</div>';
+  ov+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'
+    +'<button class="btn" style="padding:9px 16px" onclick="closePkgView();pkgApply(\''+esc(p.id)+'\')">Apply</button>'
+    +'<button class="btn ghost" style="padding:9px 16px" onclick="openPkgFees(\''+esc(p.id)+'\')">💳 Fees</button>'
+    +'<button class="btn ghost" style="padding:9px 16px" onclick="closePkgView();pkgAsk(\''+esc(p.id)+'\')">💬 Ask me</button>'
+    +'<button onclick="openPkgReport(\''+esc(p.id)+'\')" style="padding:9px 16px;background:rgba(200,40,40,.14);color:#f08a8a;border:1px solid rgba(200,40,40,.4);border-radius:10px;font-weight:600;cursor:pointer;font-size:12.5px">Report</button>'
+    +'</div>';
+  if(body) body.innerHTML=ov;
+  function sec(t){ return '<div style="margin:14px 0 6px;font-weight:800;font-size:12px;letter-spacing:.4px;color:var(--gold2,#e0b000);text-transform:uppercase">'+t+'</div>'; }
+}
+function closePkgView(){ var m=document.getElementById('pkgViewModal'); if(m) m.style.display='none'; }
+/* ===== Fees pop-forward (fee list + disbursement note) ===== */
+function openPkgFees(id){
+  var p=pkgFind(id); if(!p) return;
+  var m=document.getElementById('pkgFeesModal'), body=document.getElementById('pkgFeesBody');
+  if(m) m.style.display='flex';
+  function row(k,v){ if(!v){return '';} return '<div style="display:flex;gap:10px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="min-width:150px;color:var(--tx3);font-size:12px">'+esc(k)+'</div><div style="flex:1;font-size:13px">'+esc(String(v))+'</div></div>'; }
+  var ov='<div style="font-weight:800;font-size:15px;margin-bottom:8px">'+esc(p.title)+'</div>';
   ov+=row('Your price', (p.totals&&Object.keys(p.totals).length)?cfmtTotals(p.totals):'Price on enquiry');
   var pay=p.payment||{};
   if(pay.deposit) ov+=row('Initial deposit', Number(pay.deposit).toLocaleString()+' '+(pay.depositCur||''));
@@ -1601,11 +1626,10 @@ function openPkgView(id){
   if(pay.balanceNote) ov+=row('Balance', pay.balanceNote);
   if(p.refund&&(p.refund.note||p.refund.refundable)) ov+=row('Refund', p.refund.note||p.refund.refundable);
   if(p.closingDate) ov+=row('Application deadline', p.closingDate);
-  // family calculator inside Summary
   var hasDeps=(p.perSpouse&&p.perSpouse.candidate>0)||(p.perChild&&p.perChild.candidate>0)||(p.perAdult&&p.perAdult.candidate>0);
   if(p.kind==='travel'&&hasDeps){
     var numIn=function(sfx,label){ return '<label style="font-size:11.5px;color:var(--tx2);display:inline-flex;align-items:center;gap:5px">'+label+' <input type="number" min="0" value="0" id="'+sfx+'-'+esc(p.id)+'" style="width:46px;padding:3px 5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:var(--tx);font-size:12px" oninput="famCalc(\''+esc(p.id)+'\')"></label>'; };
-    ov+='<div style="margin-top:8px;font-size:12px;color:var(--tx2);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:9px 11px">'
+    ov+='<div style="margin-top:10px;font-size:12px;color:var(--tx2);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:9px 11px">'
       +'<div style="margin-bottom:6px;color:var(--tx3)">Travelling with family? Add them to see your total (you are already counted):</div>'
       +'<div style="display:flex;gap:14px;flex-wrap:wrap">'
       +((p.perSpouse&&p.perSpouse.candidate>0)?numIn('fspouse','Spouse'):'')
@@ -1613,15 +1637,13 @@ function openPkgView(id){
       +((p.perAdult&&p.perAdult.candidate>0)?numIn('fadult','Dependent adults'):'')
       +'</div><div id="fam-'+esc(p.id)+'" style="font-weight:700;color:var(--gold2,#e0b000);margin-top:7px">Total for 1 traveller: '+cfmtTotals(p.totals||{})+'</div></div>';
   }
-  ov+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'
-    +'<button class="btn" style="padding:9px 16px" onclick="closePkgView();pkgApply(\''+esc(p.id)+'\')">Apply</button>'
-    +'<button class="btn ghost" style="padding:9px 16px" onclick="closePkgView();pkgAsk(\''+esc(p.id)+'\')">💬 Ask a question</button>'
-    +'<button onclick="openPkgReport(\''+esc(p.id)+'\')" style="padding:9px 16px;background:rgba(200,40,40,.14);color:#f08a8a;border:1px solid rgba(200,40,40,.4);border-radius:10px;font-weight:600;cursor:pointer;font-size:12.5px">Report</button>'
+  ov+='<div style="margin-top:13px;font-size:11.5px;color:var(--tx2);background:rgba(224,176,0,.08);border:1px solid rgba(224,176,0,.22);border-radius:8px;padding:10px 12px;line-height:1.6">'
+    +'<b style="color:#e8c74a;display:block;margin-bottom:3px">How your payment works</b>'
+    +'All fees are paid through STACS and released to the service provider only after the agreed service has been properly delivered, without fault or negligence. Your payment is for the professional service itself, not for a guaranteed outcome. Decisions such as employment, admission, visa approval or licensing rest with the employer, institution, embassy or other authority, and STACS cannot guarantee their decision. Where an outcome is not favourable, the reasons given by that authority apply, except where otherwise agreed at their own discretion.'
     +'</div>';
   if(body) body.innerHTML=ov;
-  function sec(t){ return '<div style="margin:14px 0 6px;font-weight:800;font-size:12px;letter-spacing:.4px;color:var(--gold2,#e0b000);text-transform:uppercase">'+t+'</div>'; }
 }
-function closePkgView(){ var m=document.getElementById('pkgViewModal'); if(m) m.style.display='none'; }
+function closePkgFees(){ var m=document.getElementById('pkgFeesModal'); if(m) m.style.display='none'; }
 function pkgApply(id){ var p=pkgFind(id); if(!p) return; pkgAsk(id); setTimeout(function(){ var el=document.getElementById('msgInput'); if(el){ el.value="I'm interested in this '"+String(p.title).replace(/'/g,'’')+"' only.\n\nAre the slots still available?"; } },220); }
 function pkgNotify(id, btn){
   if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
@@ -4277,6 +4299,16 @@ function resumeToggleReplace(reqId, checked){
       <button onclick="closePkgView()" aria-label="Close" style="background:none;border:none;color:#fff;font-size:24px;line-height:1;cursor:pointer">&times;</button>
     </div>
     <div id="pkgViewBody" style="padding:18px 20px 24px">Loading…</div>
+  </div>
+</div>
+<!-- Fees pop-forward (stacks above the detail popup) -->
+<div id="pkgFeesModal" style="display:none;position:fixed;inset:0;z-index:1002;background:rgba(5,20,12,.62);align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto">
+  <div style="background:#0e1a14;max-width:500px;width:100%;border:1px solid rgba(255,255,255,.1);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:linear-gradient(135deg,#0B3B21,#12502A);border-radius:14px 14px 0 0;position:sticky;top:0">
+      <b style="color:#fff;font-size:15px">Fees</b>
+      <button onclick="closePkgFees()" aria-label="Close" style="background:none;border:none;color:#fff;font-size:24px;line-height:1;cursor:pointer">&times;</button>
+    </div>
+    <div id="pkgFeesBody" style="padding:18px 20px 24px">Loading…</div>
   </div>
 </div>
 <!-- Report pop-forward -->
