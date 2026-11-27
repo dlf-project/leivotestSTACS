@@ -154,6 +154,10 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
      <div class="field"><label>Start Date</label><input id="pk_startDate" type="date"></div>
      <div class="field"><label>Closing Date</label><input id="pk_closingDate" type="date"></div>
      <div class="field"><label>Allocated slots (optional)</label><input id="pk_slots" type="number" min="0" placeholder="e.g. 40"></div>
+     <div class="field"><label>Required documents list (pick all the candidate will need)</label>
+      <div class="chips" id="chips_reqdoc"></div>
+      <select id="sel_reqdoc" onchange="addChip('reqdoc',this.value);this.value='';"><option value="">Add a required document…</option></select>
+      <div class="note">Select every document the candidate must prepare for this process. Candidates see this list clearly on the package.</div></div>
     </div>
 
     <div id="simpleBlock" style="display:none">
@@ -375,7 +379,8 @@ var CMP_QUESTIONS=[
  'If the embassy denies the visa, what happens (refund and next steps)?',
  'What is NOT included, and what should the candidate not expect?'
 ];
-var PICK={emp:[],med:[],dest:[],spdest:[]};
+var PICK={emp:[],med:[],dest:[],spdest:[],reqdoc:[]};
+var DOCUMENT_TYPES=['International Passport','Passport Photographs','Birth Certificate','National ID Card','Curriculum Vitae / Resume','Educational Certificates','Academic Transcripts','Professional Licence / Certification','Trade Test Certificate','Work Experience / Reference Letter','Employment Letter','Police / Character Certificate','Medical Report / Fitness Certificate','Vaccination / Immunisation Record','Proof of Funds / Bank Statement','Sponsorship Letter','Admission Letter','Language Test Result (IELTS/TOEFL/etc.)','Credential Evaluation / Verification','Marriage Certificate','Proof of Address / Utility Bill','Driver’s Licence','Tax Identification','Portfolio / Work Samples','Visa / Residence Permit','Other (specify in description)'];
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function ngn(n){return '₦'+Number(n||0).toLocaleString('en-NG');}
@@ -518,7 +523,7 @@ function renderChips(kind){var box=document.getElementById('chips_'+kind);box.in
 // build dropdowns + boxes
 (function(){
  var ds=document.getElementById('ov_destination');COUNTRIES.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;ds.appendChild(o);});
- fillSelect('sel_emp',EMPLOYMENT);fillSelect('sel_med',MEDICAL);fillSelect('sel_dest',COUNTRIES);fillSelect('sel_spdest',COUNTRIES);fillSelect('ov_processingTime',PROCESSING);
+ fillSelect('sel_emp',EMPLOYMENT);fillSelect('sel_med',MEDICAL);fillSelect('sel_dest',COUNTRIES);fillSelect('sel_spdest',COUNTRIES);fillSelect('sel_reqdoc',DOCUMENT_TYPES);fillSelect('ov_processingTime',PROCESSING);
  var sb=document.getElementById('servicesBox');SERVICES.forEach(function(s){sb.insertAdjacentHTML('beforeend','<label class="chk"><input type="checkbox" class="svc" value="'+esc(s)+'"> '+esc(s)+'</label>');});
  var fb=document.getElementById('feesBox');FEEKEYS.forEach(function(f){fb.insertAdjacentHTML('beforeend',feeRowHtml(f[0],esc(f[1]),'fee'));});
  var db=document.getElementById('depBox');if(db){db.insertAdjacentHTML('beforeend',feeRowHtml('perSpouse','Travelling with additional spouse (charged per spouse)','dep'));
@@ -688,6 +693,7 @@ function gatherPkg(){
   startDate:(document.getElementById('pk_startDate')||{}).value||'',
   closingDate:(document.getElementById('pk_closingDate')||{}).value||'',
   allocatedSlots:(document.getElementById('pk_slots')||{}).value||'',
+  requiredDocuments:PICK.reqdoc.slice(),
   simple:{title:document.getElementById('sp_title').value.trim(),destinations:PICK.spdest.slice(),note:document.getElementById('sp_note').value.trim()},
   overview:{title:document.getElementById('ov_title').value.trim(),destination:document.getElementById('ov_destination').value,
     employmentTypes:PICK.emp.slice(),visaCategory:document.getElementById('ov_visaCategory').value.trim(),
@@ -758,6 +764,11 @@ function editPkg(id){var p=(window._PKGS||[]).filter(function(x){return x.packag
  var md=p.data||{};
  document.getElementById('pk_mode').value=md.mode||'full';setPkgMode(md.mode||'full');
  document.getElementById('pk_category').value=md.category||'';applyCategory(md.category||'');
+ var _sc=document.getElementById('pk_subcategory');if(_sc)_sc.value=md.subCategory||'';
+ var _sd=document.getElementById('pk_startDate');if(_sd)_sd.value=md.startDate||'';
+ var _cd=document.getElementById('pk_closingDate');if(_cd)_cd.value=md.closingDate||'';
+ var _sl=document.getElementById('pk_slots');if(_sl)_sl.value=md.allocatedSlots||'';
+ PICK.reqdoc=Array.isArray(md.requiredDocuments)?md.requiredDocuments.slice():[];renderChips('reqdoc');
  var sp=md.simple||{};document.getElementById('sp_title').value=sp.title||'';document.getElementById('sp_note').value=sp.note||'';countChars('sp_note','sp_count',500);
  PICK.spdest=Array.isArray(sp.destinations)?sp.destinations.slice():[];renderChips('spdest');
  var cmp=md.compliance||{},srcd=cmp.source||{};
