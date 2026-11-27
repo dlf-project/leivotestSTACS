@@ -153,6 +153,7 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
       <select id="pk_subcategory" onchange="applyCategory(this.value)"><option value="">Select a sub-category…</option><option>Conference Visit</option><option>Travel &amp; Tour Visit</option><option>Travel &amp; Work Temporarily</option><option>Immigrate Permanently</option><option>Study &amp; Work</option><option>Business Mobility</option><option>Other</option></select></div>
      <div class="field"><label>Start Date</label><input id="pk_startDate" type="date"></div>
      <div class="field"><label>Closing Date</label><input id="pk_closingDate" type="date"></div>
+     <div class="field"><label>Allocated slots (optional)</label><input id="pk_slots" type="number" min="0" placeholder="e.g. 40"></div>
     </div>
 
     <div id="simpleBlock" style="display:none">
@@ -686,6 +687,7 @@ function gatherPkg(){
   subCategory:(document.getElementById('pk_subcategory')||{}).value||'',
   startDate:(document.getElementById('pk_startDate')||{}).value||'',
   closingDate:(document.getElementById('pk_closingDate')||{}).value||'',
+  allocatedSlots:(document.getElementById('pk_slots')||{}).value||'',
   simple:{title:document.getElementById('sp_title').value.trim(),destinations:PICK.spdest.slice(),note:document.getElementById('sp_note').value.trim()},
   overview:{title:document.getElementById('ov_title').value.trim(),destination:document.getElementById('ov_destination').value,
     employmentTypes:PICK.emp.slice(),visaCategory:document.getElementById('ov_visaCategory').value.trim(),
