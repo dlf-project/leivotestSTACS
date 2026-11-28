@@ -1,0 +1,105 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STACS — Workforce Request</title>
+<style>
+:root{--bg:#0A2E16;--card:#12502A;--card2:#0F4423;--bdr:rgba(255,255,255,.14);--tx:#F0F0EC;--tx2:rgba(240,240,236,.82);--tx3:rgba(240,240,236,.58);--gold:#E2A53A;--field:rgba(255,255,255,.06)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55}
+.wrap{max-width:640px;margin:0 auto;padding:26px 16px 70px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.top img{width:46px;height:46px;border-radius:50%;background:#fff;object-fit:cover;border:1px solid var(--bdr)}
+.top b{font-size:15px}.top small{display:block;font-size:10.5px;letter-spacing:.16em;color:var(--tx3);text-transform:uppercase}
+h1{font-size:23px;margin:4px 0 6px}
+.lead{color:var(--tx2);font-size:14px;margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:20px}
+.field{margin-bottom:14px}
+label{display:block;font-size:12.5px;color:var(--tx2);margin-bottom:5px;font-weight:600}
+.req{color:var(--gold)}
+input,select,textarea{width:100%;padding:11px 12px;background:var(--field);border:1px solid var(--bdr);border-radius:10px;color:var(--tx);font-size:14px;font-family:inherit}
+textarea{min-height:78px;resize:vertical}
+input::placeholder,textarea::placeholder{color:var(--tx3)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.row2{grid-template-columns:1fr}}
+.btn{width:100%;margin-top:8px;padding:13px;background:linear-gradient(135deg,#C8920A,#E2A53A);color:#20160a;border:none;border-radius:11px;font-weight:800;font-size:15px;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:default}
+.note{font-size:11.5px;color:var(--tx3);margin-top:3px}
+.msg{padding:11px 13px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none}
+.msg.err{display:block;background:rgba(200,40,40,.14);border:1px solid rgba(200,40,40,.4);color:#f3a2a2}
+.done{text-align:center;padding:14px 4px}
+.done .tick{width:58px;height:58px;border-radius:50%;background:rgba(224,165,58,.18);border:1px solid rgba(224,165,58,.5);color:var(--gold);font-size:30px;line-height:58px;margin:0 auto 14px}
+.done h2{margin:0 0 8px;font-size:20px}
+.ticket{display:inline-block;margin-top:8px;padding:7px 14px;background:var(--field);border:1px solid var(--bdr);border-radius:9px;font-weight:700;letter-spacing:.04em}
+.foot{margin-top:18px;font-size:11.5px;color:var(--tx3);text-align:center}
+.foot a{color:var(--tx2)}
+</style></head><body>
+<div class="wrap">
+  <div class="top"><img src="https://www.leivotest.com/stacs/images/logo.jpg" onerror="this.style.display='none'" alt="STACS"><div><b>LEIVOTEST · STACS</b><small>Workforce Request</small></div></div>
+  <h1>Tell us who you need</h1>
+  <div class="lead">If your organisation is looking for skilled workers, send us a short request. There is no cost and no obligation. A member of our team will reach out to understand your needs and show you verified, prepared candidates. We do not guarantee any particular hire; we help you find and work with good people safely.</div>
+
+  <div class="card">
+    <div id="err" class="msg err"></div>
+    <div id="form">
+      <div class="field"><label>Organisation name <span class="req">*</span></label><input id="f_org" placeholder="Your company or agency"></div>
+      <div class="row2">
+        <div class="field"><label>Your name <span class="req">*</span></label><input id="f_contact" placeholder="Full name"></div>
+        <div class="field"><label>Your role / title</label><input id="f_role" placeholder="e.g. HR Manager"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Work email <span class="req">*</span></label><input id="f_email" type="email" placeholder="name@company.com"></div>
+        <div class="field"><label>Phone / WhatsApp</label><input id="f_phone" placeholder="+..."></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Country</label><input id="f_country" placeholder="Where you are based"></div>
+        <div class="field"><label>Sector</label><select id="f_sector"><option value="">Select…</option></select></div>
+      </div>
+      <div class="field"><label>Roles you need to fill</label><input id="f_roles" placeholder="e.g. Care workers, welders, drivers"></div>
+      <div class="row2">
+        <div class="field"><label>How many people</label><input id="f_headcount" placeholder="e.g. 10"></div>
+        <div class="field"><label>Timeline</label><select id="f_timeline"><option value="">Select…</option></select></div>
+      </div>
+      <div class="field"><label>Key skills or requirements</label><textarea id="f_skills" placeholder="Certifications, experience, language, licences…"></textarea></div>
+      <div class="field"><label>Destination / work location</label><input id="f_dest" placeholder="Where the work is"></div>
+      <div class="field"><label>Anything else</label><textarea id="f_notes" placeholder="Tell us anything that would help us help you"></textarea></div>
+      <button class="btn" id="submit" onclick="submitReq()">Send my request</button>
+      <div class="note">We will reply from recruitment@leivotest.com. Your details are used only to respond to this request.</div>
+    </div>
+    <div id="done" class="done" style="display:none">
+      <div class="tick">&#10003;</div>
+      <h2>Request received</h2>
+      <div style="color:var(--tx2);font-size:14px">Thank you. Our team will reach out to you shortly. We have also sent a confirmation to your email.</div>
+      <div class="ticket" id="ticket"></div>
+    </div>
+  </div>
+  <div class="foot">STACS — Africa's Empowerment Infrastructure for Skills, Trades, Businesses and Global Opportunities.<br>recruitment@leivotest.com · <a href="https://www.stacs.leivotest.com">www.stacs.leivotest.com</a></div>
+</div>
+<script>
+// Employer hub /exec URL. Update this after redeploying the Employer backend if the URL changes.
+var ENDPOINT='https://script.google.com/macros/s/AKfycbwPlLG5bdp5MsTFUU6RYLdz6g5zWJLRkmjmkkenqqWBz4Xy9PoSIZVRDA4iZSRBHRBq/exec';
+var SECTORS=['Healthcare','Construction & Trades','Hospitality','Agriculture','Manufacturing','Logistics & Transport','Technology','Education','Oil & Gas','Domestic & Care','Security','Retail','Other'];
+var TIMELINES=['As soon as possible','Within 1 month','1 to 3 months','3 to 6 months','Just exploring'];
+(function(){
+  function fill(id,arr){ var s=document.getElementById(id); arr.forEach(function(o){ var op=document.createElement('option'); op.value=o; op.textContent=o; s.appendChild(op); }); }
+  fill('f_sector',SECTORS); fill('f_timeline',TIMELINES);
+})();
+function val(id){ return (document.getElementById(id).value||'').trim(); }
+function showErr(m){ var e=document.getElementById('err'); e.textContent=m; e.className='msg err'; e.scrollIntoView({behavior:'smooth',block:'center'}); }
+function submitReq(){
+  var org=val('f_org'), contact=val('f_contact'), email=val('f_email');
+  if(!org||!contact||!email){ showErr('Please fill in your organisation, your name and a work email.'); return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showErr('Please enter a valid email address.'); return; }
+  var btn=document.getElementById('submit'); btn.disabled=true; btn.textContent='Sending…';
+  document.getElementById('err').className='msg';
+  var payload={ action:'submit-workforce-request', organisation:org, contactName:contact, role:val('f_role'), email:email,
+    phone:val('f_phone'), country:val('f_country'), sector:val('f_sector'), rolesNeeded:val('f_roles'), headcount:val('f_headcount'),
+    skills:val('f_skills'), timeline:val('f_timeline'), destination:val('f_dest'), notes:val('f_notes') };
+  fetch(ENDPOINT,{method:'POST',body:JSON.stringify(payload)})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res&&res.ok){ document.getElementById('form').style.display='none'; document.getElementById('ticket').textContent='Reference: '+res.ticket; document.getElementById('done').style.display='block'; window.scrollTo({top:0,behavior:'smooth'}); }
+      else { showErr((res&&res.error)||'Something went wrong. Please try again.'); btn.disabled=false; btn.textContent='Send my request'; }
+    })
+    .catch(function(){ showErr('We could not reach the server. Please check your connection and try again.'); btn.disabled=false; btn.textContent='Send my request'; });
+}
+</script>
+</body></html>
