@@ -105,6 +105,7 @@ body.modal-open{overflow:hidden}
     <button data-panel="travelpkgs" onclick="showPanel('travelpkgs',this)"><span class="i">🧳</span>Travel Packages</button>
     <button data-panel="teamadmins" onclick="showPanel('teamadmins',this)" style="display:none"><span class="i">👥</span>Team Admins</button>
     <button data-panel="messages" onclick="showPanel('messages',this)"><span class="i">💬</span>Messages</button>
+    <button data-panel="partners" onclick="showPanel('partners',this)"><span class="i">🌍</span>Partnership Network</button>
     <button data-panel="marketers" onclick="showPanel('marketers',this)"><span class="i">🤝</span>Marketers</button>
     <button data-panel="reftokens" onclick="showPanel('reftokens',this)"><span class="i">🎟️</span>Referral Tokens</button>
   </nav>
@@ -125,6 +126,34 @@ body.modal-open{overflow:hidden}
        <button class="ghost" onclick="loadAgreements()" style="border-radius:0">Refresh</button>
      </div>
      <div id="agrList">Loading…</div>
+   </div>
+
+   <div class="apanel" id="panel-partners">
+     <h2 style="margin-bottom:4px">Partnership Network</h2>
+     <div class="sub">Workforce requests from employers and agencies, and the partner records built from them. Move each organisation along the relationship levels as you engage with them.</div>
+
+     <h3 style="margin:18px 0 6px;font-size:15px">Workforce requests</h3>
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+       <input id="wrSearch" placeholder="Search requests…" style="flex:1;min-width:160px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:13px">
+       <button class="ghost" onclick="loadWorkforceReqs()">Search</button>
+     </div>
+     <div id="wrList">Loading…</div>
+
+     <h3 style="margin:22px 0 6px;font-size:15px">Partner records</h3>
+     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+       <input id="pnSearch" placeholder="Search partners…" style="flex:1;min-width:160px;background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:13px">
+       <select id="pnLevel" onchange="loadPartners()" style="background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:13px">
+         <option value="">All levels</option>
+         <option value="Prospect">Prospect</option>
+         <option value="Contacted">Contacted</option>
+         <option value="Engaged">Engaged</option>
+         <option value="Partner">Partner</option>
+         <option value="Dormant">Dormant</option>
+       </select>
+       <button class="ghost" onclick="loadPartners()">Search</button>
+       <button onclick="openPartnerEdit('')" style="background:linear-gradient(135deg,#C8920A,#E2A53A);color:#20160a;border:none;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer">+ New partner</button>
+     </div>
+     <div id="pnList">Loading…</div>
    </div>
 
    <div class="apanel" id="panel-travelpkgs">
@@ -1308,6 +1337,84 @@ function showPanel(name, btn){
   else if(name==='messages'){ loadAdminMsgThreads(); loadAdminMsgBlocks(); }
   else if(name==='marketers'){ loadBanksForMarketer(); loadMarketers(); }
   else if(name==='reftokens'){ loadRefTokens(); }
+  else if(name==='partners'){ loadWorkforceReqs(); loadPartners(); }
+}
+
+/* ===== Partnership Network (workforce requests + partner records) ===== */
+var PARTNER_LEVELS=['Prospect','Contacted','Engaged','Partner','Dormant'];
+var PARTNER_CACHE=[];
+function pnEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function loadWorkforceReqs(){
+  var q=(document.getElementById('wrSearch')||{}).value||'';
+  var el=document.getElementById('wrList'); if(el) el.innerHTML='Loading…';
+  fetch(EMPLOYER_URL+'?action=admin-workforce-requests&token='+encodeURIComponent(TOK.e)+'&q='+encodeURIComponent(q))
+    .then(function(r){return r.json();}).then(function(res){
+      if(!res||!res.ok){ el.innerHTML='<div class="sub">Could not load requests'+(res&&res.error?(': '+pnEsc(res.error)):'')+'.</div>'; return; }
+      var reqs=res.requests||[];
+      if(!reqs.length){ el.innerHTML='<div class="sub">No workforce requests yet.</div>'; return; }
+      el.innerHTML=reqs.map(function(w){
+        return '<div style="border:1px solid var(--bdr);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--card2)">'
+          +'<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>'+pnEsc(w.organisation)+'</b><span class="sub">'+pnEsc(w.when)+' · '+pnEsc(w.ticket)+'</span></div>'
+          +'<div class="sub" style="margin:3px 0">'+pnEsc(w.contactName)+(w.role?(' ('+pnEsc(w.role)+')'):'')+' · '+pnEsc(w.email)+(w.phone?(' · '+pnEsc(w.phone)):'')+'</div>'
+          +'<div style="font-size:13px">'+(w.rolesNeeded?('<b>Roles:</b> '+pnEsc(w.rolesNeeded)+' '):'')+(w.headcount?('<b>Headcount:</b> '+pnEsc(w.headcount)+' '):'')+(w.timeline?('<b>Timeline:</b> '+pnEsc(w.timeline)):'')+'</div>'
+          +((w.skills||w.destination||w.country||w.sector)?('<div class="sub" style="margin-top:3px">'+[w.sector,w.country,w.destination,w.skills].filter(Boolean).map(pnEsc).join(' · ')+'</div>'):'')
+          +(w.notes?('<div class="sub" style="margin-top:3px">'+pnEsc(w.notes)+'</div>'):'')
+          +(w.partnerId?('<div class="sub" style="margin-top:4px">Partner record: '+pnEsc(w.partnerId)+'</div>'):'')
+          +'</div>';
+      }).join('');
+    }).catch(function(){ if(el) el.innerHTML='<div class="sub">Could not load requests.</div>'; });
+}
+function loadPartners(){
+  var q=(document.getElementById('pnSearch')||{}).value||'';
+  var lvl=(document.getElementById('pnLevel')||{}).value||'';
+  var el=document.getElementById('pnList'); if(el) el.innerHTML='Loading…';
+  fetch(EMPLOYER_URL+'?action=admin-partners&token='+encodeURIComponent(TOK.e)+'&q='+encodeURIComponent(q))
+    .then(function(r){return r.json();}).then(function(res){
+      if(!res||!res.ok){ el.innerHTML='<div class="sub">Could not load partners'+(res&&res.error?(': '+pnEsc(res.error)):'')+'.</div>'; return; }
+      PARTNER_CACHE=res.partners||[];
+      var counts=res.counts||{};
+      var chips=PARTNER_LEVELS.map(function(l){ return '<span style="font-size:11.5px;padding:3px 9px;border:1px solid var(--bdr);border-radius:20px;margin-right:6px">'+l+': <b>'+(counts[l]||0)+'</b></span>'; }).join('');
+      var rows=PARTNER_CACHE.filter(function(p){ return !lvl || p.level===lvl; });
+      var body=rows.length ? rows.map(function(p){
+        var opts=PARTNER_LEVELS.map(function(l){ return '<option value="'+l+'"'+(l===p.level?' selected':'')+'>'+l+'</option>'; }).join('');
+        return '<div style="border:1px solid var(--bdr);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--card2)">'
+          +'<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b style="cursor:pointer" onclick="openPartnerEdit(\''+pnEsc(p.id)+'\')">'+pnEsc(p.organisation||'(no name)')+'</b><span class="sub">'+pnEsc(p.type||'')+' · '+pnEsc(p.id)+'</span></div>'
+          +'<div class="sub" style="margin:3px 0">'+[p.contactName,p.email,p.phone,p.country].filter(Boolean).map(pnEsc).join(' · ')+'</div>'
+          +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">'
+          +'<label class="sub">Level:</label><select onchange="partnerSetLevel(\''+pnEsc(p.id)+'\',this.value)" style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 9px;color:var(--tx);font-size:12.5px">'+opts+'</select>'
+          +'<button class="ghost" style="padding:6px 12px;font-size:12.5px" onclick="openPartnerEdit(\''+pnEsc(p.id)+'\')">Edit</button>'
+          +'<span class="sub" style="margin-left:auto">Updated '+pnEsc(p.updated)+'</span></div>'
+          +(p.notes?('<div class="sub" style="margin-top:6px;white-space:pre-wrap">'+pnEsc(p.notes)+'</div>'):'')
+          +'</div>';
+      }).join('') : '<div class="sub">No partners'+(lvl?(' at level '+lvl):'')+' yet.</div>';
+      el.innerHTML='<div style="margin-bottom:12px">'+chips+'</div>'+body;
+    }).catch(function(){ if(el) el.innerHTML='<div class="sub">Could not load partners.</div>'; });
+}
+function partnerSetLevel(id, level){
+  fetch(EMPLOYER_URL,{method:'POST',body:JSON.stringify({action:'partner-convert',token:TOK.e,id:id,level:level})})
+    .then(function(r){return r.json();}).then(function(res){ if(res&&res.ok){ loadPartners(); } else { alert((res&&res.error)||'Could not update level.'); } })
+    .catch(function(){ alert('Could not update level.'); });
+}
+function openPartnerEdit(id){
+  var p=id ? (PARTNER_CACHE.filter(function(x){return x.id===id;})[0]||{}) : {};
+  var m=document.getElementById('pnModal'); m.style.display='flex';
+  document.getElementById('pnEditId').value=p.id||'';
+  ['organisation','type','contactName','role','email','phone','country','sector','website','owner','notes'].forEach(function(k){
+    var f=document.getElementById('pe_'+k); if(f) f.value=p[k]||'';
+  });
+  var sel=document.getElementById('pe_level'); if(sel){ sel.innerHTML=PARTNER_LEVELS.map(function(l){return '<option value="'+l+'"'+((p.level||'Prospect')===l?' selected':'')+'>'+l+'</option>';}).join(''); }
+  document.getElementById('pnModalTitle').textContent=p.id?'Edit partner':'New partner';
+}
+function closePartnerEdit(){ document.getElementById('pnModal').style.display='none'; }
+function savePartner(){
+  var partner={ id:document.getElementById('pnEditId').value||'', level:document.getElementById('pe_level').value };
+  ['organisation','type','contactName','role','email','phone','country','sector','website','owner','notes'].forEach(function(k){ partner[k]=(document.getElementById('pe_'+k)||{}).value||''; });
+  if(!partner.organisation){ alert('Please enter an organisation name.'); return; }
+  var btn=document.getElementById('pnSaveBtn'); btn.disabled=true; btn.textContent='Saving…';
+  fetch(EMPLOYER_URL,{method:'POST',body:JSON.stringify({action:'partner-save',token:TOK.e,partner:partner})})
+    .then(function(r){return r.json();}).then(function(res){ btn.disabled=false; btn.textContent='Save';
+      if(res&&res.ok){ closePartnerEdit(); loadPartners(); } else { alert((res&&res.error)||'Could not save.'); } })
+    .catch(function(){ btn.disabled=false; btn.textContent='Save'; alert('Could not save.'); });
 }
 /* ===== Travel Packages review + Previous-Edition PDF ===== */
 function loadTravelPkgs(){
@@ -2232,4 +2339,34 @@ function approve(which,email,btn){
     <div id="pkgDetailBody" style="padding:18px 20px 24px">Loading…</div>
   </div>
 </div>
+<div id="pnModal" style="display:none;position:fixed;inset:0;z-index:1200;background:rgba(5,20,12,.64);align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto">
+  <div style="background:#0e1a14;max-width:560px;width:100%;border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:linear-gradient(135deg,#0B3B21,#12502A);border-radius:14px 14px 0 0">
+      <b style="color:#fff;font-size:15px" id="pnModalTitle">Partner</b>
+      <button onclick="closePartnerEdit()" style="background:none;border:none;color:#fff;font-size:24px;line-height:1;cursor:pointer">&times;</button>
+    </div>
+    <div style="padding:18px 20px 22px">
+      <input type="hidden" id="pnEditId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="grid-column:1/3"><label class="sub">Organisation</label><input id="pe_organisation" class="pein"></div>
+        <div><label class="sub">Type</label><input id="pe_type" class="pein" placeholder="Employer / Agency / NGO"></div>
+        <div><label class="sub">Level</label><select id="pe_level" class="pein"></select></div>
+        <div><label class="sub">Contact name</label><input id="pe_contactName" class="pein"></div>
+        <div><label class="sub">Role / title</label><input id="pe_role" class="pein"></div>
+        <div><label class="sub">Email</label><input id="pe_email" class="pein"></div>
+        <div><label class="sub">Phone</label><input id="pe_phone" class="pein"></div>
+        <div><label class="sub">Country</label><input id="pe_country" class="pein"></div>
+        <div><label class="sub">Sector</label><input id="pe_sector" class="pein"></div>
+        <div><label class="sub">Website</label><input id="pe_website" class="pein"></div>
+        <div><label class="sub">Owner (our side)</label><input id="pe_owner" class="pein"></div>
+        <div style="grid-column:1/3"><label class="sub">Notes</label><textarea id="pe_notes" class="pein" style="min-height:70px;resize:vertical"></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+        <button class="ghost" onclick="closePartnerEdit()">Cancel</button>
+        <button id="pnSaveBtn" onclick="savePartner()" style="background:linear-gradient(135deg,#C8920A,#E2A53A);color:#20160a;border:none;border-radius:8px;padding:9px 18px;font-weight:700;cursor:pointer">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>.pein{width:100%;padding:9px 11px;margin-top:3px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:8px;color:var(--tx);font-size:13px;font-family:inherit}</style>
 </body></html>
