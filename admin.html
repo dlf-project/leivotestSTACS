@@ -1344,6 +1344,7 @@ function showPanel(name, btn){
 var PARTNER_LEVELS=['Prospect','Contacted','Engaged','Partner','Dormant'];
 var PARTNER_CACHE=[];
 function pnEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function pnFlash(text){ var m=document.getElementById('msg'); if(!m) return; m.className='msg ok'; m.textContent=text; setTimeout(function(){ if(m.textContent===text){ m.className='msg'; m.textContent=''; } }, 6000); }
 function loadWorkforceReqs(){
   var q=(document.getElementById('wrSearch')||{}).value||'';
   var el=document.getElementById('wrList'); if(el) el.innerHTML='Loading…';
@@ -1359,7 +1360,11 @@ function loadWorkforceReqs(){
           +'<div style="font-size:13px">'+(w.rolesNeeded?('<b>Roles:</b> '+pnEsc(w.rolesNeeded)+' '):'')+(w.headcount?('<b>Headcount:</b> '+pnEsc(w.headcount)+' '):'')+(w.timeline?('<b>Timeline:</b> '+pnEsc(w.timeline)):'')+'</div>'
           +((w.skills||w.destination||w.country||w.sector)?('<div class="sub" style="margin-top:3px">'+[w.sector,w.country,w.destination,w.skills].filter(Boolean).map(pnEsc).join(' · ')+'</div>'):'')
           +(w.notes?('<div class="sub" style="margin-top:3px">'+pnEsc(w.notes)+'</div>'):'')
-          +(w.partnerId?('<div class="sub" style="margin-top:4px">Partner record: '+pnEsc(w.partnerId)+'</div>'):'')
+          +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:7px">'
+          +(w.partnerId?('<span class="sub">Partner record: '+pnEsc(w.partnerId)+'</span>'):'')
+          +(/converted to job draft/i.test(w.status||'') ? ('<span class="sub" style="color:var(--gold)">✓ '+pnEsc(w.status)+'</span>')
+             : ('<button class="ghost" style="padding:6px 12px;font-size:12.5px;margin-left:auto" onclick="convertReqToJob(\''+pnEsc(w.ticket)+'\',this)">Convert to job draft</button>'))
+          +'</div>'
           +'</div>';
       }).join('');
     }).catch(function(){ if(el) el.innerHTML='<div class="sub">Could not load requests.</div>'; });
@@ -1392,8 +1397,18 @@ function loadPartners(){
 }
 function partnerSetLevel(id, level){
   fetch(EMPLOYER_URL,{method:'POST',body:JSON.stringify({action:'partner-convert',token:TOK.e,id:id,level:level})})
-    .then(function(r){return r.json();}).then(function(res){ if(res&&res.ok){ loadPartners(); } else { alert((res&&res.error)||'Could not update level.'); } })
+    .then(function(r){return r.json();}).then(function(res){
+      if(res&&res.ok){ if(res.emailed){ pnFlash('Moved to '+level+' and emailed the provider.'); } loadPartners(); }
+      else { alert((res&&res.error)||'Could not update level.'); } })
     .catch(function(){ alert('Could not update level.'); });
+}
+function convertReqToJob(ticket, btn){
+  if(btn){ btn.disabled=true; btn.textContent='Converting…'; }
+  fetch(EMPLOYER_URL,{method:'POST',body:JSON.stringify({action:'convert-request-to-job',token:TOK.e,ticket:ticket})})
+    .then(function(r){return r.json();}).then(function(res){
+      if(res&&res.ok){ pnFlash('Draft job created ('+res.jobId+'). Open it in the Employer hub when ready.'); loadWorkforceReqs(); }
+      else { if(btn){ btn.disabled=false; btn.textContent='Convert to job draft'; } alert((res&&res.error)||'Could not convert.'); } })
+    .catch(function(){ if(btn){ btn.disabled=false; btn.textContent='Convert to job draft'; } alert('Could not convert.'); });
 }
 function openPartnerEdit(id){
   var p=id ? (PARTNER_CACHE.filter(function(x){return x.id===id;})[0]||{}) : {};
